@@ -3,8 +3,8 @@ Selector tests for cssselect backend
 """
 from twisted.trial import unittest
 from scrapy.http import HtmlResponse
-from scrapy.selector.csstranslator import ScrapyHTMLTranslator
-from scrapy.selector import Selector
+from scrapyselectors.csstranslator import ScrapyHTMLTranslator
+from scrapyselectors import Selector
 from cssselect.parser import SelectorSyntaxError
 from cssselect.xpath import ExpressionError
 
