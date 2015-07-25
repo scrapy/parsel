@@ -5,7 +5,7 @@ import six
 from twisted.trial import unittest
 from scrapy.exceptions import ScrapyDeprecationWarning
 from scrapy.http import TextResponse, HtmlResponse, XmlResponse
-from scrapyselectors import Selector
+from parsel import Selector
 
 
 class SelectorTestCase(unittest.TestCase):

@@ -1,5 +1,5 @@
 import unittest
-from scrapyselectors.lxmldocument import LxmlDocument
+from parsel.lxmldocument import LxmlDocument
 from scrapy.http import TextResponse, HtmlResponse
 
 
