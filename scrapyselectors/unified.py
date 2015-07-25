@@ -8,7 +8,6 @@ import six
 from scrapy.utils.misc import extract_regex
 from scrapy.utils.trackref import object_ref
 from scrapy.utils.python import to_bytes, flatten, iflatten
-from scrapy.utils.decorators import deprecated
 from scrapy.http import HtmlResponse, XmlResponse
 from .lxmldocument import LxmlDocument
 from .csstranslator import ScrapyHTMLTranslator, ScrapyGenericTranslator
@@ -153,15 +152,6 @@ class Selector(object_ref):
         return "<%s xpath=%r data=%s>" % (type(self).__name__, self._expr, data)
     __repr__ = __str__
 
-    # Deprecated api
-    @deprecated(use_instead='.xpath()')
-    def select(self, xpath):
-        return self.xpath(xpath)
-
-    @deprecated(use_instead='.extract()')
-    def extract_unquoted(self):
-        return self.extract()
-
 
 class SelectorList(list):
 
@@ -189,15 +179,3 @@ class SelectorList(list):
             return x.extract()
         else:
             return default
-
-    @deprecated(use_instead='.extract()')
-    def extract_unquoted(self):
-        return [x.extract_unquoted() for x in self]
-
-    @deprecated(use_instead='.xpath()')
-    def x(self, xpath):
-        return self.select(xpath)
-
-    @deprecated(use_instead='.xpath()')
-    def select(self, xpath):
-        return self.xpath(xpath)
