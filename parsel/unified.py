@@ -6,10 +6,7 @@ from lxml import etree
 import six
 
 from scrapy.utils.misc import extract_regex
-from scrapy.utils.trackref import object_ref
-from scrapy.utils.python import to_bytes, flatten, iflatten
-from scrapy.http import HtmlResponse, XmlResponse
-from .lxmldocument import LxmlDocument
+from scrapy.utils.python import flatten, iflatten
 from .csstranslator import ScrapyHTMLTranslator, ScrapyGenericTranslator
 
 
@@ -31,22 +28,16 @@ _ctgroup = {
 }
 
 
-def _st(response, st):
+def _st(st):
     if st is None:
-        return 'xml' if isinstance(response, XmlResponse) else 'html'
-    elif st in ('xml', 'html'):
+        return 'html'
+    elif st in _ctgroup:
         return st
     else:
         raise ValueError('Invalid type: %s' % st)
 
 
-def _response_from_text(text, st):
-    rt = XmlResponse if st == 'xml' else HtmlResponse
-    return rt(url='about:blank', encoding='utf-8',
-              body=to_bytes(text, 'utf-8'))
-
-
-class Selector(object_ref):
+class Selector(object):
 
     __slots__ = ['response', 'text', 'namespaces', 'type', '_expr', '_root',
                  '__weakref__', '_parser', '_csstranslator', '_tostring_method']
@@ -65,25 +56,27 @@ class Selector(object_ref):
     }
     _lxml_smart_strings = False
 
-    def __init__(self, response=None, text=None, type=None, namespaces=None,
-                 _root=None, _expr=None):
-        self.type = st = _st(response, type or self._default_type)
+    def __init__(self, text=None, type=None, namespaces=None, _root=None, _expr=None):
+        self.type = st = _st(type or self._default_type)
         self._parser = _ctgroup[st]['_parser']
         self._csstranslator = _ctgroup[st]['_csstranslator']
         self._tostring_method = _ctgroup[st]['_tostring_method']
 
         if text is not None:
-            response = _response_from_text(text, st)
+            _root = self._get_root(text)
+        elif _root is None:
+            raise ValueError("Selector needs either text or _root argument")
 
-        if response is not None:
-            _root = LxmlDocument(response, self._parser)
-
-        self.response = response
         self.namespaces = dict(self._default_namespaces)
         if namespaces is not None:
             self.namespaces.update(namespaces)
         self._root = _root
         self._expr = _expr
+
+    def _get_root(self, text):
+        body = text.strip().encode('utf8') or '<html/>'
+        parser = self._parser(recover=True, encoding='utf8')
+        return etree.fromstring(body, parser=parser)
 
     def xpath(self, query):
         try:

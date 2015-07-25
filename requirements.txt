@@ -1,5 +1,5 @@
 # temporary: we'll remove Scrapy dependency in next commits
--e git://github.com/scrapy/scrapy.git@9d9d4238aa8c0b6009aca689b8c23cb8bdab8fa7#egg=scrapy
+# -e git://github.com/scrapy/scrapy.git@9d9d4238aa8c0b6009aca689b8c23cb8bdab8fa7#egg=scrapy
 
 lxml==3.4.4
 six==1.9.0
