@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import re
 import weakref
 import six
@@ -36,17 +37,26 @@ class SelectorTestCase(unittest.TestCase):
         body = u"<p><input name='{}' value='\xa9'/></p>".format(50 * 'b')
         sel = self.sscls(text=body)
 
+        representation = "<Selector xpath='//input/@name' data='{}'>".format(40 * 'b')
+        if six.PY2:
+            representation = "<Selector xpath='//input/@name' data=u'{}'>".format(40 * 'b')
+
         self.assertEqual(
-            map(repr, sel.xpath('//input/@name')),
-            ["<Selector xpath='//input/@name' data=u'{}'>".format(40 * 'b')]
+            [repr(it) for it in sel.xpath('//input/@name')],
+            [representation]
         )
 
     def test_representation_unicode_query(self):
         body = u"<p><input name='{}' value='\xa9'/></p>".format(50 * 'b')
+
+        representation = '<Selector xpath=\'//input[@value="©"]/@value\' data=\'©\'>'
+        if six.PY2:
+            representation = "<Selector xpath=u'//input[@value=\"\\xa9\"]/@value' data=u'\\xa9'>"
+
         sel = self.sscls(text=body)
         self.assertEqual(
-            map(repr, sel.xpath(u'//input[@value="\xa9"]/@value')),
-            ["<Selector xpath=u'//input[@value=\"\\xa9\"]/@value' data=u'\\xa9'>"]
+            [repr(it) for it in sel.xpath(u'//input[@value="\xa9"]/@value')],
+            [representation]
         )
 
     def test_extract_first(self):
