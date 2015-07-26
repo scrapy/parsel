@@ -1,4 +1,4 @@
-# temporary: we'll remove Scrapy dependency in next commits
 lxml==3.4.4
 six==1.9.0
 cssselect==0.9.1
+w3lib==1.11.0

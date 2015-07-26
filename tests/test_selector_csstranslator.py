@@ -1,7 +1,7 @@
 """
 Selector tests for cssselect backend
 """
-from twisted.trial import unittest
+import unittest
 from parsel.csstranslator import ScrapyHTMLTranslator
 from parsel import Selector
 from cssselect.parser import SelectorSyntaxError
