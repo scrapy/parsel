@@ -5,8 +5,8 @@ XPath selectors based on lxml
 from lxml import etree
 import six
 
-from scrapy.utils.misc import extract_regex
-from scrapy.utils.python import flatten, iflatten
+from parsel.utils import extract_regex
+from parsel.utils import flatten, iflatten
 from .csstranslator import ScrapyHTMLTranslator, ScrapyGenericTranslator
 
 
