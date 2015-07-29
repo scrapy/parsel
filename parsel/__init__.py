@@ -7,4 +7,4 @@ __author__ = 'Scrapy project'
 __email__ = 'info@scrapy.org'
 __version__ = '1.0.0'
 
-from parsel.unified import *
+from parsel.unified import Selector, SelectorList  # NOQA

@@ -10,9 +10,6 @@ from parsel.utils import flatten, iflatten
 from .csstranslator import ScrapyHTMLTranslator, ScrapyGenericTranslator
 
 
-__all__ = ['Selector', 'SelectorList']
-
-
 class SafeXMLParser(etree.XMLParser):
     def __init__(self, *args, **kwargs):
         kwargs.setdefault('resolve_entities', False)
