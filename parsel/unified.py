@@ -36,7 +36,7 @@ def _st(st):
 
 class Selector(object):
 
-    __slots__ = ['response', 'text', 'namespaces', 'type', '_expr', '_root',
+    __slots__ = ['text', 'namespaces', 'type', '_expr', '_root',
                  '__weakref__', '_parser', '_csstranslator', '_tostring_method']
 
     _default_type = None
@@ -71,7 +71,7 @@ class Selector(object):
         self._expr = _expr
 
     def _get_root(self, text):
-        body = text.strip().encode('utf8') or '<html/>'
+        body = text.strip().encode('utf8') or u'<html/>'
         parser = self._parser(recover=True, encoding='utf8')
         return etree.fromstring(body, parser=parser)
 
