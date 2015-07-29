@@ -5,6 +5,6 @@ or CSS selectors
 
 __author__ = 'Scrapy project'
 __email__ = 'info@scrapy.org'
-__version__ = '1.0.0'
+__version__ = '0.0.0'
 
 from parsel.unified import Selector, SelectorList  # NOQA
