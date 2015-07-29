@@ -38,7 +38,7 @@ lint:
 	flake8 parsel tests
 
 test:
-	nosetests --with-doctest
+	nosetests --with-doctest --rednose -s -v
 
 test-all:
 	tox
