@@ -53,21 +53,21 @@ class Selector(object):
     }
     _lxml_smart_strings = False
 
-    def __init__(self, text=None, type=None, namespaces=None, _root=None, _expr=None):
+    def __init__(self, text=None, type=None, namespaces=None, root=None, _expr=None):
         self.type = st = _st(type or self._default_type)
         self._parser = _ctgroup[st]['_parser']
         self._csstranslator = _ctgroup[st]['_csstranslator']
         self._tostring_method = _ctgroup[st]['_tostring_method']
 
         if text is not None:
-            _root = self._get_root(text)
-        elif _root is None:
-            raise ValueError("Selector needs either text or _root argument")
+            root = self._get_root(text)
+        elif root is None:
+            raise ValueError("Selector needs either text or root argument")
 
         self.namespaces = dict(self._default_namespaces)
         if namespaces is not None:
             self.namespaces.update(namespaces)
-        self._root = _root
+        self._root = root
         self._expr = _expr
 
     def _get_root(self, text):
@@ -91,7 +91,7 @@ class Selector(object):
         if type(result) is not list:
             result = [result]
 
-        result = [self.__class__(_root=x, _expr=query,
+        result = [self.__class__(root=x, _expr=query,
                                  namespaces=self.namespaces,
                                  type=self.type)
                   for x in result]
