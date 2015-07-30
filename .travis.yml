@@ -1,14 +1,12 @@
 language: python
 python: 2.7
 env:
-  - TOXENV=py27
-  - TOXENV=pypy
-  - TOXENV=py33
-  - TOXENV=py34
-
+- TOXENV=py27
+- TOXENV=pypy
+- TOXENV=py33
+- TOXENV=py34
 install:
-  - pip install tox
-
+- pip install tox
 script: tox
 notifications:
   irc:
@@ -21,9 +19,9 @@ deploy:
   distributions: sdist bdist_wheel
   user: scrapy
   password:
-    secure: gIMpTo+g15n4fmR2Aw4X6GqCpkhd2NyLK0E1OzJVQqDMFD2e296I2MEWJQ5etKFYP+xABllMao9sO+pBKZLXvVilhHa1PCO5v9Mo3i9TDvszW+o9iW4ArrMRkfZR2+NV47vff1KUkBHFuqRkzOks/NS9wMG6A3MXAa4EFkH9UhI=
+    secure: kY3UdcidDTnwfBY9gGeUDK7g9k9Weg+AEo1CJYdQ8fBYQkIQBubbTiu1UGqOb0v/btySZDidp/jsGPLxlTZ34sG9jQEiteQILHJMjLzgcNNTSBsf8VIqTxcLpxS+RgeB2MyITOvYhxNMI4ezMXkm9TH7jL60gv/4BtiMOTpFzr8=
   on:
     tags: true
     all_branches: true
     repo: scrapy/parsel
-    condition: "$TOXENV == py27"
+    condition: $TOXENV == py27
