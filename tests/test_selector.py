@@ -59,6 +59,10 @@ class SelectorTestCase(unittest.TestCase):
             [representation]
         )
 
+    def test_check_text_argument_type(self):
+        self.assertRaisesRegexp(TypeError, 'text argument should be of type',
+                                self.sscls, b'<html/>')
+
     def test_extract_first(self):
         """Test if extract_first() returns first element"""
         body = u'<ul><li id="1">1</li><li id="2">2</li></ul>'
