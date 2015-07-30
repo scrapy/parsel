@@ -5,16 +5,9 @@ XPath selectors based on lxml
 from lxml import etree
 import six
 
-from scrapy.utils.misc import extract_regex
-from scrapy.utils.trackref import object_ref
-from scrapy.utils.python import unicode_to_str, flatten, iflatten
-from scrapy.utils.decorator import deprecated
-from scrapy.http import HtmlResponse, XmlResponse
-from .lxmldocument import LxmlDocument
+from parsel.utils import extract_regex
+from parsel.utils import flatten, iflatten
 from .csstranslator import ScrapyHTMLTranslator, ScrapyGenericTranslator
-
-
-__all__ = ['Selector', 'SelectorList']
 
 
 class SafeXMLParser(etree.XMLParser):
@@ -32,24 +25,18 @@ _ctgroup = {
 }
 
 
-def _st(response, st):
+def _st(st):
     if st is None:
-        return 'xml' if isinstance(response, XmlResponse) else 'html'
-    elif st in ('xml', 'html'):
+        return 'html'
+    elif st in _ctgroup:
         return st
     else:
         raise ValueError('Invalid type: %s' % st)
 
 
-def _response_from_text(text, st):
-    rt = XmlResponse if st == 'xml' else HtmlResponse
-    return rt(url='about:blank', encoding='utf-8',
-              body=unicode_to_str(text, 'utf-8'))
+class Selector(object):
 
-
-class Selector(object_ref):
-
-    __slots__ = ['response', 'text', 'namespaces', 'type', '_expr', '_root',
+    __slots__ = ['text', 'namespaces', 'type', '_expr', '_root',
                  '__weakref__', '_parser', '_csstranslator', '_tostring_method']
 
     _default_type = None
@@ -66,25 +53,29 @@ class Selector(object_ref):
     }
     _lxml_smart_strings = False
 
-    def __init__(self, response=None, text=None, type=None, namespaces=None,
-                 _root=None, _expr=None):
-        self.type = st = _st(response, type or self._default_type)
+    def __init__(self, text=None, type=None, namespaces=None, root=None, _expr=None):
+        self.type = st = _st(type or self._default_type)
         self._parser = _ctgroup[st]['_parser']
         self._csstranslator = _ctgroup[st]['_csstranslator']
         self._tostring_method = _ctgroup[st]['_tostring_method']
 
         if text is not None:
-            response = _response_from_text(text, st)
+            if not isinstance(text, six.text_type):
+                raise TypeError("text argument should be of type %s" % six.text_type)
+            root = self._get_root(text)
+        elif root is None:
+            raise ValueError("Selector needs either text or root argument")
 
-        if response is not None:
-            _root = LxmlDocument(response, self._parser)
-
-        self.response = response
         self.namespaces = dict(self._default_namespaces)
         if namespaces is not None:
             self.namespaces.update(namespaces)
-        self._root = _root
+        self._root = root
         self._expr = _expr
+
+    def _get_root(self, text):
+        body = text.strip().encode('utf8') or b'<html/>'
+        parser = self._parser(recover=True, encoding='utf8')
+        return etree.fromstring(body, parser=parser)
 
     def xpath(self, query):
         try:
@@ -102,7 +93,7 @@ class Selector(object_ref):
         if type(result) is not list:
             result = [result]
 
-        result = [self.__class__(_root=x, _expr=query,
+        result = [self.__class__(root=x, _expr=query,
                                  namespaces=self.namespaces,
                                  type=self.type)
                   for x in result]
@@ -121,7 +112,7 @@ class Selector(object_ref):
         try:
             return etree.tostring(self._root,
                                   method=self._tostring_method,
-                                  encoding=unicode,
+                                  encoding='unicode',
                                   with_tail=False)
         except (AttributeError, TypeError):
             if self._root is True:
@@ -129,7 +120,7 @@ class Selector(object_ref):
             elif self._root is False:
                 return u'0'
             else:
-                return unicode(self._root)
+                return six.text_type(self._root)
 
     def register_namespace(self, prefix, uri):
         if self.namespaces is None:
@@ -153,15 +144,6 @@ class Selector(object_ref):
         return "<%s xpath=%r data=%s>" % (type(self).__name__, self._expr, data)
     __repr__ = __str__
 
-    # Deprecated api
-    @deprecated(use_instead='.xpath()')
-    def select(self, xpath):
-        return self.xpath(xpath)
-
-    @deprecated(use_instead='.extract()')
-    def extract_unquoted(self):
-        return self.extract()
-
 
 class SelectorList(list):
 
@@ -184,18 +166,8 @@ class SelectorList(list):
     def extract(self):
         return [x.extract() for x in self]
 
-    def extract_first(self):
+    def extract_first(self, default=None):
         for x in self:
             return x.extract()
-
-    @deprecated(use_instead='.extract()')
-    def extract_unquoted(self):
-        return [x.extract_unquoted() for x in self]
-
-    @deprecated(use_instead='.xpath()')
-    def x(self, xpath):
-        return self.select(xpath)
-
-    @deprecated(use_instead='.xpath()')
-    def select(self, xpath):
-        return self.xpath(xpath)
+        else:
+            return default
