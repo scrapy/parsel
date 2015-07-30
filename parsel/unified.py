@@ -71,7 +71,7 @@ class Selector(object):
         self._expr = _expr
 
     def _get_root(self, text):
-        body = text.strip().encode('utf8') or u'<html/>'
+        body = text.strip().encode('utf8') or b'<html/>'
         parser = self._parser(recover=True, encoding='utf8')
         return etree.fromstring(body, parser=parser)
 
