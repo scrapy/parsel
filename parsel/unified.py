@@ -7,7 +7,7 @@ import six
 
 from parsel.utils import extract_regex
 from parsel.utils import flatten, iflatten
-from .csstranslator import ScrapyHTMLTranslator, ScrapyGenericTranslator
+from .csstranslator import HTMLTranslator, GenericTranslator
 
 
 class SafeXMLParser(etree.XMLParser):
@@ -17,10 +17,10 @@ class SafeXMLParser(etree.XMLParser):
 
 _ctgroup = {
     'html': {'_parser': etree.HTMLParser,
-             '_csstranslator': ScrapyHTMLTranslator(),
+             '_csstranslator': HTMLTranslator(),
              '_tostring_method': 'html'},
     'xml': {'_parser': SafeXMLParser,
-            '_csstranslator': ScrapyGenericTranslator(),
+            '_csstranslator': GenericTranslator(),
             '_tostring_method': 'xml'},
 }
 

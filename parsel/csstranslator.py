@@ -1,9 +1,11 @@
-from cssselect import GenericTranslator, HTMLTranslator
-from cssselect.xpath import _unicode_safe_getattr, XPathExpr, ExpressionError
+from cssselect import GenericTranslator as OriginalGenericTranslator
+from cssselect import HTMLTranslator as OriginalHTMLTranslator
+from cssselect.xpath import XPathExpr as OriginalXPathExpr
+from cssselect.xpath import _unicode_safe_getattr, ExpressionError
 from cssselect.parser import FunctionalPseudoElement
 
 
-class ScrapyXPathExpr(XPathExpr):
+class XPathExpr(OriginalXPathExpr):
 
     textnode = False
     attribute = None
@@ -16,7 +18,7 @@ class ScrapyXPathExpr(XPathExpr):
         return x
 
     def __str__(self):
-        path = super(ScrapyXPathExpr, self).__str__()
+        path = super(XPathExpr, self).__str__()
         if self.textnode:
             if path == '*':
                 path = 'text()'
@@ -33,7 +35,7 @@ class ScrapyXPathExpr(XPathExpr):
         return path
 
     def join(self, combiner, other):
-        super(ScrapyXPathExpr, self).join(combiner, other)
+        super(XPathExpr, self).join(combiner, other)
         self.textnode = other.textnode
         self.attribute = other.attribute
         return self
@@ -43,7 +45,7 @@ class TranslatorMixin(object):
 
     def xpath_element(self, selector):
         xpath = super(TranslatorMixin, self).xpath_element(selector)
-        return ScrapyXPathExpr.from_xpath(xpath)
+        return XPathExpr.from_xpath(xpath)
 
     def xpath_pseudo_element(self, xpath, pseudo_element):
         if isinstance(pseudo_element, FunctionalPseudoElement):
@@ -71,18 +73,18 @@ class TranslatorMixin(object):
             raise ExpressionError(
                 "Expected a single string or ident for ::attr(), got %r"
                 % function.arguments)
-        return ScrapyXPathExpr.from_xpath(xpath,
+        return XPathExpr.from_xpath(xpath,
             attribute=function.arguments[0].value)
 
     def xpath_text_simple_pseudo_element(self, xpath):
         """Support selecting text nodes using ::text pseudo-element"""
-        return ScrapyXPathExpr.from_xpath(xpath, textnode=True)
+        return XPathExpr.from_xpath(xpath, textnode=True)
 
 
-class ScrapyGenericTranslator(TranslatorMixin, GenericTranslator):
+class GenericTranslator(TranslatorMixin, OriginalGenericTranslator):
     pass
 
 
-class ScrapyHTMLTranslator(TranslatorMixin, HTMLTranslator):
+class HTMLTranslator(TranslatorMixin, OriginalHTMLTranslator):
     pass
 

@@ -2,7 +2,7 @@
 Selector tests for cssselect backend
 """
 import unittest
-from parsel.csstranslator import ScrapyHTMLTranslator
+from parsel.csstranslator import HTMLTranslator
 from parsel import Selector
 from cssselect.parser import SelectorSyntaxError
 from cssselect.xpath import ExpressionError
@@ -46,7 +46,7 @@ HTMLBODY = u'''
 
 class TranslatorMixinTest(unittest.TestCase):
 
-    tr_cls = ScrapyHTMLTranslator
+    tr_cls = HTMLTranslator
 
     def setUp(self):
         self.tr = self.tr_cls()
