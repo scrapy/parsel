@@ -3,7 +3,14 @@
 History
 -------
 
-0.9.1 (2015-07-30)
+0.9.2 (2015-08-07)
+------------------
+
+* Rename module unified -> selector and promoted root attribute
+* Add create_root_node function
+
+
+0.9.1 (2015-08-04)
 ---------------------
 
 * Setup Sphinx build and docs structure
