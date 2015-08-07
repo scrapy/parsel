@@ -34,6 +34,14 @@ def _st(st):
         raise ValueError('Invalid type: %s' % st)
 
 
+def create_root_node(text, parser_cls):
+    """Create root node for text using given parser class.
+    """
+    body = text.strip().encode('utf8') or b'<html/>'
+    parser = parser_cls(recover=True, encoding='utf8')
+    return etree.fromstring(body, parser=parser)
+
+
 class Selector(object):
 
     __slots__ = ['text', 'namespaces', 'type', '_expr', 'root',
@@ -73,9 +81,7 @@ class Selector(object):
         self._expr = _expr
 
     def _get_root(self, text):
-        body = text.strip().encode('utf8') or b'<html/>'
-        parser = self._parser(recover=True, encoding='utf8')
-        return etree.fromstring(body, parser=parser)
+        return create_root_node(text, self._parser)
 
     def xpath(self, query):
         try:
