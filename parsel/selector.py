@@ -34,12 +34,12 @@ def _st(st):
         raise ValueError('Invalid type: %s' % st)
 
 
-def create_root_node(text, parser_cls):
+def create_root_node(text, parser_cls, base_url=None):
     """Create root node for text using given parser class.
     """
     body = text.strip().encode('utf8') or b'<html/>'
     parser = parser_cls(recover=True, encoding='utf8')
-    return etree.fromstring(body, parser=parser)
+    return etree.fromstring(body, parser=parser, base_url=base_url)
 
 
 class Selector(object):
@@ -61,7 +61,8 @@ class Selector(object):
     }
     _lxml_smart_strings = False
 
-    def __init__(self, text=None, type=None, namespaces=None, root=None, _expr=None):
+    def __init__(self, text=None, type=None, namespaces=None, root=None,
+                 base_url=None, _expr=None):
         self.type = st = _st(type or self._default_type)
         self._parser = _ctgroup[st]['_parser']
         self._csstranslator = _ctgroup[st]['_csstranslator']
@@ -70,7 +71,7 @@ class Selector(object):
         if text is not None:
             if not isinstance(text, six.text_type):
                 raise TypeError("text argument should be of type %s" % six.text_type)
-            root = self._get_root(text)
+            root = self._get_root(text, base_url)
         elif root is None:
             raise ValueError("Selector needs either text or root argument")
 
@@ -80,8 +81,8 @@ class Selector(object):
         self.root = root
         self._expr = _expr
 
-    def _get_root(self, text):
-        return create_root_node(text, self._parser)
+    def _get_root(self, text, base_url=None):
+        return create_root_node(text, self._parser, base_url=base_url)
 
     def xpath(self, query):
         try:
