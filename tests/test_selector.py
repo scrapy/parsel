@@ -373,6 +373,10 @@ class SelectorTestCase(unittest.TestCase):
 
         self.assertEqual(sel.extract(), '<foo>&xxe;</foo>')
 
+    def test_configure_base_url(self):
+        sel = self.sscls(text=u'nothing', base_url='http://example.com')
+        self.assertEquals(u'http://example.com', sel.root.base)
+
 
 class ExsltTestCase(unittest.TestCase):
 
