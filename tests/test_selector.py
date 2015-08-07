@@ -354,15 +354,15 @@ class SelectorTestCase(unittest.TestCase):
         # only when smart_strings are on
         x = self.sscls(text=body)
         li_text = x.xpath('//li/text()')
-        self.assertFalse(any(map(lambda e: hasattr(e._root, 'getparent'), li_text)))
+        self.assertFalse(any(map(lambda e: hasattr(e.root, 'getparent'), li_text)))
         div_class = x.xpath('//div/@class')
-        self.assertFalse(any(map(lambda e: hasattr(e._root, 'getparent'), div_class)))
+        self.assertFalse(any(map(lambda e: hasattr(e.root, 'getparent'), div_class)))
 
         x = SmartStringsSelector(text=body)
         li_text = x.xpath('//li/text()')
-        self.assertTrue(all(map(lambda e: hasattr(e._root, 'getparent'), li_text)))
+        self.assertTrue(all(map(lambda e: hasattr(e.root, 'getparent'), li_text)))
         div_class = x.xpath('//div/@class')
-        self.assertTrue(all(map(lambda e: hasattr(e._root, 'getparent'), div_class)))
+        self.assertTrue(all(map(lambda e: hasattr(e.root, 'getparent'), div_class)))
 
     def test_xml_entity_expansion(self):
         malicious_xml = u'<?xml version="1.0" encoding="ISO-8859-1"?>'\

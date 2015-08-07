@@ -36,7 +36,7 @@ def _st(st):
 
 class Selector(object):
 
-    __slots__ = ['text', 'namespaces', 'type', '_expr', '_root',
+    __slots__ = ['text', 'namespaces', 'type', '_expr', 'root',
                  '__weakref__', '_parser', '_csstranslator', '_tostring_method']
 
     _default_type = None
@@ -69,7 +69,7 @@ class Selector(object):
         self.namespaces = dict(self._default_namespaces)
         if namespaces is not None:
             self.namespaces.update(namespaces)
-        self._root = root
+        self.root = root
         self._expr = _expr
 
     def _get_root(self, text):
@@ -79,7 +79,7 @@ class Selector(object):
 
     def xpath(self, query):
         try:
-            xpathev = self._root.xpath
+            xpathev = self.root.xpath
         except AttributeError:
             return SelectorList([])
 
@@ -110,17 +110,17 @@ class Selector(object):
 
     def extract(self):
         try:
-            return etree.tostring(self._root,
+            return etree.tostring(self.root,
                                   method=self._tostring_method,
                                   encoding='unicode',
                                   with_tail=False)
         except (AttributeError, TypeError):
-            if self._root is True:
+            if self.root is True:
                 return u'1'
-            elif self._root is False:
+            elif self.root is False:
                 return u'0'
             else:
-                return six.text_type(self._root)
+                return six.text_type(self.root)
 
     def register_namespace(self, prefix, uri):
         if self.namespaces is None:
@@ -128,7 +128,7 @@ class Selector(object):
         self.namespaces[prefix] = uri
 
     def remove_namespaces(self):
-        for el in self._root.iter('*'):
+        for el in self.root.iter('*'):
             if el.tag.startswith('{'):
                 el.tag = el.tag.split('}', 1)[1]
             # loop on element attributes also
