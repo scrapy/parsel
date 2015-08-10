@@ -2,11 +2,10 @@
 XPath selectors based on lxml
 """
 
-from lxml import etree
 import six
+from lxml import etree
 
-from parsel.utils import extract_regex
-from parsel.utils import flatten, iflatten
+from .utils import flatten, iflatten, extract_regex
 from .csstranslator import HTMLTranslator, GenericTranslator
 
 
