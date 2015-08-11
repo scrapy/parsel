@@ -493,3 +493,16 @@ class ExsltTestCase(unittest.TestCase):
                                //div[@itemtype="http://schema.org/Event"]
                                     //*[@itemscope]/*/@itemprop)''').extract(),
                          [u'url', u'name', u'startDate', u'location', u'offers'])
+
+    def test_extending_selector(self):
+        class MySelectorList(Selector.selectorlist_cls):
+            pass
+
+        class MySelector(Selector):
+            selectorlist_cls = MySelectorList
+
+        sel = MySelector(text=u'<html><div>foo</div></html>')
+        self.assertIsInstance(sel.xpath('//div'), MySelectorList)
+        self.assertIsInstance(sel.xpath('//div')[0], MySelector)
+        self.assertIsInstance(sel.css('div'), MySelectorList)
+        self.assertIsInstance(sel.css('div')[0], MySelector)

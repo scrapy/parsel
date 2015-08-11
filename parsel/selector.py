@@ -41,6 +41,34 @@ def create_root_node(text, parser_cls, base_url=None):
     return etree.fromstring(body, parser=parser, base_url=base_url)
 
 
+class SelectorList(list):
+
+    def __getslice__(self, i, j):
+        return self.__class__(list.__getslice__(self, i, j))
+
+    def xpath(self, xpath):
+        return self.__class__(flatten([x.xpath(xpath) for x in self]))
+
+    def css(self, xpath):
+        return self.__class__(flatten([x.css(xpath) for x in self]))
+
+    def re(self, regex):
+        return flatten([x.re(regex) for x in self])
+
+    def re_first(self, regex):
+        for el in iflatten(x.re(regex) for x in self):
+            return el
+
+    def extract(self):
+        return [x.extract() for x in self]
+
+    def extract_first(self, default=None):
+        for x in self:
+            return x.extract()
+        else:
+            return default
+
+
 class Selector(object):
 
     __slots__ = ['text', 'namespaces', 'type', '_expr', 'root',
@@ -59,6 +87,7 @@ class Selector(object):
         "set": "http://exslt.org/sets"
     }
     _lxml_smart_strings = False
+    selectorlist_cls = SelectorList
 
     def __init__(self, text=None, type=None, namespaces=None, root=None,
                  base_url=None, _expr=None):
@@ -87,7 +116,7 @@ class Selector(object):
         try:
             xpathev = self.root.xpath
         except AttributeError:
-            return SelectorList([])
+            return self.selectorlist_cls([])
 
         try:
             result = xpathev(query, namespaces=self.namespaces,
@@ -103,7 +132,7 @@ class Selector(object):
                                  namespaces=self.namespaces,
                                  type=self.type)
                   for x in result]
-        return SelectorList(result)
+        return self.selectorlist_cls(result)
 
     def css(self, query):
         return self.xpath(self._css2xpath(query))
@@ -149,31 +178,3 @@ class Selector(object):
         data = repr(self.extract()[:40])
         return "<%s xpath=%r data=%s>" % (type(self).__name__, self._expr, data)
     __repr__ = __str__
-
-
-class SelectorList(list):
-
-    def __getslice__(self, i, j):
-        return self.__class__(list.__getslice__(self, i, j))
-
-    def xpath(self, xpath):
-        return self.__class__(flatten([x.xpath(xpath) for x in self]))
-
-    def css(self, xpath):
-        return self.__class__(flatten([x.css(xpath) for x in self]))
-
-    def re(self, regex):
-        return flatten([x.re(regex) for x in self])
-
-    def re_first(self, regex):
-        for el in iflatten(x.re(regex) for x in self):
-            return el
-
-    def extract(self):
-        return [x.extract() for x in self]
-
-    def extract_first(self, default=None):
-        for x in self:
-            return x.extract()
-        else:
-            return default
