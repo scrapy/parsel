@@ -12,10 +12,10 @@ parsel.csstranslator module
     :undoc-members:
     :show-inheritance:
 
-parsel.unified module
----------------------
+parsel.selector module
+----------------------
 
-.. automodule:: parsel.unified
+.. automodule:: parsel.selector
     :members:
     :undoc-members:
     :show-inheritance:

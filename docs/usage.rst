@@ -1,45 +1,52 @@
 .. _topics-selectors:
 
-=========
-Selectors
-=========
+=====
+Usage
+=====
 
-When you're scraping web pages, the most common task you need to perform is
-to extract data from the HTML source. There are several libraries available to
-achieve this:
+Getting started
+===============
 
- * `BeautifulSoup`_ is a very popular screen scraping library among Python
-   programmers which constructs a Python object based on the structure of the
-   HTML code and also deals with bad markup reasonably well, but it has one
-   drawback: it's slow.
+If you already know how to write `CSS`_ or `XPath`_ expressions, using Parsel
+is straightforward: you just need to create a
+:class:`~parsel.selector.Selector` object for the HTML or XML text you want to
+parse, and use the available methods for selecting parts from the text and
+extracting data out of the result.
 
- * `lxml`_ is an XML parsing library (which also parses HTML) with a pythonic
-   API based on `ElementTree`_. (lxml is not part of the Python standard
-   library.)
+Creating a :class:`Selector` object is simple::
 
-Scrapy comes with its own mechanism for extracting data. They're called
-selectors because they "select" certain parts of the HTML document specified
-either by `XPath`_ or `CSS`_ expressions.
+    >>> from parsel import Selector
+    >>> text = u"<html><body><h1>Hello, Parsel!</h1></body></html>"
+    >>> sel = Selector(text=text, type='html')
+
+.. note::
+    One important thing to note is that if you're using Python 2,
+    make sure to use an `unicode` object for the text argument.
+    :class:`~parsel.selector.Selector` expects text to be an `unicode` object in Python 2 or
+    an `str` object in Python 3.
+
+Once you have created the Selector object, you can use `CSS`_ or
+`XPath`_ expressions to select elements::
+
+    >>> sel.css('h1')
+    [<Selector xpath=u'descendant-or-self::h1' data=u'<h1>Hello, Parsel!</h1>'>]
+    >>> sel.xpath('//h1')  # the same, but now with XPath
+    [<Selector xpath='//h1' data=u'<h1>Hello, Parsel!</h1>'>]
+
+And extract data from those elements::
+
+    >>> sel.xpath('//h1/text()').extract()
+    [u'Hello, Parsel!']
+    >>> sel.css('h1::text').extract_first()
+    u'Hello, Parsel!'
 
 `XPath`_ is a language for selecting nodes in XML documents, which can also be
 used with HTML. `CSS`_ is a language for applying styles to HTML documents. It
 defines selectors to associate those styles with specific HTML elements.
 
-Scrapy selectors are built over the `lxml`_ library, which means they're very
-similar in speed and parsing accuracy.
+You can use either language you're more comfortable with, though you may find
+that in some specific cases `XPath`_ is more powerful than `CSS`_.
 
-This page explains how selectors work and describes their API which is very
-small and simple, unlike the `lxml`_ API which is much bigger because the
-`lxml`_ library can be used for many other tasks, besides selecting markup
-documents.
-
-For a complete reference of the selectors API see
-:ref:`Selector reference <topics-selectors-ref>`
-
-.. _BeautifulSoup: http://www.crummy.com/software/BeautifulSoup/
-.. _lxml: http://lxml.de/
-.. _ElementTree: https://docs.python.org/2/library/xml.etree.elementtree.html
-.. _cssselect: https://pypi.python.org/pypi/cssselect/
 .. _XPath: http://www.w3.org/TR/xpath
 .. _CSS: http://www.w3.org/TR/selectors
 
@@ -47,86 +54,47 @@ For a complete reference of the selectors API see
 Using selectors
 ===============
 
-Constructing selectors
-----------------------
+To explain how to use the selectors we'll use the `requests`_ library
+to download an example page located in the Parsel's documentation:
 
-.. highlight:: python
-
-Scrapy selectors are instances of :class:`~scrapy.selector.Selector` class
-constructed by passing **text** or :class:`~scrapy.http.TextResponse`
-object. It automatically chooses the best parsing rules (XML vs HTML) based on
-input type::
-
-    >>> from scrapy.selector import Selector
-    >>> from scrapy.http import HtmlResponse
-
-Constructing from text::
-
-    >>> body = '<html><body><span>good</span></body></html>'
-    >>> Selector(text=body).xpath('//span/text()').extract()
-    [u'good']
-
-Constructing from response::
-
-    >>> response = HtmlResponse(url='http://example.com', body=body)
-    >>> Selector(response=response).xpath('//span/text()').extract()
-    [u'good']
-
-For convenience, response objects expose a selector on `.selector` attribute,
-it's totally OK to use this shortcut when possible::
-
-    >>> response.selector.xpath('//span/text()').extract()
-    [u'good']
-
-
-Using selectors
----------------
-
-To explain how to use the selectors we'll use the `Scrapy shell` (which
-provides interactive testing) and an example page located in the Scrapy
-documentation server:
-
-    http://doc.scrapy.org/en/latest/_static/selectors-sample1.html
+    http://parsel.readthedocs.org/en/latest/_static/selectors-sample1.html
 
 .. _topics-selectors-htmlcode:
 
-Here's its HTML code:
+For the sake of completeness, here's its full HTML code:
 
-.. literalinclude:: ../_static/selectors-sample1.html
+.. literalinclude:: _static/selectors-sample1.html
    :language: html
 
-.. highlight:: sh
-
-First, let's open the shell::
-
-    scrapy shell http://doc.scrapy.org/en/latest/_static/selectors-sample1.html
-
-Then, after the shell loads, you'll have the response available as ``response``
-shell variable, and its attached selector in ``response.selector`` attribute.
-
-Since we're dealing with HTML, the selector will automatically use an HTML parser.
-
 .. highlight:: python
+
+So, let's download that page and create a selector for it::
+
+    >>> import requests
+    >>> from parsel import Selector
+    >>> url = 'http://parsel.readthedocs.org/en/latest/_static/selectors-sample1.html'
+    >>> text = requests.get(url).text
+    >>> selector = Selector(text=text)
+
+Since we're dealing with HTML, the default type for Selector, we don't need
+to specify the `type` argument.
 
 So, by looking at the :ref:`HTML code <topics-selectors-htmlcode>` of that
 page, let's construct an XPath for selecting the text inside the title tag::
 
-    >>> response.selector.xpath('//title/text()')
+    >>> selector.xpath('//title/text()')
     [<Selector (text) xpath=//title/text()>]
 
-Querying responses using XPath and CSS is so common that responses include two
-convenience shortcuts: ``response.xpath()`` and ``response.css()``::
+You can also ask the same thing using CSS instead::
 
-    >>> response.xpath('//title/text()')
-    [<Selector (text) xpath=//title/text()>]
-    >>> response.css('title::text')
+    >>> selector.css('title::text')
     [<Selector (text) xpath=//title/text()>]
 
 As you can see, ``.xpath()`` and ``.css()`` methods return a
-:class:`~scrapy.selector.SelectorList` instance, which is a list of new
+:class:`~parsel.selector.SelectorList` instance, which is a list of new
 selectors. This API can be used for quickly selecting nested data::
 
-    >>> response.css('img').xpath('@src').extract()
+    >>> selector.css('img').xpath('@src').extract()
     [u'image1_thumb.jpg',
      u'image2_thumb.jpg',
      u'image3_thumb.jpg',
@@ -136,55 +104,55 @@ selectors. This API can be used for quickly selecting nested data::
 To actually extract the textual data, you must call the selector ``.extract()``
 method, as follows::
 
-    >>> response.xpath('//title/text()').extract()
+    >>> selector.xpath('//title/text()').extract()
     [u'Example website']
 
-If you want to extract only first matched element, you can call the selector ``.extract_first()``
+If you want to extract only first matched element, you can call the selector ``.extract_first()``::
 
-    >>> response.xpath('//div[@id="images"]/a/text()').extract_first()
+    >>> selector.xpath('//div[@id="images"]/a/text()').extract_first()
     u'Name: My image 1 '
 
-It returns ``None`` if no element was found:
+It returns ``None`` if no element was found::
 
-    >>> response.xpath('//div/[id="not-exists"]/text()').extract_first() is None
+    >>> selector.xpath('//div/[id="not-exists"]/text()').extract_first() is None
     True
 
 Notice that CSS selectors can select text or attribute nodes using CSS3
 pseudo-elements::
 
-    >>> response.css('title::text').extract()
+    >>> selector.css('title::text').extract()
     [u'Example website']
 
 Now we're going to get the base URL and some image links::
 
-    >>> response.xpath('//base/@href').extract()
+    >>> selector.xpath('//base/@href').extract()
     [u'http://example.com/']
 
-    >>> response.css('base::attr(href)').extract()
+    >>> selector.css('base::attr(href)').extract()
     [u'http://example.com/']
 
-    >>> response.xpath('//a[contains(@href, "image")]/@href').extract()
+    >>> selector.xpath('//a[contains(@href, "image")]/@href').extract()
     [u'image1.html',
      u'image2.html',
      u'image3.html',
      u'image4.html',
      u'image5.html']
 
-    >>> response.css('a[href*=image]::attr(href)').extract()
+    >>> selector.css('a[href*=image]::attr(href)').extract()
     [u'image1.html',
      u'image2.html',
      u'image3.html',
      u'image4.html',
      u'image5.html']
 
-    >>> response.xpath('//a[contains(@href, "image")]/img/@src').extract()
+    >>> selector.xpath('//a[contains(@href, "image")]/img/@src').extract()
     [u'image1_thumb.jpg',
      u'image2_thumb.jpg',
      u'image3_thumb.jpg',
      u'image4_thumb.jpg',
      u'image5_thumb.jpg']
 
-    >>> response.css('a[href*=image] img::attr(src)').extract()
+    >>> selector.css('a[href*=image] img::attr(src)').extract()
     [u'image1_thumb.jpg',
      u'image2_thumb.jpg',
      u'image3_thumb.jpg',
@@ -200,7 +168,7 @@ The selection methods (``.xpath()`` or ``.css()``) return a list of selectors
 of the same type, so you can call the selection methods for those selectors
 too. Here's an example::
 
-    >>> links = response.xpath('//a[contains(@href, "image")]')
+    >>> links = selector.xpath('//a[contains(@href, "image")]')
     >>> links.extract()
     [u'<a href="image1.html">Name: My image 1 <br><img src="image1_thumb.jpg"></a>',
      u'<a href="image2.html">Name: My image 2 <br><img src="image2_thumb.jpg"></a>',
@@ -221,7 +189,7 @@ too. Here's an example::
 Using selectors with regular expressions
 ----------------------------------------
 
-:class:`~scrapy.selector.Selector` also has a ``.re()`` method for extracting
+:class:`~parsel.selector.Selector` also has a ``.re()`` method for extracting
 data using regular expressions. However, unlike using ``.xpath()`` or
 ``.css()`` methods, ``.re()`` returns a list of unicode strings. So you
 can't construct nested ``.re()`` calls.
@@ -229,7 +197,7 @@ can't construct nested ``.re()`` calls.
 Here's an example used to extract image names from the :ref:`HTML code
 <topics-selectors-htmlcode>` above::
 
-    >>> response.xpath('//a[contains(@href, "image")]/text()').re(r'Name:\s*(.*)')
+    >>> selector.xpath('//a[contains(@href, "image")]/text()').re(r'Name:\s*(.*)')
     [u'My image 1',
      u'My image 2',
      u'My image 3',
@@ -239,7 +207,7 @@ Here's an example used to extract image names from the :ref:`HTML code
 There's an additional helper reciprocating ``.extract_first()`` for ``.re()``,
 named ``.re_first()``. Use it to extract just the first matching string::
 
-    >>> response.xpath('//a[contains(@href, "image")]/text()').re_first(r'Name:\s*(.*)')
+    >>> selector.xpath('//a[contains(@href, "image")]/text()').re_first(r'Name:\s*(.*)')
     u'My image 1'
 
 .. _topics-selectors-relative-xpaths:
@@ -254,7 +222,7 @@ with ``/``, that XPath will be absolute to the document and not relative to the
 For example, suppose you want to extract all ``<p>`` elements inside ``<div>``
 elements. First, you would get all ``<div>`` elements::
 
-    >>> divs = response.xpath('//div')
+    >>> divs = selector.xpath('//div')
 
 At first, you may be tempted to use the following approach, which is wrong, as
 it actually extracts all ``<p>`` elements from the document, not only those
@@ -300,8 +268,8 @@ The ``test()`` function, for example, can prove quite useful when XPath's
 
 Example selecting links in list item with a "class" attribute ending with a digit::
 
-    >>> from scrapy import Selector
-    >>> doc = """
+    >>> from parsel import Selector
+    >>> doc = u"""
     ... <div>
     ...     <ul>
     ...         <li class="item-0"><a href="link1.html">first item</a></li>
@@ -312,7 +280,7 @@ Example selecting links in list item with a "class" attribute ending with a digi
     ...     </ul>
     ... </div>
     ... """
-    >>> sel = Selector(text=doc, type="html")
+    >>> sel = Selector(text=doc)
     >>> sel.xpath('//li//@href').extract()
     [u'link1.html', u'link2.html', u'link3.html', u'link4.html', u'link5.html']
     >>> sel.xpath('//li[re:test(@class, "item-\d$")]//@href').extract()
@@ -333,7 +301,7 @@ extracting text elements for example.
 Example extracting microdata (sample content taken from http://schema.org/Product)
 with groups of itemscopes and corresponding itemprops::
 
-    >>> doc = """
+    >>> doc = u"""
     ... <div itemscope itemtype="http://schema.org/Product">
     ...   <span itemprop="name">Kenmore White 17" Microwave</span>
     ...   <img src="kenmore-microwave-17in.jpg" alt='Kenmore 17" Microwave' />
@@ -428,7 +396,7 @@ Some XPath tips
 ---------------
 
 Here are some tips that you may find useful when using XPath
-with Scrapy selectors, based on `this post from ScrapingHub's blog`_.
+with Parsel, based on `this post from ScrapingHub's blog`_.
 If you are not much familiar with XPath yet,
 you may want to take a look first at this `XPath tutorial`_.
 
@@ -449,7 +417,7 @@ a string function like ``contains()`` or ``starts-with()``, it results in the te
 
 Example::
 
-    >>> from scrapy import Selector
+    >>> from parsel import Selector
     >>> sel = Selector(text='<a href="#">Click here to go to the <strong>Next Page</strong></a>')
 
 Converting a *node-set* to string::
@@ -487,7 +455,7 @@ Beware of the difference between //node[1] and (//node)[1]
 
 Example::
 
-    >>> from scrapy import Selector
+    >>> from parsel import Selector
     >>> sel = Selector(text="""
     ....:     <ul class="list">
     ....:         <li>1</li>
@@ -537,7 +505,7 @@ class name that shares the string ``someclass``.
 As it turns out, Scrapy selectors allow you to chain selectors, so most of the time
 you can just select by class using CSS and then switch to XPath when needed::
 
-    >>> from scrapy import Selector
+    >>> from parsel import Selector
     >>> sel = Selector(text='<div class="hero shout"><time datetime="2014-07-23 19:00">Special date</time></div>')
     >>> sel.css('.shout').xpath('./time/@datetime').extract()
     [u'2014-07-23 19:00']
@@ -548,40 +516,21 @@ to use the ``.`` in the XPath expressions that will follow.
 
 .. _topics-selectors-ref:
 
-Built-in Selectors reference
-============================
+API reference
+=============
 
-.. module:: scrapy.selector
+.. module:: parsel.selector
    :synopsis: Selector class
 
-.. class:: Selector(response=None, text=None, type=None)
+.. class:: Selector(text, type=None)
 
-  An instance of :class:`Selector` is a wrapper over response to select
-  certain parts of its content.
+  :class:`Selector` allows you to select parts of an XML or HTML text using CSS
+  or XPath expressions and extract data from it.
 
-  ``response`` is an :class:`~scrapy.http.HtmlResponse` or an
-  :class:`~scrapy.http.XmlResponse` object that will be used for selecting and
-  extracting data.
-
-  ``text`` is a unicode string or utf-8 encoded text for cases when a
-  ``response`` isn't available. Using ``text`` and ``response`` together is
-  undefined behavior.
+  ``text`` is utf-8 encoded text (unicode object in Python 3 or str in Python 3)
 
   ``type`` defines the selector type, it can be ``"html"``, ``"xml"`` or ``None`` (default).
-
-    If ``type`` is ``None``, the selector automatically chooses the best type
-    based on ``response`` type (see below), or defaults to ``"html"`` in case it
-    is used together with ``text``.
-
-    If ``type`` is ``None`` and a ``response`` is passed, the selector type is
-    inferred from the response type as follow:
-
-        * ``"html"`` for :class:`~scrapy.http.HtmlResponse` type
-        * ``"xml"`` for :class:`~scrapy.http.XmlResponse` type
-        * ``"html"`` for anything else
-
-   Otherwise, if ``type`` is set, the selector type will be forced and no
-   detection will occur.
+    If ``type`` is ``None``, the selector defaults to ``"html"``.
 
   .. method:: xpath(query)
 
@@ -591,10 +540,6 @@ Built-in Selectors reference
 
       ``query`` is a string containing the XPATH query to apply.
 
-      .. note::
-
-          For convenience, this method can be called as ``response.xpath()``
-
   .. method:: css(query)
 
       Apply the given CSS selector and return a :class:`SelectorList` instance.
@@ -603,10 +548,6 @@ Built-in Selectors reference
 
       In the background, CSS queries are translated into XPath queries using
       `cssselect`_ library and run ``.xpath()`` method.
-
-      .. note::
-
-          For convenience this method can be called as ``response.css()``
 
   .. method:: extract()
 
@@ -676,21 +617,21 @@ SelectorList objects
         returns True if the list is not empty, False otherwise.
 
 
-Selector examples on HTML response
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Selector examples on HTML text
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Here's a couple of :class:`Selector` examples to illustrate several concepts.
+Here are some :class:`Selector` examples to illustrate several concepts.
 In all cases, we assume there is already a :class:`Selector` instantiated with
-a :class:`~scrapy.http.HtmlResponse` object like this::
+an HTML text like this::
 
-      sel = Selector(html_response)
+      sel = Selector(text=html_text, type='html')
 
-1. Select all ``<h1>`` elements from an HTML response body, returning a list of
+1. Select all ``<h1>`` elements from an HTML text, returning a list of
    :class:`Selector` objects (ie. a :class:`SelectorList` object)::
 
       sel.xpath("//h1")
 
-2. Extract the text of all ``<h1>`` elements from an HTML response body,
+2. Extract the text of all ``<h1>`` elements from an HTML text,
    returning a list of unicode strings::
 
       sel.xpath("//h1").extract()         # this includes the h1 tag
@@ -701,16 +642,16 @@ a :class:`~scrapy.http.HtmlResponse` object like this::
       for node in sel.xpath("//p"):
           print node.xpath("@class").extract()
 
-Selector examples on XML response
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Here's a couple of examples to illustrate several concepts. In both cases we
-assume there is already a :class:`Selector` instantiated with an
-:class:`~scrapy.http.XmlResponse` object like this::
+Selector examples on XML text
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-      sel = Selector(xml_response)
+Here are some examples to illustrate concepts for :class:`Selector` objects
+instantiated with an XML text like this::
 
-1. Select all ``<product>`` elements from an XML response body, returning a list
+      sel = Selector(text=xml_text, type='xml')
+
+1. Select all ``<product>`` elements from an XML text, returning a list
    of :class:`Selector` objects (ie. a :class:`SelectorList` object)::
 
       sel.xpath("//product")
@@ -733,21 +674,24 @@ simple/convenient XPaths. You can use the
 
 Let's show an example that illustrates this with Github blog atom feed.
 
-First, we open the shell with the url we want to scrape::
+Let's download the atom feed using `requests`_ and create a selector::
 
-    $ scrapy shell https://github.com/blog.atom
+    >>> import requests
+    >>> from parsel import Selector
+    >>> text = requests.get('https://github.com/blog.atom').text
+    >>> sel = Selector(text=text, type='xml')
 
-Once in the shell we can try selecting all ``<link>`` objects and see that it
-doesn't work (because the Atom XML namespace is obfuscating those nodes)::
+We can try selecting all ``<link>`` objects and then see that it doesn't work
+(because the Atom XML namespace is obfuscating those nodes)::
 
-    >>> response.xpath("//link")
+    >>> sel.xpath("//link")
     []
 
 But once we call the :meth:`Selector.remove_namespaces` method, all
 nodes can be accessed directly by their names::
 
-    >>> response.selector.remove_namespaces()
-    >>> response.xpath("//link")
+    >>> sel.remove_namespaces()
+    >>> sel.xpath("//link")
     [<Selector xpath='//link' data=u'<link xmlns="http://www.w3.org/2005/Atom'>,
      <Selector xpath='//link' data=u'<link xmlns="http://www.w3.org/2005/Atom'>,
      ...
@@ -765,3 +709,30 @@ of relevance, are:
    though.
 
 .. _Google Base XML feed: https://support.google.com/merchants/answer/160589?hl=en&ref_topic=2473799
+.. _requests: http://www.python-requests.org/
+
+
+Similar libraries
+=================
+
+
+ * `BeautifulSoup`_ is a very popular screen scraping library among Python
+   programmers which constructs a Python object based on the structure of the
+   HTML code and also deals with bad markup reasonably well, but it has one
+   drawback: it's slow.
+
+ * `lxml`_ is an XML parsing library (which also parses HTML) with a pythonic
+   API based on `ElementTree`_. (lxml is not part of the Python standard
+   library.)
+
+Parsel is built on top of the `lxml`_ library, which means they're very similar
+in speed and parsing accuracy. The advantage of using Parsel over `lxml`_ is
+that Parsel is simpler to use and extend, unlike the `lxml`_ API which is much
+bigger because the `lxml`_ library can be used for many other tasks, besides
+selecting markup documents.
+
+
+.. _BeautifulSoup: http://www.crummy.com/software/BeautifulSoup/
+.. _lxml: http://lxml.de/
+.. _ElementTree: https://docs.python.org/2/library/xml.etree.elementtree.html
+.. _cssselect: https://pypi.python.org/pypi/cssselect/
