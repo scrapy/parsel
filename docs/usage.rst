@@ -17,7 +17,7 @@ Creating a :class:`Selector` object is simple::
 
     >>> from parsel import Selector
     >>> text = u"<html><body><h1>Hello, Parsel!</h1></body></html>"
-    >>> sel = Selector(text=text, type='html')
+    >>> sel = Selector(text=text)
 
 .. note::
     One important thing to note is that if you're using Python 2,
@@ -718,21 +718,26 @@ Similar libraries
 
  * `BeautifulSoup`_ is a very popular screen scraping library among Python
    programmers which constructs a Python object based on the structure of the
-   HTML code and also deals with bad markup reasonably well, but it has one
-   drawback: it's slow.
+   HTML code and also deals with bad markup reasonably well.
 
  * `lxml`_ is an XML parsing library (which also parses HTML) with a pythonic
    API based on `ElementTree`_. (lxml is not part of the Python standard
-   library.)
+   library.). Parsel uses it under-the-hood.
+
+ * `PyQuery`_ is a library that, like Parsel, uses `lxml`_ and
+   `cssselect`_ under the hood, but it offers a jQuery-like API to
+   traverse and manipulate XML/HTML documents.
 
 Parsel is built on top of the `lxml`_ library, which means they're very similar
 in speed and parsing accuracy. The advantage of using Parsel over `lxml`_ is
 that Parsel is simpler to use and extend, unlike the `lxml`_ API which is much
 bigger because the `lxml`_ library can be used for many other tasks, besides
-selecting markup documents.
+selecting markup documents. Also, Parsel allows you to use CSS, by translating
+CSS to XPath using the `cssselect`_ library.
 
 
 .. _BeautifulSoup: http://www.crummy.com/software/BeautifulSoup/
 .. _lxml: http://lxml.de/
+.. _PyQuery: https://pypi.python.org/pypi/pyquery
 .. _ElementTree: https://docs.python.org/2/library/xml.etree.elementtree.html
 .. _cssselect: https://pypi.python.org/pypi/cssselect/
