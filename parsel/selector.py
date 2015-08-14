@@ -43,8 +43,14 @@ def create_root_node(text, parser_cls, base_url=None):
 
 class SelectorList(list):
 
+    # __getslice__ is deprecated but `list` builtin implements it only in Py2
     def __getslice__(self, i, j):
-        return self.__class__(list.__getslice__(self, i, j))
+        o = super(SelectorList, self).__getslice__(i, j)
+        return self.__class__(o)
+
+    def __getitem__(self, pos):
+        o = super(SelectorList, self).__getitem__(pos)
+        return self.__class__(o) if isinstance(pos, slice) else o
 
     def xpath(self, xpath):
         return self.__class__(flatten([x.xpath(xpath) for x in self]))
@@ -158,8 +164,6 @@ class Selector(object):
                 return six.text_type(self.root)
 
     def register_namespace(self, prefix, uri):
-        if self.namespaces is None:
-            self.namespaces = {}
         self.namespaces[prefix] = uri
 
     def remove_namespaces(self):
@@ -171,8 +175,9 @@ class Selector(object):
                 if an.startswith('{'):
                     el.attrib[an.split('}', 1)[1]] = el.attrib.pop(an)
 
-    def __nonzero__(self):
+    def __bool__(self):
         return bool(self.extract())
+    __nonzero__ = __bool__
 
     def __str__(self):
         data = repr(self.extract()[:40])

@@ -132,6 +132,33 @@ class SelectorTestCase(unittest.TestCase):
         self.assertEqual(xs.xpath("//div").extract(),
                          [u'<div><img src="a.jpg"><p>Hello</p></img></div>'])
 
+    def test_error_for_unknown_selector_type(self):
+        self.assertRaises(ValueError, self.sscls, text=u'', type='_na_')
+
+    def test_text_or_root_is_required(self):
+        self.assertRaisesRegexp(ValueError,
+                                'Selector needs either text or root argument',
+                                self.sscls)
+
+    def test_bool(self):
+        text = u'<a href="" >false</a><a href="nonempty">true</a>'
+        hs = self.sscls(text=text, type='html')
+        falsish = hs.xpath('//a/@href')[0]
+        self.assertEqual(falsish.extract(), u'')
+        self.assertFalse(falsish)
+        trueish = hs.xpath('//a/@href')[1]
+        self.assertEqual(trueish.extract(), u'nonempty')
+        self.assertTrue(trueish)
+
+    def test_slicing(self):
+        text = u'<div><p>1</p><p>2</p><p>3</p></div>'
+        hs = self.sscls(text=text, type='html')
+        self.assertIsInstance(hs.css('p')[2], self.sscls)
+        self.assertIsInstance(hs.css('p')[2:3], self.sscls.selectorlist_cls)
+        self.assertIsInstance(hs.css('p')[:2], self.sscls.selectorlist_cls)
+        self.assertEqual(hs.css('p')[2:3].extract(), [u'<p>3</p>'])
+        self.assertEqual(hs.css('p')[1:3].extract(), [u'<p>2</p>', u'<p>3</p>'])
+
     def test_nested_selectors(self):
         """Nested selector tests"""
         body = u"""<body>
@@ -378,6 +405,19 @@ class SelectorTestCase(unittest.TestCase):
         self.assertEquals(u'http://example.com', sel.root.base)
 
 
+    def test_extending_selector(self):
+        class MySelectorList(Selector.selectorlist_cls):
+            pass
+
+        class MySelector(Selector):
+            selectorlist_cls = MySelectorList
+
+        sel = MySelector(text=u'<html><div>foo</div></html>')
+        self.assertIsInstance(sel.xpath('//div'), MySelectorList)
+        self.assertIsInstance(sel.xpath('//div')[0], MySelector)
+        self.assertIsInstance(sel.css('div'), MySelectorList)
+        self.assertIsInstance(sel.css('div')[0], MySelector)
+
 class ExsltTestCase(unittest.TestCase):
 
     sscls = Selector
@@ -493,16 +533,3 @@ class ExsltTestCase(unittest.TestCase):
                                //div[@itemtype="http://schema.org/Event"]
                                     //*[@itemscope]/*/@itemprop)''').extract(),
                          [u'url', u'name', u'startDate', u'location', u'offers'])
-
-    def test_extending_selector(self):
-        class MySelectorList(Selector.selectorlist_cls):
-            pass
-
-        class MySelector(Selector):
-            selectorlist_cls = MySelectorList
-
-        sel = MySelector(text=u'<html><div>foo</div></html>')
-        self.assertIsInstance(sel.xpath('//div'), MySelectorList)
-        self.assertIsInstance(sel.xpath('//div')[0], MySelector)
-        self.assertIsInstance(sel.css('div'), MySelectorList)
-        self.assertIsInstance(sel.css('div')[0], MySelector)
