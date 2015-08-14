@@ -57,6 +57,9 @@ docs:
 	$(MAKE) -C docs html
 	python -m webbrowser docs/_build/html/index.html
 
+servedocs: docs
+	watchmedo shell-command -p '*.rst' -c '$(MAKE) -C docs html' -R -D docs/
+
 release: clean
 	python setup.py sdist upload
 	python setup.py bdist_wheel upload
