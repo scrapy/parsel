@@ -3,10 +3,14 @@ Parsel
 ===============================
 
 .. image:: https://img.shields.io/travis/scrapy/parsel.svg
-        :target: https://travis-ci.org/scrapy/parsel
+   :target: https://travis-ci.org/scrapy/parsel
 
 .. image:: https://img.shields.io/pypi/v/parsel.svg
-        :target: https://pypi.python.org/pypi/parsel
+   :target: https://pypi.python.org/pypi/parsel
+
+.. image:: https://img.shields.io/codecov/c/github/scrapy/parsel/master.svg
+   :target: http://codecov.io/github/scrapy/parsel?branch=master
+   :alt: Coverage report
 
 
 Parsel is a library to extract data from HTML and XML using XPath and CSS selectors

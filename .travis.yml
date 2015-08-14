@@ -5,15 +5,20 @@ env:
   - TOXENV=pypy
   - TOXENV=py33
   - TOXENV=py34
+
 install:
-  - pip install -U tox twine wheel
+  - pip install -U tox twine wheel codecov
 script: tox
+after_success:
+  - codecov
+
 notifications:
   irc:
     use_notice: true
     skip_join: true
     channels:
       - irc.freenode.org#scrapy
+
 deploy:
   provider: pypi
   distributions: sdist bdist_wheel
