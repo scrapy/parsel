@@ -519,102 +519,17 @@ to use the ``.`` in the XPath expressions that will follow.
 API reference
 =============
 
-.. module:: parsel.selector
-   :synopsis: Selector class
 
-.. class:: Selector(text, type=None)
-
-  :class:`Selector` allows you to select parts of an XML or HTML text using CSS
-  or XPath expressions and extract data from it.
-
-  ``text`` is utf-8 encoded text (unicode object in Python 3 or str in Python 3)
-
-  ``type`` defines the selector type, it can be ``"html"``, ``"xml"`` or ``None`` (default).
-    If ``type`` is ``None``, the selector defaults to ``"html"``.
-
-  .. method:: xpath(query)
-
-      Find nodes matching the xpath ``query`` and return the result as a
-      :class:`SelectorList` instance with all elements flattened. List
-      elements implement :class:`Selector` interface too.
-
-      ``query`` is a string containing the XPATH query to apply.
-
-  .. method:: css(query)
-
-      Apply the given CSS selector and return a :class:`SelectorList` instance.
-
-      ``query`` is a string containing the CSS selector to apply.
-
-      In the background, CSS queries are translated into XPath queries using
-      `cssselect`_ library and run ``.xpath()`` method.
-
-  .. method:: extract()
-
-     Serialize and return the matched nodes as a list of unicode strings.
-     Percent encoded content is unquoted.
-
-  .. method:: re(regex)
-
-     Apply the given regex and return a list of unicode strings with the
-     matches.
-
-     ``regex`` can be either a compiled regular expression or a string which
-     will be compiled to a regular expression using ``re.compile(regex)``
-
-  .. method:: register_namespace(prefix, uri)
-
-     Register the given namespace to be used in this :class:`Selector`.
-     Without registering namespaces you can't select or extract data from
-     non-standard namespaces. See examples below.
-
-  .. method:: remove_namespaces()
-
-     Remove all namespaces, allowing to traverse the document using
-     namespace-less xpaths. See example below.
-
-  .. method:: __nonzero__()
-
-     Returns ``True`` if there is any real content selected or ``False``
-     otherwise.  In other words, the boolean value of a :class:`Selector` is
-     given by the contents it selects.
+.. autoclass:: parsel.selector.Selector
+    :members:
 
 
 SelectorList objects
 --------------------
 
-.. class:: SelectorList
+.. autoclass:: parsel.selector.SelectorList
+    :members:
 
-   The :class:`SelectorList` class is a subclass of the builtin ``list``
-   class, which provides a few additional methods.
-
-   .. method:: xpath(query)
-
-       Call the ``.xpath()`` method for each element in this list and return
-       their results flattened as another :class:`SelectorList`.
-
-       ``query`` is the same argument as the one in :meth:`Selector.xpath`
-
-   .. method:: css(query)
-
-       Call the ``.css()`` method for each element in this list and return
-       their results flattened as another :class:`SelectorList`.
-
-       ``query`` is the same argument as the one in :meth:`Selector.css`
-
-   .. method:: extract()
-
-       Call the ``.extract()`` method for each element is this list and return
-       their results flattened, as a list of unicode strings.
-
-   .. method:: re()
-
-       Call the ``.re()`` method for each element is this list and return
-       their results flattened, as a list of unicode strings.
-
-   .. method:: __nonzero__()
-
-        returns True if the list is not empty, False otherwise.
 
 
 Selector examples on HTML text
