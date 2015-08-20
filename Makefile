@@ -50,6 +50,7 @@ coverage:
 	python -m webbrowser htmlcov/index.html
 
 docs:
+	( python -c 'import sphinx_rtd_theme' 2>/dev/null || pip install sphinx_rtd_theme )
 	rm -f docs/parsel.rst
 	rm -f docs/modules.rst
 	sphinx-apidoc -o docs/ parsel
