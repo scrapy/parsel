@@ -558,6 +558,8 @@ an HTML text like this::
           print node.xpath("@class").extract()
 
 
+.. _selector-examples-xml:
+
 Selector examples on XML text
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 

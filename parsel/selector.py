@@ -226,14 +226,14 @@ class Selector(object):
         """
         Register the given namespace to be used in this :class:`Selector`.
         Without registering namespaces you can't select or extract data from
-        non-standard namespaces. See examples below.
+        non-standard namespaces. See :ref:`selector-examples-xml`.
         """
         self.namespaces[prefix] = uri
 
     def remove_namespaces(self):
         """
         Remove all namespaces, allowing to traverse the document using
-        namespace-less xpaths. See example below.
+        namespace-less xpaths. See :ref:`removing-namespaces`.
         """
         for el in self.root.iter('*'):
             if el.tag.startswith('{'):
