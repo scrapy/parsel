@@ -104,7 +104,7 @@ class Selector(object):
     :class:`Selector` allows you to select parts of an XML or HTML text using CSS
     or XPath expressions and extract data from it.
 
-    ``text`` is utf-8 encoded text (unicode object in Python 3 or str in Python 3)
+    ``text`` is a ``unicode`` object in Python 2 or a ``str`` object in Python 3
 
     ``type`` defines the selector type, it can be ``"html"``, ``"xml"`` or ``None`` (default).
     If ``type`` is ``None``, the selector defaults to ``"html"``.
@@ -245,7 +245,7 @@ class Selector(object):
 
     def __bool__(self):
         """
-        Returns ``True`` if there is any real content selected or ``False``
+        Return ``True`` if there is any real content selected or ``False``
         otherwise.  In other words, the boolean value of a :class:`Selector` is
         given by the contents it selects.
         """
