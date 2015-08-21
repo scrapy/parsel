@@ -42,6 +42,10 @@ def create_root_node(text, parser_cls, base_url=None):
 
 
 class SelectorList(list):
+    """
+    The :class:`SelectorList` class is a subclass of the builtin ``list``
+    class, which provides a few additional methods.
+    """
 
     # __getslice__ is deprecated but `list` builtin implements it only in Py2
     def __getslice__(self, i, j):
@@ -53,12 +57,28 @@ class SelectorList(list):
         return self.__class__(o) if isinstance(pos, slice) else o
 
     def xpath(self, xpath):
+        """
+        Call the ``.xpath()`` method for each element in this list and return
+        their results flattened as another :class:`SelectorList`.
+
+        ``query`` is the same argument as the one in :meth:`Selector.xpath`
+        """
         return self.__class__(flatten([x.xpath(xpath) for x in self]))
 
     def css(self, xpath):
+        """
+        Call the ``.css()`` method for each element in this list and return
+        their results flattened as another :class:`SelectorList`.
+
+        ``query`` is the same argument as the one in :meth:`Selector.css`
+        """
         return self.__class__(flatten([x.css(xpath) for x in self]))
 
     def re(self, regex):
+        """
+        Call the ``.re()`` method for each element is this list and return
+        their results flattened, as a list of unicode strings.
+        """
         return flatten([x.re(regex) for x in self])
 
     def re_first(self, regex):
@@ -66,6 +86,10 @@ class SelectorList(list):
             return el
 
     def extract(self):
+        """
+        Call the ``.extract()`` method for each element is this list and return
+        their results flattened, as a list of unicode strings.
+        """
         return [x.extract() for x in self]
 
     def extract_first(self, default=None):
@@ -76,6 +100,15 @@ class SelectorList(list):
 
 
 class Selector(object):
+    """
+    :class:`Selector` allows you to select parts of an XML or HTML text using CSS
+    or XPath expressions and extract data from it.
+
+    ``text`` is a ``unicode`` object in Python 2 or a ``str`` object in Python 3
+
+    ``type`` defines the selector type, it can be ``"html"``, ``"xml"`` or ``None`` (default).
+    If ``type`` is ``None``, the selector defaults to ``"html"``.
+    """
 
     __slots__ = ['text', 'namespaces', 'type', '_expr', 'root',
                  '__weakref__', '_parser', '_csstranslator', '_tostring_method']
@@ -119,6 +152,13 @@ class Selector(object):
         return create_root_node(text, self._parser, base_url=base_url)
 
     def xpath(self, query):
+        """
+        Find nodes matching the xpath ``query`` and return the result as a
+        :class:`SelectorList` instance with all elements flattened. List
+        elements implement :class:`Selector` interface too.
+
+        ``query`` is a string containing the XPATH query to apply.
+        """
         try:
             xpathev = self.root.xpath
         except AttributeError:
@@ -141,15 +181,34 @@ class Selector(object):
         return self.selectorlist_cls(result)
 
     def css(self, query):
+        """
+        Apply the given CSS selector and return a :class:`SelectorList` instance.
+
+        ``query`` is a string containing the CSS selector to apply.
+
+        In the background, CSS queries are translated into XPath queries using
+        `cssselect`_ library and run ``.xpath()`` method.
+        """
         return self.xpath(self._css2xpath(query))
 
     def _css2xpath(self, query):
         return self._csstranslator.css_to_xpath(query)
 
     def re(self, regex):
+        """
+        Apply the given regex and return a list of unicode strings with the
+        matches.
+
+        ``regex`` can be either a compiled regular expression or a string which
+        will be compiled to a regular expression using ``re.compile(regex)``
+        """
         return extract_regex(regex, self.extract())
 
     def extract(self):
+        """
+        Serialize and return the matched nodes as a list of unicode strings.
+        Percent encoded content is unquoted.
+        """
         try:
             return etree.tostring(self.root,
                                   method=self._tostring_method,
@@ -164,9 +223,18 @@ class Selector(object):
                 return six.text_type(self.root)
 
     def register_namespace(self, prefix, uri):
+        """
+        Register the given namespace to be used in this :class:`Selector`.
+        Without registering namespaces you can't select or extract data from
+        non-standard namespaces. See :ref:`selector-examples-xml`.
+        """
         self.namespaces[prefix] = uri
 
     def remove_namespaces(self):
+        """
+        Remove all namespaces, allowing to traverse the document using
+        namespace-less xpaths. See :ref:`removing-namespaces`.
+        """
         for el in self.root.iter('*'):
             if el.tag.startswith('{'):
                 el.tag = el.tag.split('}', 1)[1]
@@ -176,6 +244,11 @@ class Selector(object):
                     el.attrib[an.split('}', 1)[1]] = el.attrib.pop(an)
 
     def __bool__(self):
+        """
+        Return ``True`` if there is any real content selected or ``False``
+        otherwise.  In other words, the boolean value of a :class:`Selector` is
+        given by the contents it selects.
+        """
         return bool(self.extract())
     __nonzero__ = __bool__
 
