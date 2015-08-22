@@ -3,6 +3,19 @@
 History
 -------
 
+1.0.0 (105-08-22)
+---------------
+
+* Documentation fixes
+
+
+0.9.6 (2015-08-14)
+------------------
+
+* Updated documentation
+* Extended test coverage
+
+
 0.9.5 (2015-08-11)
 ------------------
 

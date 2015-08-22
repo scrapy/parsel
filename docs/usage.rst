@@ -83,12 +83,12 @@ So, by looking at the :ref:`HTML code <topics-selectors-htmlcode>` of that
 page, let's construct an XPath for selecting the text inside the title tag::
 
     >>> selector.xpath('//title/text()')
-    [<Selector (text) xpath=//title/text()>]
+    [<Selector xpath='//title/text()' data=u'Example website'>]
 
 You can also ask the same thing using CSS instead::
 
     >>> selector.css('title::text')
-    [<Selector (text) xpath=//title/text()>]
+    [<Selector xpath=u'descendant-or-self::title/text()' data=u'Example website'>]
 
 As you can see, ``.xpath()`` and ``.css()`` methods return a
 :class:`~parsel.selector.SelectorList` instance, which is a list of new
