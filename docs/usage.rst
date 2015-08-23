@@ -539,7 +539,7 @@ Here are some :class:`Selector` examples to illustrate several concepts.
 In all cases, we assume there is already a :class:`Selector` instantiated with
 an HTML text like this::
 
-      sel = Selector(text=html_text, type='html')
+      sel = Selector(text=html_text)
 
 1. Select all ``<h1>`` elements from an HTML text, returning a list of
    :class:`Selector` objects (ie. a :class:`SelectorList` object)::
