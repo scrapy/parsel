@@ -42,12 +42,19 @@ class XPathExpr(OriginalXPathExpr):
 
 
 class TranslatorMixin(object):
+    """This mixin adds support to CSS pseudo elements via dynamic dispatch.
+
+    Currently supported pseudo-elements are ``::text`` and ``::attr(ATTR_NAME)``.
+    """
 
     def xpath_element(self, selector):
         xpath = super(TranslatorMixin, self).xpath_element(selector)
         return XPathExpr.from_xpath(xpath)
 
     def xpath_pseudo_element(self, xpath, pseudo_element):
+        """
+        Dispatch method that transform XPath to support pseudo-element
+        """
         if isinstance(pseudo_element, FunctionalPseudoElement):
             method = 'xpath_%s_functional_pseudo_element' % (
                 pseudo_element.name.replace('-', '_'))
@@ -55,7 +62,7 @@ class TranslatorMixin(object):
             if not method:
                 raise ExpressionError(
                     "The functional pseudo-element ::%s() is unknown"
-                % pseudo_element.name)
+                    % pseudo_element.name)
             xpath = method(xpath, pseudo_element)
         else:
             method = 'xpath_%s_simple_pseudo_element' % (
@@ -69,12 +76,14 @@ class TranslatorMixin(object):
         return xpath
 
     def xpath_attr_functional_pseudo_element(self, xpath, function):
+        """Support selecting attribute values using ::attr() pseudo-element
+        """
         if function.argument_types() not in (['STRING'], ['IDENT']):
             raise ExpressionError(
                 "Expected a single string or ident for ::attr(), got %r"
                 % function.arguments)
         return XPathExpr.from_xpath(xpath,
-            attribute=function.arguments[0].value)
+                                    attribute=function.arguments[0].value)
 
     def xpath_text_simple_pseudo_element(self, xpath):
         """Support selecting text nodes using ::text pseudo-element"""
@@ -87,4 +96,3 @@ class GenericTranslator(TranslatorMixin, OriginalGenericTranslator):
 
 class HTMLTranslator(TranslatorMixin, OriginalHTMLTranslator):
     pass
-
