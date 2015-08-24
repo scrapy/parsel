@@ -43,6 +43,8 @@ setup(
         'License :: OSI Approved :: BSD License',
         'Natural Language :: English',
         'Topic :: Text Processing :: Markup',
+        'Topic :: Text Processing :: Markup :: HTML',
+        'Topic :: Text Processing :: Markup :: XML',
         "Programming Language :: Python :: 2",
         'Programming Language :: Python :: 2.7',
         'Programming Language :: Python :: 3',
