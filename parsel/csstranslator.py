@@ -53,7 +53,7 @@ class TranslatorMixin(object):
 
     def xpath_pseudo_element(self, xpath, pseudo_element):
         """
-        Dispatch method that transform XPath to support pseudo-element
+        Dispatch method that transforms XPath to support pseudo-element
         """
         if isinstance(pseudo_element, FunctionalPseudoElement):
             method = 'xpath_%s_functional_pseudo_element' % (
