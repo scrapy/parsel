@@ -3,6 +3,13 @@
 History
 -------
 
+1.0.1 (2015-08-24)
+------------------
+
+* Updated PyPI classifiers
+* Added docstrings for csstranslator module and other doc fixes
+
+
 1.0.0 (2015-08-22)
 ------------------
 
