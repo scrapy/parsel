@@ -38,10 +38,11 @@ setup(
     zip_safe=False,
     keywords='parsel',
     classifiers=[
-        'Development Status :: 2 - Pre-Alpha',
+        'Development Status :: 5 - Production/Stable',
         'Intended Audience :: Developers',
         'License :: OSI Approved :: BSD License',
         'Natural Language :: English',
+        'Topic :: Text Processing :: Markup',
         "Programming Language :: Python :: 2",
         'Programming Language :: Python :: 2.7',
         'Programming Language :: Python :: 3',
