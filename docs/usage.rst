@@ -114,7 +114,7 @@ If you want to extract only first matched element, you can call the selector ``.
 
 It returns ``None`` if no element was found::
 
-    >>> selector.xpath('//div/[id="not-exists"]/text()').extract_first() is None
+    >>> selector.xpath('//div[@id="not-exists"]/text()').extract_first() is None
     True
 
 Notice that CSS selectors can select text or attribute nodes using CSS3
