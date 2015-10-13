@@ -249,7 +249,7 @@ XPath specification.
 Using EXSLT extensions
 ----------------------
 
-Being built atop `lxml`_, Scrapy selectors also support some `EXSLT`_ extensions
+Being built atop `lxml`_, parsel selectors support some `EXSLT`_ extensions
 and come with these pre-registered namespaces to use in XPath expressions:
 
 
@@ -502,7 +502,7 @@ other classes, and if you just use ``contains(@class, 'someclass')`` to make up
 for that you may end up with more elements that you want, if they have a different
 class name that shares the string ``someclass``.
 
-As it turns out, Scrapy selectors allow you to chain selectors, so most of the time
+As it turns out, parsel selectors allow you to chain selectors, so most of the time
 you can just select by class using CSS and then switch to XPath when needed::
 
     >>> from parsel import Selector
@@ -618,8 +618,8 @@ instead of having to call it manually, this is because of two reasons, which, in
 of relevance, are:
 
 1. Removing namespaces requires to iterate and modify all nodes in the
-   document, which is a reasonably expensive operation to perform for all
-   documents crawled by Scrapy
+   document, which is a reasonably expensive operation to perform by default
+   for all documents.
 
 2. There could be some cases where using namespaces is actually required, in
    case some element names clash between namespaces. These cases are very rare
