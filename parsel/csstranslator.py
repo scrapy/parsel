@@ -2,7 +2,7 @@ from cssselect import GenericTranslator as OriginalGenericTranslator
 from cssselect import HTMLTranslator as OriginalHTMLTranslator
 from cssselect.xpath import XPathExpr as OriginalXPathExpr
 from cssselect.xpath import _unicode_safe_getattr, ExpressionError
-from cssselect.parser import FunctionalPseudoElement
+from cssselect.parser import FunctionalPseudoElement, parse_series
 
 
 class XPathExpr(OriginalXPathExpr):
@@ -15,10 +15,21 @@ class XPathExpr(OriginalXPathExpr):
         x = cls(path=xpath.path, element=xpath.element, condition=xpath.condition)
         x.textnode = textnode
         x.attribute = attribute
+        x.post_condition = None
         return x
+
+    def add_post_condition(self, post_condition):
+        if self.post_condition:
+            self.post_condition = '%s and (%s)' % (self.post_condition,
+                                                   post_condition)
+        else:
+            self.post_condition = post_condition
+        return self
 
     def __str__(self):
         path = super(XPathExpr, self).__str__()
+        if self.post_condition:
+            path = '%s[%s]' % (path, self.post_condition)
         if self.textnode:
             if path == '*':
                 path = 'text()'
@@ -38,6 +49,7 @@ class XPathExpr(OriginalXPathExpr):
         super(XPathExpr, self).join(combiner, other)
         self.textnode = other.textnode
         self.attribute = other.attribute
+        self.post_condition = other.post_condition
         return self
 
 
@@ -88,6 +100,116 @@ class TranslatorMixin(object):
     def xpath_text_simple_pseudo_element(self, xpath):
         """Support selecting text nodes using ::text pseudo-element"""
         return XPathExpr.from_xpath(xpath, textnode=True)
+
+    def xpath_first_of_pseudo(self, xpath):
+        """Support selecting first child nodes using :first pseudo-class"""
+        xpath.add_star_prefix()
+        return xpath.add_post_condition("position() = 1")
+
+    def xpath_last_of_pseudo(self, xpath):
+        """Support selecting last child nodes using :last pseudo-class"""
+        xpath.add_star_prefix()
+        return xpath.add_post_condition("position() = last()")
+
+    def xpath_anb_condition(self, function, last=False):
+        try:
+            a, b = parse_series(function.arguments)
+        except ValueError:
+            raise ExpressionError("Invalid series: '%r'" % function.arguments)
+        # non-last
+        # --------
+        #    position() = an+b
+        # -> position() - b = an
+        #
+        # if a < 0:
+        #    position() - b <= 0
+        # -> position() <= b
+        #
+        # last
+        # ----
+        #    last() - position() = an+b -1
+        # -> last() - position() - b +1 = an
+        #
+        # if a < 0:
+        #    last() - position() - b +1 <= 0
+        # -> position() >= last() - b +1
+        #
+        # -b +1 = -(b-1)
+        if last:
+            b = b - 1
+        if b > 0:
+            b_neg = str(-b)
+        else:
+            b_neg = '+%s' % (-b)
+        if a == 0:
+            if last:
+                # http://www.w3.org/TR/selectors/#nth-last-child-pseudo
+                # The :nth-last-child(an+b) pseudo-class notation represents
+                # an element that has an+b-1 siblings after it in the document tree
+                #
+                #    last() - position() = an+b-1
+                # -> position() = last() -b +1 (for a==0)
+                #
+                if b == 0:
+                    b = 'last()'
+                else:
+                    b = 'last() %s' % b_neg
+            return 'position() = %s' % b
+        if a != 1:
+            # last() - position() - b +1 = an
+            if last:
+                left = 'last() - position()'
+            # position() - b = an
+            else:
+                left = 'position()'
+            if b != 0:
+                left = '%s %s' % (left, b_neg)
+            if last or b != 0:
+                left = '(%s)' % left
+            expr = ['%s mod %s = 0' % (left, a)]
+        else:
+            expr = []
+        if last:
+            if b == 0:
+                right = 'last()'
+            else:
+                right = 'last() %s' % b_neg
+            if a > 0:
+                expr.append('(position() <= %s)' % right)
+            else:
+                expr.append('(position() >= %s)' % right)
+        else:
+            # position() > 0 so if b < 0, then position() > b
+            # also, position() >= 1 always
+            if b > 1:
+                if a > 0:
+                    expr.append('position() >= %s' % b)
+                else:
+                    expr.append('position() <= %s' % b)
+
+        expr = ' and '.join(expr)
+        if expr:
+            return expr
+
+    def xpath_nth_of_function(self, xpath, function):
+        """Support selecting n-th nodes satisfying previous selector(s),
+        using :nth-of(an+b) pseudo-class"""
+        xpath.add_star_prefix()
+        cond = self.xpath_anb_condition(function, last=False)
+        if cond:
+            return xpath.add_post_condition(cond)
+        else:
+            return xpath
+
+    def xpath_nth_last_of_function(self, xpath, function):
+        """Support selecting n-th last nodes satisfying previous
+        selector(s), using :nth-last-of(an+b) pseudo-class"""
+        xpath.add_star_prefix()
+        cond = self.xpath_anb_condition(function, last=True)
+        if cond:
+            return xpath.add_post_condition(cond)
+        else:
+            return xpath
 
 
 class GenericTranslator(TranslatorMixin, OriginalGenericTranslator):
