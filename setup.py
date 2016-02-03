@@ -33,6 +33,7 @@ setup(
         'lxml',
         'six>=1.5.2',
         'cssselect>=0.9',
+        'jmespath>=0.9.0',
     ],
     license="BSD",
     zip_safe=False,
