@@ -40,22 +40,13 @@ def _st(st):
         raise ValueError('Invalid type: %s' % st)
 
 
-def check_text(text):
-    if text is not None:
-        if not isinstance(text, six.text_type):
-            raise TypeError("text argument should be of type %s" % six.text_type)
-        return True
-    return False
-
-
-def translate_path(to_json):
+def _translate_path(to_json):
     """
     this is a decorator that modifies the selector
     instance as needed by the methods jmespath and xpath
     when ``to_json`` is true converts selector
     instance to jmespath compatible type if required
     """
-
     def deco(func):
         def wrapped(selector_cls, *args, **kwargs):
             type = 'json' if to_json else None
@@ -69,7 +60,7 @@ def translate_path(to_json):
     return deco
 
 
-def json_incompatible(func):
+def _json_incompatible(func):
     """
     this a decorator that gives a warning when a certain
     method is called which not compatible with the Selector
@@ -168,8 +159,7 @@ class Selector(object):
     """
 
     __slots__ = ['text', 'namespaces', 'type', '_expr', 'root',
-                 '__weakref__', '_parser', '_csstranslator',
-                 '_tostring_method', 'json_obj', '_jsexpr']
+                 '__weakref__', '_parser', '_csstranslator', '_tostring_method']
 
     _default_type = None
     _default_namespaces = {
@@ -187,44 +177,41 @@ class Selector(object):
     selectorlist_cls = SelectorList
 
     def __init__(self, text=None, type=None, namespaces=None, root=None,
-                 base_url=None, _expr=None, json_obj=None, _jsexpr=None):
+                 base_url=None, _expr=None):
 
         self.type = st = _st(type or self._default_type)
         self._parser = _ctgroup[st]['_parser']
         self._csstranslator = _ctgroup[st]['_csstranslator']
         self._tostring_method = _ctgroup[st]['_tostring_method']
-        self._expr = _expr
-        self._jsexpr = _jsexpr
+
+        reinit = False
+        if text is not None:
+            if not isinstance(text, six.text_type):
+                raise TypeError("text argument should be of type %s" % six.text_type)
+            if type == 'json':
+                try:
+                    root = json.loads(text)
+                except ValueError:
+                    reinit = True
+            else:
+                root = self._get_root(text, base_url)
+        elif root is None:
+            raise ValueError("Selector needs either text or root argument")
 
         self.namespaces = dict(self._default_namespaces)
         if namespaces is not None:
             self.namespaces.update(namespaces)
 
-        reinitialise = False
-        if type == 'json':
-            if check_text(text):
-                try:
-                    json_obj = json.loads(text)
-                except ValueError:
-                    reinitialise = True
-            elif json_obj is None:
-                raise ValueError("Selector needs either text or json_obj argument when type is `json`")
-        else:
-            if check_text(text):
-                root = self._get_root(text, base_url)
-            elif root is None:
-                raise ValueError("Selector needs either text or root argument")
-
         self.root = root
-        self.json_obj = json_obj
+        self._expr = _expr
 
-        if reinitialise:
+        if reinit:
             self.__init__(text=text)
 
     def _get_root(self, text, base_url=None):
         return create_root_node(text, self._parser, base_url=base_url)
 
-    @translate_path(to_json=False)
+    @_translate_path(to_json=False)
     def xpath(self, query):
         """
         Find nodes matching the xpath ``query`` and return the result as a
@@ -253,7 +240,7 @@ class Selector(object):
                   for x in result]
         return self.selectorlist_cls(result)
 
-    @translate_path(to_json=False)
+    @_translate_path(to_json=False)
     def css(self, query):
         """
         Apply the given CSS selector and return a :class:`SelectorList` instance.
@@ -281,10 +268,10 @@ class Selector(object):
         Percent encoded content is unquoted.
         """
         if self._is_type_json():
-            if isinstance(self.json_obj, six.string_types):
-                return six.text_type(self.json_obj)
+            if isinstance(self.root, six.string_types):
+                return six.text_type(self.root)
             else:
-                return six.text_type(json.dumps(self.json_obj))
+                return six.text_type(json.dumps(self.root))
 
         try:
             return etree.tostring(self.root,
@@ -299,7 +286,7 @@ class Selector(object):
             else:
                 return six.text_type(self.root)
 
-    @json_incompatible
+    @_json_incompatible
     def register_namespace(self, prefix, uri):
         """
         Register the given namespace to be used in this :class:`Selector`.
@@ -308,7 +295,7 @@ class Selector(object):
         """
         self.namespaces[prefix] = uri
 
-    @json_incompatible
+    @_json_incompatible
     def remove_namespaces(self):
         """
         Remove all namespaces, allowing to traverse the document using
@@ -322,7 +309,7 @@ class Selector(object):
                 if an.startswith('{'):
                     el.attrib[an.split('}', 1)[1]] = el.attrib.pop(an)
 
-    @translate_path(to_json=True)
+    @_translate_path(to_json=True)
     def jmespath(self, query):
         """
         Find nodes matching the jmespath ``query`` and return the result as a
@@ -331,7 +318,7 @@ class Selector(object):
         ``query`` is a string containing the jmespath query to apply.
         """
         try:
-            result = jpath.search(query, self.json_obj)
+            result = jpath.search(query, self.root)
         except JMESPathError:
             msg = u"Invalid JMESPath: %s" % query
             raise ValueError(msg if six.PY3 else msg.encode("unicode_escape"))
@@ -340,8 +327,8 @@ class Selector(object):
             result = [result]
 
         result = [self.__class__(type=self.type,
-                                 json_obj=x,
-                                 _jsexpr=query)
+                                 root=x,
+                                 _expr=query)
                   for x in flatten(result, lambda y: isinstance(y, list)) if x is not None]
         return self.selectorlist_cls(result)
 
@@ -359,6 +346,6 @@ class Selector(object):
 
     def __str__(self):
         data = repr(self.extract()[:40])
-        return "<%s xpath=%r jmespath=%r data=%s>" % (type(self).__name__, self._expr, self._jsexpr, data)
+        return "<%s type=%r path=%r data=%s>" % (type(self).__name__, self.type, self._expr, data)
 
     __repr__ = __str__
