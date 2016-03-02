@@ -206,7 +206,7 @@ class Selector(object):
 
     def extract(self):
         """
-        Serialize and return the matched nodes as a list of unicode strings.
+        Serialize and return the matched nodes in a single unicode string.
         Percent encoded content is unquoted.
         """
         try:
