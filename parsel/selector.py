@@ -98,6 +98,18 @@ class SelectorList(list):
         else:
             return default
 
+    def text_content(self):
+        """
+        Call the ``.text_content()`` method for each element is this list and return
+        their results flattened, as a list of unicode strings.
+        """
+        return [x.text_content() for x in self]
+
+    def text_content_first(self, default=None):
+        for x in self:
+            return x.text_content()
+        else:
+            return default
 
 class Selector(object):
     """
@@ -221,6 +233,13 @@ class Selector(object):
                 return u'0'
             else:
                 return six.text_type(self.root)
+
+    def text_content(self):
+        """
+        Returns the text content of the element, including the text  content of
+        its children, with no markup.
+        """
+        return six.text_type(self.root.xpath("normalize-space()"))
 
     def register_namespace(self, prefix, uri):
         """

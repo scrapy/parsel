@@ -86,6 +86,61 @@ class SelectorTestCase(unittest.TestCase):
 
         self.assertEqual(sel.xpath('//div/text()').extract_first(default='missing'), 'missing')
 
+    def test_text_content_first(self):
+        """Test if text_first() returns first element"""
+        body = u'<ul><li id="1">1</li><li id="2">2</li></ul>'
+        sel = self.sscls(text=body)
+
+        self.assertEqual(sel.xpath('//ul/li').text_content_first(),
+                         sel.xpath('//ul/li').text_content()[0])
+
+        self.assertEqual(sel.xpath('//ul/li[@id="1"]').text_content_first(),
+                         sel.xpath('//ul/li[@id="1"]').text_content()[0])
+
+        self.assertEqual(sel.xpath('//ul/li[2]').text_content_first(),
+                         sel.xpath('//ul/li').text_content()[1])
+
+        self.assertEqual(sel.xpath('//ul/li[@id="doesnt-exist"]').text_content_first(), None)
+        
+        self.assertEqual(sel.xpath('//ul/li').text_content_first(), '1')
+        
+        self.assertEqual(sel.xpath('//ul/li[2]').text_content_first(), '2'),
+        
+        self.assertEqual(sel.xpath('//ul').text_content_first(), '12'),
+
+    def test_text_content_first_default(self):
+        """Test if text_first() returns default value when no results found"""
+        body = u'<ul><li id="1">1</li><li id="2">2</li></ul>'
+        sel = self.sscls(text=body)
+
+        self.assertEqual(sel.xpath('//div').text_content_first(default='missing'), 'missing')
+
+    def test_text_content(self):
+        """Test if text_first() returns default value when no results found"""
+        body = u'<ul><li id="1">1</li><li id="2">2</li></ul>'
+        sel = self.sscls(text=body)
+
+        self.assertEqual(sel.xpath('//ul').text_content(), [u'12'])
+        self.assertEqual(sel.xpath('//ul/li').text_content(), [u'1', u'2'])
+        
+    def test_text_content_with_spaces(self):
+        """Test if text_first() returns default value when no results found"""
+        body = u"""
+            <p>
+              Mary <b>had    </b>   a little   <i> <br/>
+              lamb  </i>   
+            </p> 
+            <div>meh meh</div>
+            <p>    
+              It's
+              <txd>fleece</txd>
+              was w<em>hi</em>te as s<span>no</span>w.
+            </p> 
+        """
+        sel = self.sscls(text=body)
+
+        self.assertEqual(sel.xpath('//p').text_content(),  [u'Mary had a little lamb', u'It\'s fleece was white as snow.'])
+
     def test_re_first(self):
         """Test if re_first() returns first matched element"""
         body = u'<ul><li id="1">1</li><li id="2">2</li></ul>'
