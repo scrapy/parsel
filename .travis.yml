@@ -1,10 +1,10 @@
 language: python
-python: 2.7
+python: 3.5
 env:
   - TOXENV=py27
-  - TOXENV=pypy
   - TOXENV=py33
   - TOXENV=py34
+  - TOXENV=py35
 
 install:
   - pip install -U tox twine wheel codecov
