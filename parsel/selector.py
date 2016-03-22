@@ -76,12 +76,16 @@ class SelectorList(list):
 
     def re(self, regex):
         """
-        Call the ``.re()`` method for each element is this list and return
+        Call the ``.re()`` method for each element in this list and return
         their results flattened, as a list of unicode strings.
         """
         return flatten([x.re(regex) for x in self])
 
     def re_first(self, regex):
+        """
+        Call the ``.re()`` method for the first element in this list and
+        return the result in an unicode string.
+        """
         for el in iflatten(x.re(regex) for x in self):
             return el
 
@@ -93,6 +97,10 @@ class SelectorList(list):
         return [x.extract() for x in self]
 
     def extract_first(self, default=None):
+        """
+        Return the result of ``.extract()`` for the first element in this list.
+        If the list is empty, return the default value.
+        """
         for x in self:
             return x.extract()
         else:
