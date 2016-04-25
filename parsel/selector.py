@@ -2,6 +2,8 @@
 XPath selectors based on lxml
 """
 
+import sys
+
 import six
 from lxml import etree
 
@@ -175,9 +177,10 @@ class Selector(object):
         try:
             result = xpathev(query, namespaces=self.namespaces,
                              smart_strings=self._lxml_smart_strings)
-        except etree.XPathError:
-            msg = u"Invalid XPath: %s" % query
-            raise ValueError(msg if six.PY3 else msg.encode("unicode_escape"))
+        except etree.XPathError as exc:
+            msg = u"XPath error: %s in %s" % (exc, query)
+            msg = msg if six.PY3 else msg.encode('unicode_escape')
+            six.reraise(ValueError, ValueError(msg), sys.exc_info()[2])
 
         if type(result) is not list:
             result = [result]
