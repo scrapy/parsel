@@ -1,6 +1,6 @@
 include AUTHORS.rst
 include CONTRIBUTING.rst
-include HISTORY.rst
+include NEWS
 include LICENSE
 include README.rst
 
