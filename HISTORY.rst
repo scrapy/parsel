@@ -3,6 +3,12 @@
 History
 -------
 
+1.0.2 (2016-04-26)
+------------------
+
+* Fix bug in exception handling causing original traceback to be lost
+* Added docstrings and other doc fixes
+
 1.0.1 (2015-08-24)
 ------------------
 
