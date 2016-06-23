@@ -132,6 +132,19 @@ class SelectorTestCase(unittest.TestCase):
         self.assertEqual(xs.xpath("//div").extract(),
                          [u'<div><img src="a.jpg"><p>Hello</p></img></div>'])
 
+    def test_type_html_and_html_html_are_equal(self):
+        # some text which is parsed differently by XML and HTML flavors
+        text = u'<div><img src="a.jpg"><p>Hello</div>'
+        hs = self.sscls(text=text, type='html')
+        hhs = self.sscls(text=text, type='html_html')
+        self.assertEqual(hs.xpath("//div").extract(), hhs.xpath("//div").extract())
+
+    def test_html_html_element_class(self):
+        hhs = self.sscls(text=u'', type='html_html')
+        # The main different is that this class have additional handy methods
+        # for html text.
+        self.assertTrue(hasattr(hhs.root, 'make_links_absolute'))
+
     def test_error_for_unknown_selector_type(self):
         self.assertRaises(ValueError, self.sscls, text=u'', type='_na_')
 
