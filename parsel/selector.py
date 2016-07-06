@@ -111,6 +111,7 @@ class SelectorList(list):
         their results flattened, as a list of unicode strings.
         """
         return [x.extract() for x in self]
+    getall = extract
 
     def extract_first(self, default=None):
         """
@@ -121,6 +122,7 @@ class SelectorList(list):
             return x.extract()
         else:
             return default
+    get = extract_first
 
 
 class Selector(object):
@@ -260,6 +262,7 @@ class Selector(object):
                 return u'0'
             else:
                 return six.text_type(self.root)
+    get = extract
 
     def register_namespace(self, prefix, uri):
         """
