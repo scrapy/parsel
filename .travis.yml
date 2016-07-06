@@ -16,10 +16,11 @@ install:
         else
           rm -rf "$PYENV_ROOT" && git clone --depth 1 https://github.com/yyuu/pyenv.git "$PYENV_ROOT"
         fi
-        export PYPY_VERSION="5.3.1"
-        "$PYENV_ROOT/bin/pyenv" install --skip-existing "pypy-$PYPY_VERSION"
-        virtualenv --python="$PYENV_ROOT/versions/pypy-$PYPY_VERSION/bin/python" "$HOME/virtualenvs/pypy-$PYPY_VERSION"
-        source "$HOME/virtualenvs/pypy-$PYPY_VERSION/bin/activate"
+        # get latest PyPy from pyenv directly (thanks to natural version sort option -V)
+        export PYPY_VERSION=`"$PYENV_ROOT/bin/pyenv" install --list |grep -o -E 'pypy-[0-9][\.0-9]*$' |sort -V |tail -1`
+        "$PYENV_ROOT/bin/pyenv" install --skip-existing "$PYPY_VERSION"
+        virtualenv --python="$PYENV_ROOT/versions/$PYPY_VERSION/bin/python" "$HOME/virtualenvs/$PYPY_VERSION"
+        source "$HOME/virtualenvs/$PYPY_VERSION/bin/activate"
       fi
   - pip install -U tox twine wheel codecov
 script: tox
