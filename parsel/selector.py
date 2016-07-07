@@ -58,14 +58,14 @@ class SelectorList(list):
         o = super(SelectorList, self).__getitem__(pos)
         return self.__class__(o) if isinstance(pos, slice) else o
 
-    def xpath(self, xpath):
+    def xpath(self, xpath, **kwargs):
         """
         Call the ``.xpath()`` method for each element in this list and return
         their results flattened as another :class:`SelectorList`.
 
         ``query`` is the same argument as the one in :meth:`Selector.xpath`
         """
-        return self.__class__(flatten([x.xpath(xpath) for x in self]))
+        return self.__class__(flatten([x.xpath(xpath, **kwargs) for x in self]))
 
     def css(self, xpath):
         """
@@ -161,7 +161,7 @@ class Selector(object):
     def _get_root(self, text, base_url=None):
         return create_root_node(text, self._parser, base_url=base_url)
 
-    def xpath(self, query):
+    def xpath(self, query, **kwargs):
         """
         Find nodes matching the xpath ``query`` and return the result as a
         :class:`SelectorList` instance with all elements flattened. List
@@ -175,8 +175,11 @@ class Selector(object):
             return self.selectorlist_cls([])
 
         try:
-            result = xpathev(query, namespaces=self.namespaces,
-                             smart_strings=self._lxml_smart_strings)
+            nsp = dict(self.namespaces)
+            nsp.update(kwargs.pop('namespaces', {}))
+            result = xpathev(query, namespaces=nsp,
+                             smart_strings=self._lxml_smart_strings,
+                             **kwargs)
         except etree.XPathError as exc:
             msg = u"XPath error: %s in %s" % (exc, query)
             msg = msg if six.PY3 else msg.encode('unicode_escape')

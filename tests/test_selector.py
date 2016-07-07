@@ -33,6 +33,20 @@ class SelectorTestCase(unittest.TestCase):
         self.assertEqual([x.extract() for x in sel.xpath("concat(//input[@name='a']/@value, //input[@name='b']/@value)")],
                          [u'12'])
 
+    def test_simple_selection_with_variables(self):
+        """Using XPath variables"""
+        body = u"<p><input name='a' value='1'/><input name='b' value='2'/></p>"
+        sel = self.sscls(text=body)
+
+        self.assertEqual([x.extract() for x in sel.xpath("//input[@value=$number]/@name", number=1)],
+                         [u'a'])
+        self.assertEqual([x.extract() for x in sel.xpath("//input[@name=$letter]/@value", letter='b')],
+                         [u'2'])
+
+        self.assertEqual(sel.xpath("count(//input[@value=$number or @name=$letter])",
+                                   number=2, letter='a').extract(),
+                         [u'2.0'])
+
     def test_representation_slice(self):
         body = u"<p><input name='{}' value='\xa9'/></p>".format(50 * 'b')
         sel = self.sscls(text=body)
@@ -211,6 +225,35 @@ class SelectorTestCase(unittest.TestCase):
         self.assertEqual(x.xpath("//somens:a/text()").extract(),
                          [u'take this'])
 
+    def test_namespaces_adhoc(self):
+        body = u"""
+        <test xmlns:somens="http://scrapy.org">
+           <somens:a id="foo">take this</a>
+           <a id="bar">found</a>
+        </test>
+        """
+
+        x = self.sscls(text=body, type='xml')
+
+        self.assertEqual(x.xpath("//somens:a/text()",
+                                 namespaces={"somens": "http://scrapy.org"}).extract(),
+                         [u'take this'])
+
+    def test_namespaces_adhoc_variables(self):
+        body = u"""
+        <test xmlns:somens="http://scrapy.org">
+           <somens:a id="foo">take this</a>
+           <a id="bar">found</a>
+        </test>
+        """
+
+        x = self.sscls(text=body, type='xml')
+
+        self.assertEqual(x.xpath("//somens:a/following-sibling::a[@id=$identifier]/text()",
+                                 namespaces={"somens": "http://scrapy.org"},
+                                 identifier="bar").extract(),
+                         [u'found'])
+
     def test_namespaces_multiple(self):
         body = u"""<?xml version="1.0" encoding="UTF-8"?>
 <BrowseNode xmlns="http://webservices.amazon.com/AWSECommerceService/2005-10-05"
@@ -230,6 +273,63 @@ class SelectorTestCase(unittest.TestCase):
         self.assertEqual(x.xpath("//xmlns:TestTag/@b:att").extract()[0], 'value')
         self.assertEqual(x.xpath("//p:SecondTestTag/xmlns:price/text()").extract()[0], '90')
         self.assertEqual(x.xpath("//p:SecondTestTag").xpath("./xmlns:price/text()")[0].extract(), '90')
+        self.assertEqual(x.xpath("//p:SecondTestTag/xmlns:material/text()").extract()[0], 'iron')
+
+    def test_namespaces_multiple_adhoc(self):
+        body = u"""<?xml version="1.0" encoding="UTF-8"?>
+<BrowseNode xmlns="http://webservices.amazon.com/AWSECommerceService/2005-10-05"
+            xmlns:b="http://somens.com"
+            xmlns:p="http://www.scrapy.org/product" >
+    <b:Operation>hello</b:Operation>
+    <TestTag b:att="value"><Other>value</Other></TestTag>
+    <p:SecondTestTag><material>iron</material><price>90</price><p:name>Dried Rose</p:name></p:SecondTestTag>
+</BrowseNode>
+        """
+        x = self.sscls(text=body, type='xml')
+        x.register_namespace("xmlns", "http://webservices.amazon.com/AWSECommerceService/2005-10-05")
+        self.assertEqual(len(x.xpath("//xmlns:TestTag")), 1)
+
+        # "b" namespace is not declared yet
+        self.assertRaises(ValueError, x.xpath, "//xmlns:TestTag/@b:att")
+
+        # "b" namespace being passed ad-hoc
+        self.assertEqual(x.xpath("//b:Operation/text()",
+            namespaces={"b": "http://somens.com"}).extract()[0], 'hello')
+
+        # "b" namespace declaration is not cached
+        self.assertRaises(ValueError, x.xpath, "//xmlns:TestTag/@b:att")
+
+        # "xmlns" is still defined
+        self.assertEqual(x.xpath("//xmlns:TestTag/@b:att",
+            namespaces={"b": "http://somens.com"}).extract()[0], 'value')
+
+        # chained selectors still have knowledge of register_namespace() operations
+        self.assertEqual(x.xpath("//p:SecondTestTag",
+            namespaces={"p": "http://www.scrapy.org/product"}).xpath("./xmlns:price/text()")[0].extract(), '90')
+
+        # but chained selector don't know about parent ad-hoc declarations
+        self.assertRaises(ValueError,x.xpath("//p:SecondTestTag",
+            namespaces={"p": "http://www.scrapy.org/product"}).xpath, "p:name/text()")
+
+        # ad-hoc declarations need repeats when chaining
+        self.assertEqual(x.xpath("//p:SecondTestTag",
+                            namespaces={"p": "http://www.scrapy.org/product"}
+                        ).xpath("p:name/text()",
+                            namespaces={"p": "http://www.scrapy.org/product"}
+                        ).extract_first(), 'Dried Rose')
+
+        # declaring several ad-hoc namespaces
+        self.assertEqual(x.xpath("""string(
+                //b:Operation
+                 /following-sibling::xmlns:TestTag
+                 /following-sibling::*//p:name)""",
+            namespaces={"b": "http://somens.com",
+                        "p": "http://www.scrapy.org/product"}).extract_first(), 'Dried Rose')
+
+        # "p" prefix is not cached from previous calls
+        self.assertRaises(ValueError, x.xpath, "//p:SecondTestTag/xmlns:price/text()")
+
+        x.register_namespace("p", "http://www.scrapy.org/product")
         self.assertEqual(x.xpath("//p:SecondTestTag/xmlns:material/text()").extract()[0], 'iron')
 
     def test_make_links_absolute(self):
