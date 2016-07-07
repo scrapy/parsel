@@ -161,22 +161,27 @@ class Selector(object):
     def _get_root(self, text, base_url=None):
         return create_root_node(text, self._parser, base_url=base_url)
 
-    def xpath(self, query, **kwargs):
+    def xpath(self, query, namespaces={}, **kwargs):
         """
         Find nodes matching the xpath ``query`` and return the result as a
         :class:`SelectorList` instance with all elements flattened. List
         elements implement :class:`Selector` interface too.
 
         ``query`` is a string containing the XPATH query to apply.
+
+        ``namespaces`` is an optional ``prefix: namespace-uri`` mapping (dict)
+        for additional prefixes to those registered with ``register_namespace(prefix, uri)``.
+        Contrary to ``register_namespace()``, these prefixes are not
+        saved for future calls.
         """
         try:
             xpathev = self.root.xpath
         except AttributeError:
             return self.selectorlist_cls([])
 
+        nsp = dict(self.namespaces)
+        nsp.update(namespaces)
         try:
-            nsp = dict(self.namespaces)
-            nsp.update(kwargs.pop('namespaces', {}))
             result = xpathev(query, namespaces=nsp,
                              smart_strings=self._lxml_smart_strings,
                              **kwargs)
