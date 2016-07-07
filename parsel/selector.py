@@ -58,14 +58,19 @@ class SelectorList(list):
         o = super(SelectorList, self).__getitem__(pos)
         return self.__class__(o) if isinstance(pos, slice) else o
 
-    def xpath(self, xpath, **kwargs):
+    def xpath(self, xpath, namespaces={}, **kwargs):
         """
         Call the ``.xpath()`` method for each element in this list and return
         their results flattened as another :class:`SelectorList`.
 
         ``query`` is the same argument as the one in :meth:`Selector.xpath`
+
+        ``namespaces`` is an optional ``prefix: namespace-uri`` mapping (dict)
+        for additional prefixes to those registered with ``register_namespace(prefix, uri)``.
+        Contrary to ``register_namespace()``, these prefixes are not
+        saved for future calls.
         """
-        return self.__class__(flatten([x.xpath(xpath, **kwargs) for x in self]))
+        return self.__class__(flatten([x.xpath(xpath, namespaces=namespaces, **kwargs) for x in self]))
 
     def css(self, xpath):
         """
