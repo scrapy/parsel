@@ -8,6 +8,7 @@ History
 
 * Add BSD-3-Clause license file
 * Re-enable PyPy tests
+* Integrate py.test runs with setuptools (needed for Debian packaging)
 * Changelog is now called ``NEWS``
 
 1.0.2 (2016-04-26)
