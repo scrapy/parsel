@@ -3,6 +3,13 @@
 History
 -------
 
+1.0.3 (2016-07-29)
+~~~~~~~~~~~~~~~~~~
+
+* Add BSD-3-Clause license file
+* Re-enable PyPy tests
+* Changelog is now called ``NEWS``
+
 1.0.2 (2016-04-26)
 ~~~~~~~~~~~~~~~~~~
 
