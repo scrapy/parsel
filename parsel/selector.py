@@ -3,6 +3,7 @@ XPath selectors based on lxml
 """
 
 import sys
+import re
 
 import six
 from lxml import etree
@@ -38,7 +39,13 @@ def _st(st):
 def create_root_node(text, parser_cls, base_url=None):
     """Create root node for text using given parser class.
     """
-    body = text.strip().encode('utf8') or b'<html/>'
+    body = None
+    # If text contains only comments like <!--hello-->
+    # etree.tostring will return None
+    if re.match(r'^(\s*<!--.*?-->\s*)*$', text, re.S):
+        body = ('<html>%s</html>' % text.strip()).encode('utf8')
+    else:
+        body = text.strip().encode('utf8') or b'<html/>'
     parser = parser_cls(recover=True, encoding='utf8')
     return etree.fromstring(body, parser=parser, base_url=base_url)
 
