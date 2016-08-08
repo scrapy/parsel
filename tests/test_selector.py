@@ -255,6 +255,62 @@ class SelectorTestCase(unittest.TestCase):
         x = self.sscls(text=body)
         self.assertEqual(x.xpath("//div").re("Evento: (\w+)"), [u'cumplea\xf1os'])
 
+    def test_re_first(self):
+        """Test if Selector.re_first() returns first matched element"""
+        body = u"""<div>Name: Mary
+                    <ul>
+                      <li>Name: John</li>
+                      <li>Age: 10</li>
+                      <li>Name: Paul</li>
+                      <li>Age: 20</li>
+                    </ul>
+                    Age: 20
+                  </div>"""
+
+        x = self.sscls(text=body)
+        name_re_str = "Name: (\w+)"
+        self.assertEqual(x.re_first(name_re_str), "Mary")
+        name_re = re.compile(name_re_str)
+        self.assertEqual(x.re_first(name_re), "Mary")
+
+    def test_re_first(self):
+        """Test if Selector.re_first() returns first and only matched element"""
+        body = u"""<div>Name: Mary
+                    <ul>
+                      <li>Name: John</li>
+                      <li>Age: 10</li>
+                      <li>Name: Paul</li>
+                      <li>Age: 20</li>
+                      <li>Colour: Blue</li>
+                    </ul>
+                    Age: 20
+                  </div>"""
+
+        x = self.sscls(text=body)
+        colour_re_str = "Colour: (\w+)"
+        self.assertEqual(x.re_first(colour_re_str), "Blue")
+        colour_re = re.compile(colour_re_str)
+        self.assertEqual(x.re_first(colour_re), "Blue")
+
+
+    def test_re_first(self):
+        """Test if Selector.re_first() returns None on no matching"""
+        body = u"""<div>Name: Mary
+                    <ul>
+                      <li>Name: John</li>
+                      <li>Age: 10</li>
+                      <li>Name: Paul</li>
+                      <li>Age: 20</li>
+                    </ul>
+                    Age: 20
+                  </div>"""
+
+        x = self.sscls(text=body)
+        gender_re_str = "Gender: (\w+)"
+        self.assertEqual(x.re_first(gender_re_str), None)
+        gender_re = re.compile(gender_re_str)
+        self.assertEqual(x.re_first(gender_re), None)
+
     def test_selector_over_text(self):
         hs = self.sscls(text=u'<root>lala</root>')
         self.assertEqual(hs.extract(), u'<html><body><root>lala</root></body></html>')

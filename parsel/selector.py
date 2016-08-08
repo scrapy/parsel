@@ -215,6 +215,14 @@ class Selector(object):
         """
         return extract_regex(regex, self.extract())
 
+    def re_first(self, regex):
+        """
+        Call the ``.re()`` method for the first element in this list and
+        return the result in an unicode string.
+        """
+        for r in self.re(regex):
+            return r
+
     def extract(self):
         """
         Serialize and return the matched nodes in a single unicode string.
