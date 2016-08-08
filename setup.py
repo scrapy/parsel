@@ -51,7 +51,7 @@ setup(
         'Programming Language :: Python :: 3.3',
         'Programming Language :: Python :: 3.4',
     ],
-    setup_requires=['pytest-runner',],
-    tests_require=['pytest',],
+    setup_requires=['pytest-runner', 'pytest-benchmark'],
+    tests_require=['pytest', 'pytest-benchmark'],
     test_suite='tests',
 )
