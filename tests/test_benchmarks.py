@@ -1,19 +1,63 @@
 # -*- coding: utf-8 -*-
 import pytest
 from parsel import Selector
-import codecs
+import six
 
 @pytest.fixture
-def large_text_sample():
-    return codecs.open("tests/sample_data/saffron.html", encoding='utf-8').read()
+def saffron_html_sample():
+    """
+    A smaller sample html
+    """
+    return six.u(open("tests/sample_data/saffron.html").read())
 
-def test_benchmark_re(benchmark, large_text_sample):
-    sel = Selector(text=large_text_sample)
-    dl_re = "(2.5 dl (.*))<br />"
-    benchmark(sel.re, dl_re)
+@pytest.fixture
+def parsel_html_sample():
+    """
+    A somewhat larger sample html from the parsel docs
+    """
+    return six.u(open("tests/sample_data/parsel_docs.htm").read())
+
+def test_benchmark_saffron_re(benchmark, saffron_html_sample):
+    sel = Selector(text=saffron_html_sample)
+    regex = "(2.5 dl (.*))<br />"
+    benchmark(sel.re, regex)
+
+def test_benchmark_saffron_re_first(benchmark, saffron_html_sample):
+    sel = Selector(text=saffron_html_sample)
+    regex = "(2.5 dl (.*))<br />"
+    benchmark(sel.re_first, regex)
+
+def test_benchmark_saffron_list_re(benchmark, saffron_html_sample):
+    sel = Selector(text=saffron_html_sample)
+    sel = sel.xpath('//li')
+    regex = "(2.5 dl (.*))<br />"
+    benchmark(sel.re, regex)
+
+def test_benchmark_saffron_list_re_first(benchmark, saffron_html_sample):
+    sel = Selector(text=saffron_html_sample)
+    sel = sel.xpath('//li')
+    regex = "<a .*>"
+    benchmark(sel.re_first, regex)
 
 
-def test_benchmark_re_first(benchmark, large_text_sample):
-    sel = Selector(text=large_text_sample)
-    dl_re = "(2.5 dl (.*))<br />"
-    benchmark(sel.re_first, dl_re)
+def test_benchmark_parsel_re(benchmark, parsel_html_sample):
+    sel = Selector(text=parsel_html_sample)
+    regex = "<a .*>"
+    benchmark(sel.re, regex)
+
+def test_benchmark_parsel_re_first(benchmark, parsel_html_sample):
+    sel = Selector(text=parsel_html_sample)
+    regex = "<a .*>"
+    benchmark(sel.re_first, regex)
+
+def test_benchmark_parsel_list_re(benchmark, parsel_html_sample):
+    sel = Selector(text=parsel_html_sample)
+    sel = sel.xpath('//a')
+    regex = "(\w+)"
+    benchmark(sel.re, regex)
+
+def test_benchmark_parsel_list_re_first(benchmark, parsel_html_sample):
+    sel = Selector(text=parsel_html_sample)
+    sel = sel.xpath('//a')
+    regex = "(\w+)"
+    benchmark(sel.re_first, regex)
