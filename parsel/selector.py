@@ -88,8 +88,7 @@ class SelectorList(list):
         Call the ``.re()`` method for the first element in this list and
         return the result in an unicode string.
         """
-        for el in iflatten(x.re(regex) for x in self):
-            return el
+        return next(x.re(regex) for x in self)
 
     def extract(self):
         """
@@ -213,15 +212,14 @@ class Selector(object):
         ``regex`` can be either a compiled regular expression or a string which
         will be compiled to a regular expression using ``re.compile(regex)``
         """
-        return extract_regex(regex, self.extract())
+        return list(extract_regex(regex, self.extract()))
 
     def re_first(self, regex):
         """
         Call the ``.re()`` method for the first element in this list and
         return the result in an unicode string.
         """
-        for r in self.re(regex):
-            return r
+        return next(extract_regex(regex, self.extract()), None)
 
     def extract(self):
         """
