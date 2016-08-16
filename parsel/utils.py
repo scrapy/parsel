@@ -56,7 +56,7 @@ def _is_listlike(x):
     return hasattr(x, "__iter__") and not isinstance(x, (six.text_type, bytes))
 
 def extract_regex(regex, text):
-    """Extract a list of unicode strings from the given text/encoding using the following policies:
+    """Extract an iterator of unicode strings from the given text/encoding using the following policies:
     * if the regex contains a named group called "extract" that will be returned
     * if the regex contains multiple numbered groups, all those will be returned (flattened)
     * if the regex doesn't contain any group the entire regex matching is returned
@@ -71,5 +71,5 @@ def extract_regex(regex, text):
     else:
         for match in regex.finditer(text):
             groups = match.groups()
-            for group in flatten(groups):
+            for group in iflatten(groups):
                 yield replace_entities(group, keep=['lt', 'amp'])

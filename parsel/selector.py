@@ -81,7 +81,7 @@ class SelectorList(list):
         Call the ``.re()`` method for each element in this list and return
         their results flattened, as a list of unicode strings.
         """
-        return flatten([x.re(regex) for x in self])
+        return flatten(x.re(regex) for x in self)
 
     def re_first(self, regex):
         """
