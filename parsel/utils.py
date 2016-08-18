@@ -74,7 +74,7 @@ def extract_regex_first(regex, text):
 
 
 def extract_regex(regex, text):
-    """Extract an iterator of unicode strings from the given text/encoding using the following policies:
+    """Extract a list of unicode strings from the given text/encoding using the following policies:
     * if the regex contains a named group called "extract" that will be returned
     * if the regex contains multiple numbered groups, all those will be returned (flattened)
     * if the regex doesn't contain any group the entire regex matching is returned
