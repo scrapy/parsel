@@ -19,18 +19,29 @@ def parsel_html_sample():
 
 def test_benchmark_saffron_re(benchmark, saffron_html_sample):
     sel = Selector(text=saffron_html_sample)
-    regex = "(2.5 dl (.*))<br />"
+    regex = "([\d.]+ dl (.*))<br />"
     benchmark(sel.re, regex)
 
 def test_benchmark_saffron_re_first(benchmark, saffron_html_sample):
     sel = Selector(text=saffron_html_sample)
-    regex = "(2.5 dl (.*))<br />"
+    regex = "([\d.]+ dl (.*))<br />"
     benchmark(sel.re_first, regex)
+
+def test_benchmark_saffron_re_named(benchmark, saffron_html_sample):
+    sel = Selector(text=saffron_html_sample)
+    regex = "(?P<extract>[\d.]+ dl (.*))<br />"
+    benchmark(sel.re, regex)
+
+def test_benchmark_saffron_re_first_named(benchmark, saffron_html_sample):
+    sel = Selector(text=saffron_html_sample)
+    regex = "(?P<extract>[\d.]+ dl (.*))<br />"
+    benchmark(sel.re_first, regex)
+
 
 def test_benchmark_saffron_list_re(benchmark, saffron_html_sample):
     sel = Selector(text=saffron_html_sample)
     sel = sel.xpath('//li')
-    regex = "(2.5 dl (.*))<br />"
+    regex = "([\d.]+ dl (.*))<br />"
     benchmark(sel.re, regex)
 
 def test_benchmark_saffron_list_re_first(benchmark, saffron_html_sample):
@@ -38,6 +49,24 @@ def test_benchmark_saffron_list_re_first(benchmark, saffron_html_sample):
     sel = sel.xpath('//li')
     regex = "<a .*>"
     benchmark(sel.re_first, regex)
+
+def test_benchmark_saffron_list_re_named(benchmark, saffron_html_sample):
+    sel = Selector(text=saffron_html_sample)
+    sel = sel.xpath('//li')
+    regex = "(?P<extract>[\d.]+ dl (.*))<br />"
+    benchmark(sel.re, regex)
+
+def test_benchmark_saffron_list_re_first_named(benchmark, saffron_html_sample):
+    sel = Selector(text=saffron_html_sample)
+    sel = sel.xpath('//li')
+    regex = "(?P<extract><a .*>)"
+    benchmark(sel.re_first, regex)
+
+
+
+
+
+
 
 
 def test_benchmark_parsel_re(benchmark, parsel_html_sample):
@@ -60,4 +89,26 @@ def test_benchmark_parsel_list_re_first(benchmark, parsel_html_sample):
     sel = Selector(text=parsel_html_sample)
     sel = sel.xpath('//a')
     regex = "(\w+)"
+    benchmark(sel.re_first, regex)
+
+def test_benchmark_parsel_re_named(benchmark, parsel_html_sample):
+    sel = Selector(text=parsel_html_sample)
+    regex = "(?P<extract><a .*>)"
+    benchmark(sel.re, regex)
+
+def test_benchmark_parsel_re_named_first(benchmark, parsel_html_sample):
+    sel = Selector(text=parsel_html_sample)
+    regex = "(?P<extract><a .*>)"
+    benchmark(sel.re_first, regex)
+
+def test_benchmark_parsel_list_re_named(benchmark, parsel_html_sample):
+    sel = Selector(text=parsel_html_sample)
+    sel = sel.xpath('//a')
+    regex = "(?P<extract>\w+)"
+    benchmark(sel.re, regex)
+
+def test_benchmark_parsel_list_re_named_first(benchmark, parsel_html_sample):
+    sel = Selector(text=parsel_html_sample)
+    sel = sel.xpath('//a')
+    regex = "(?P<extract>\w+)"
     benchmark(sel.re_first, regex)

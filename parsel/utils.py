@@ -70,6 +70,5 @@ def extract_regex(regex, text):
             yield replace_entities(group, keep=['lt', 'amp'])
     else:
         for match in regex.finditer(text):
-            groups = match.groups()
-            for group in iflatten(groups):
+            for group in match.groups():
                 yield replace_entities(group, keep=['lt', 'amp'])
