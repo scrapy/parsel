@@ -55,6 +55,24 @@ def _is_listlike(x):
     """
     return hasattr(x, "__iter__") and not isinstance(x, (six.text_type, bytes))
 
+def extract_regex_first(regex, text):
+    """Extract the first match of unicode strings from the given text/encoding using the following policies:
+    * if the regex contains a named group called "extract" that will be returned
+    * if the regex contains multiple numbered groups, all those will be returned (flattened)
+    * if the regex doesn't contain any group the entire regex matching is returned
+    """
+    if isinstance(regex, six.string_types):
+        regex = re.compile(regex, re.UNICODE)
+
+    m = regex.search(text)
+
+    if m:
+        if 'extract' in regex.groupindex:
+            return replace_entities(m.group('extract'), keep=['lt', 'amp'])
+
+        return [replace_entities(group, keep=['lt', 'amp']) for group in m.groups()]
+
+
 def extract_regex(regex, text):
     """Extract an iterator of unicode strings from the given text/encoding using the following policies:
     * if the regex contains a named group called "extract" that will be returned
@@ -64,11 +82,12 @@ def extract_regex(regex, text):
     if isinstance(regex, six.string_types):
         regex = re.compile(regex, re.UNICODE)
 
-    if 'extract' in regex.groupindex:
-        for match in regex.finditer(text):
-            group = match.group('extract')
-            yield replace_entities(group, keep=['lt', 'amp'])
-    else:
-        for match in regex.finditer(text):
-            for group in match.groups():
-                yield replace_entities(group, keep=['lt', 'amp'])
+    if 'extract' in regex.groupindex: # named group
+        m = regex.search(text)
+        if not m:
+            return []
+        return [replace_entities(m.group('extract'), keep=['lt', 'amp'])]
+
+    # full regex or numbered groups
+    strings = regex.findall(text)
+    return [replace_entities(s, keep=['lt', 'amp']) for s in flatten(strings)]

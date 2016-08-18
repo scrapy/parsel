@@ -7,7 +7,7 @@ import sys
 import six
 from lxml import etree
 
-from .utils import flatten, iflatten, extract_regex
+from .utils import flatten, iflatten, extract_regex, extract_regex_first
 from .csstranslator import HTMLTranslator, GenericTranslator
 
 
@@ -215,14 +215,14 @@ class Selector(object):
         ``regex`` can be either a compiled regular expression or a string which
         will be compiled to a regular expression using ``re.compile(regex)``
         """
-        return list(extract_regex(regex, self.extract()))
+        return extract_regex(regex, self.extract())
 
     def re_first(self, regex):
         """
         Call the ``.re()`` method for the first element in this list and
         return the result in an unicode string.
         """
-        return next(extract_regex(regex, self.extract()), None)
+        return extract_regex_first(regex, self.extract())
 
     def extract(self):
         """

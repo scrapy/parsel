@@ -62,13 +62,6 @@ def test_benchmark_saffron_list_re_first_named(benchmark, saffron_html_sample):
     regex = "(?P<extract><a .*>)"
     benchmark(sel.re_first, regex)
 
-
-
-
-
-
-
-
 def test_benchmark_parsel_re(benchmark, parsel_html_sample):
     sel = Selector(text=parsel_html_sample)
     regex = "<a .*>"
