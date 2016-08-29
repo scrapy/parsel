@@ -30,7 +30,7 @@ setup(
     include_package_data=True,
     install_requires=[
         'w3lib>=1.8.0',
-        'lxml',
+        'lxml>=2.3',
         'six>=1.5.2',
         'cssselect>=0.9',
     ],
