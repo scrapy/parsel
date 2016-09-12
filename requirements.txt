@@ -1,4 +1,4 @@
 lxml==3.4.4
 six==1.9.0
-cssselect==0.9.1
+-e git+git@github.com:redapple/cssselect.git@nth-pseudo-proper#egg=cssselect
 w3lib==1.11.0
