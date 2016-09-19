@@ -414,6 +414,10 @@ class SelectorTestCase(unittest.TestCase):
         sel = Selector(text, parser_cls=html.HTMLParser)
         self.assertIsNotNone(sel.xpath('//a')[0].root.make_links_absolute)
 
+        # default behavior is html.HTMLParser
+        sel = Selector(text)
+        self.assertIsNotNone(sel.xpath('//a')[0].root.make_links_absolute)
+
     def test_extending_selector(self):
         class MySelectorList(Selector.selectorlist_cls):
             pass
