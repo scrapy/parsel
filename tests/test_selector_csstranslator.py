@@ -113,6 +113,14 @@ class TranslatorMixinTest(unittest.TestCase):
             self.assertRaises(exc, self.c2x, css)
 
 
+class UtilCss2XPathTest(unittest.TestCase):
+    def test_css2xpath(self):
+        from parsel import css2xpath
+        expected_xpath = (u"descendant-or-self::*[@class and contains("
+                          "concat(' ', normalize-space(@class), ' '), ' some-class ')]")
+        self.assertEqual(css2xpath('.some-class'), expected_xpath)
+
+
 class CSSSelectorTest(unittest.TestCase):
 
     sscls = Selector
