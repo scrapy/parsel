@@ -232,6 +232,12 @@ class SelectorTestCase(unittest.TestCase):
         self.assertEqual(x.xpath("//p:SecondTestTag").xpath("./xmlns:price/text()")[0].extract(), '90')
         self.assertEqual(x.xpath("//p:SecondTestTag/xmlns:material/text()").extract()[0], 'iron')
 
+    def test_make_links_absolute(self):
+        text = u'<a href="file.html">link to file</a>'
+        sel = Selector(text=text, base_url='http://example.com')
+        sel.root.make_links_absolute()
+        self.assertEqual(u'http://example.com/file.html', sel.xpath('//a/@href').extract_first())
+
     def test_re(self):
         body = u"""<div>Name: Mary
                     <ul>
