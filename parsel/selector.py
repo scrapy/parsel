@@ -5,7 +5,7 @@ XPath selectors based on lxml
 import sys
 
 import six
-from lxml import etree
+from lxml import etree, html
 
 from .utils import flatten, iflatten, extract_regex
 from .csstranslator import HTMLTranslator, GenericTranslator
@@ -17,7 +17,7 @@ class SafeXMLParser(etree.XMLParser):
         super(SafeXMLParser, self).__init__(*args, **kwargs)
 
 _ctgroup = {
-    'html': {'_parser': etree.HTMLParser,
+    'html': {'_parser': html.HTMLParser,
              '_csstranslator': HTMLTranslator(),
              '_tostring_method': 'html'},
     'xml': {'_parser': SafeXMLParser,
