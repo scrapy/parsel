@@ -58,7 +58,7 @@ class SelectorList(list):
         o = super(SelectorList, self).__getitem__(pos)
         return self.__class__(o) if isinstance(pos, slice) else o
 
-    def xpath(self, xpath, namespaces={}, **kwargs):
+    def xpath(self, xpath, namespaces=None, **kwargs):
         """
         Call the ``.xpath()`` method for each element in this list and return
         their results flattened as another :class:`SelectorList`.
@@ -166,7 +166,7 @@ class Selector(object):
     def _get_root(self, text, base_url=None):
         return create_root_node(text, self._parser, base_url=base_url)
 
-    def xpath(self, query, namespaces={}, **kwargs):
+    def xpath(self, query, namespaces=None, **kwargs):
         """
         Find nodes matching the xpath ``query`` and return the result as a
         :class:`SelectorList` instance with all elements flattened. List
@@ -185,7 +185,8 @@ class Selector(object):
             return self.selectorlist_cls([])
 
         nsp = dict(self.namespaces)
-        nsp.update(namespaces)
+        if namespaces is not None:
+            nsp.update(namespaces)
         try:
             result = xpathev(query, namespaces=nsp,
                              smart_strings=self._lxml_smart_strings,
