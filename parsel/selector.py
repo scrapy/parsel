@@ -58,14 +58,24 @@ class SelectorList(list):
         o = super(SelectorList, self).__getitem__(pos)
         return self.__class__(o) if isinstance(pos, slice) else o
 
-    def xpath(self, xpath):
+    def xpath(self, xpath, namespaces=None, **kwargs):
         """
         Call the ``.xpath()`` method for each element in this list and return
         their results flattened as another :class:`SelectorList`.
 
         ``query`` is the same argument as the one in :meth:`Selector.xpath`
+
+        ``namespaces`` is an optional ``prefix: namespace-uri`` mapping (dict)
+        for additional prefixes to those registered with ``register_namespace(prefix, uri)``.
+        Contrary to ``register_namespace()``, these prefixes are not
+        saved for future calls.
+
+        Any additional named arguments can be used to pass values for XPath
+        variables in the XPath expression, e.g.:
+
+            selector.xpath('//a[href=$url]', url="http://www.example.com")
         """
-        return self.__class__(flatten([x.xpath(xpath) for x in self]))
+        return self.__class__(flatten([x.xpath(xpath, namespaces=namespaces, **kwargs) for x in self]))
 
     def css(self, xpath):
         """
@@ -161,22 +171,36 @@ class Selector(object):
     def _get_root(self, text, base_url=None):
         return create_root_node(text, self._parser, base_url=base_url)
 
-    def xpath(self, query):
+    def xpath(self, query, namespaces=None, **kwargs):
         """
         Find nodes matching the xpath ``query`` and return the result as a
         :class:`SelectorList` instance with all elements flattened. List
         elements implement :class:`Selector` interface too.
 
         ``query`` is a string containing the XPATH query to apply.
+
+        ``namespaces`` is an optional ``prefix: namespace-uri`` mapping (dict)
+        for additional prefixes to those registered with ``register_namespace(prefix, uri)``.
+        Contrary to ``register_namespace()``, these prefixes are not
+        saved for future calls.
+
+        Any additional named arguments can be used to pass values for XPath
+        variables in the XPath expression, e.g.:
+
+            selector.xpath('//a[href=$url]', url="http://www.example.com")
         """
         try:
             xpathev = self.root.xpath
         except AttributeError:
             return self.selectorlist_cls([])
 
+        nsp = dict(self.namespaces)
+        if namespaces is not None:
+            nsp.update(namespaces)
         try:
-            result = xpathev(query, namespaces=self.namespaces,
-                             smart_strings=self._lxml_smart_strings)
+            result = xpathev(query, namespaces=nsp,
+                             smart_strings=self._lxml_smart_strings,
+                             **kwargs)
         except etree.XPathError as exc:
             msg = u"XPath error: %s in %s" % (exc, query)
             msg = msg if six.PY3 else msg.encode('unicode_escape')
