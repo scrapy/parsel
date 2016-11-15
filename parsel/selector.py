@@ -70,7 +70,7 @@ class SelectorList(list):
         Contrary to ``register_namespace()``, these prefixes are not
         saved for future calls.
 
-        Any additional named argument can be used to pass values for XPath
+        Any additional named arguments can be used to pass values for XPath
         variables in the XPath expression, e.g.:
 
             selector.xpath('//a[href=$url]', url="http://www.example.com")
@@ -184,7 +184,7 @@ class Selector(object):
         Contrary to ``register_namespace()``, these prefixes are not
         saved for future calls.
 
-        Any additional named argument can be used to pass values for XPath
+        Any additional named arguments can be used to pass values for XPath
         variables in the XPath expression, e.g.:
 
             selector.xpath('//a[href=$url]', url="http://www.example.com")
