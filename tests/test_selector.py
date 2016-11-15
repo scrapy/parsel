@@ -69,10 +69,21 @@ class SelectorTestCase(unittest.TestCase):
         "double quotes" and I don't care :)</p>"""
         sel = self.sscls(text=body)
 
-        self.assertEqual([x.extract() for x in sel.xpath("//input[@value=$text]/@name", text='I say "Yeah!"')],
+        t = 'I say "Yeah!"'
+        # naive string formatting with give something like:
+        # ValueError: XPath error: Invalid predicate in //input[@value="I say "Yeah!""]/@name
+        self.assertRaises(ValueError, sel.xpath, '//input[@value="{}"]/@name'.format(t))
+
+        # with XPath variables, escaping is done for you
+        self.assertEqual([x.extract() for x in sel.xpath("//input[@value=$text]/@name", text=t)],
                          [u'a'])
+        lt = """I'm mixing single and "double quotes" and I don't care :)"""
+        # the following gives you something like
+        # ValueError: XPath error: Invalid predicate in //p[normalize-space()='I'm mixing single and "double quotes" and I don't care :)']//@name
+        self.assertRaises(ValueError, sel.xpath, "//p[normalize-space()='{}']//@name".format(lt))
+
         self.assertEqual([x.extract() for x in sel.xpath("//p[normalize-space()=$lng]//@name",
-            lng="""I'm mixing single and "double quotes" and I don't care :)""")],
+            lng=lt)],
                          [u'a'])
 
     def test_representation_slice(self):
