@@ -69,6 +69,11 @@ class SelectorList(list):
         for additional prefixes to those registered with ``register_namespace(prefix, uri)``.
         Contrary to ``register_namespace()``, these prefixes are not
         saved for future calls.
+
+        Any additional named argument can be used to pass values for XPath
+        variables in the XPath expression, e.g.:
+
+            selector.xpath('//a[href=$url]', url="http://www.example.com")
         """
         return self.__class__(flatten([x.xpath(xpath, namespaces=namespaces, **kwargs) for x in self]))
 
@@ -178,6 +183,11 @@ class Selector(object):
         for additional prefixes to those registered with ``register_namespace(prefix, uri)``.
         Contrary to ``register_namespace()``, these prefixes are not
         saved for future calls.
+
+        Any additional named argument can be used to pass values for XPath
+        variables in the XPath expression, e.g.:
+
+            selector.xpath('//a[href=$url]', url="http://www.example.com")
         """
         try:
             xpathev = self.root.xpath
