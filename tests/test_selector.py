@@ -47,6 +47,34 @@ class SelectorTestCase(unittest.TestCase):
                                    number=2, letter='a').extract(),
                          [u'2.0'])
 
+        # you can also pass booleans
+        self.assertEqual(sel.xpath("boolean(count(//input)=$cnt)=$test",
+                                   cnt=2, test=True).extract(),
+                         [u'1'])
+        self.assertEqual(sel.xpath("boolean(count(//input)=$cnt)=$test",
+                                   cnt=4, test=True).extract(),
+                         [u'0'])
+        self.assertEqual(sel.xpath("boolean(count(//input)=$cnt)=$test",
+                                   cnt=4, test=False).extract(),
+                         [u'1'])
+
+        # for named nodes, you need to use "name()=node_name"
+        self.assertEqual(sel.xpath("boolean(count(//*[name()=$tag])=$cnt)=$test",
+                                   tag="input", cnt=2, test=True).extract(),
+                         [u'1'])
+
+    def test_simple_selection_with_variables_escape_friendly(self):
+        """Using XPath variables with quotes that would need escaping with string formatting"""
+        body = u"""<p>I'm mixing single and <input name='a' value='I say "Yeah!"'/>
+        "double quotes" and I don't care :)</p>"""
+        sel = self.sscls(text=body)
+
+        self.assertEqual([x.extract() for x in sel.xpath("//input[@value=$text]/@name", text='I say "Yeah!"')],
+                         [u'a'])
+        self.assertEqual([x.extract() for x in sel.xpath("//p[normalize-space()=$lng]//@name",
+            lng="""I'm mixing single and "double quotes" and I don't care :)""")],
+                         [u'a'])
+
     def test_representation_slice(self):
         body = u"<p><input name='{}' value='\xa9'/></p>".format(50 * 'b')
         sel = self.sscls(text=body)
