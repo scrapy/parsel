@@ -182,14 +182,23 @@ Examples:
 
 * ``title::text`` selects children text nodes of a descendant ``<title>`` element::
 
-    >>> selector.css('title::text')
-    [<Selector xpath=u'descendant-or-self::title/text()' data=u'Example website'>]
-
+    >>> selector.css('title::text').extract_first()
+    u'Example website'
 
 * ``*::text`` selects all descendant text nodes of the current selector context::
 
-    >>> selector.css('*::text')
-    [<Selector xpath=u'descendant-or-self::text()' data=u'\n '>,...
+    >>> selector.css('#images *::text').extract()
+    [u'\n   ',
+     u'Name: My image 1 ',
+     u'\n   ',
+     u'Name: My image 2 ',
+     u'\n   ',
+     u'Name: My image 3 ',
+     u'\n   ',
+     u'Name: My image 4 ',
+     u'\n   ',
+     u'Name: My image 5 ',
+     u'\n  ']
 
 * ``a::attr(href)`` selects the *href* attribute value of descendant links::
 
