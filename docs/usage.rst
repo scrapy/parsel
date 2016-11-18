@@ -159,6 +159,55 @@ Now we're going to get the base URL and some image links::
      u'image4_thumb.jpg',
      u'image5_thumb.jpg']
 
+.. _topics-selectors-css-extensions:
+
+Extensions to CSS Selectors
+---------------------------
+
+Per W3C standards, `CSS selectors`_ do not support selecting text nodes
+or attribute values.
+But selecting these is so essential in a web scraping context
+that Parsel implements a couple of **non-standard pseudo-elements**:
+
+* to select text nodes, use ``::text``
+* to select attribute values, use ``::attr(name)`` where *name* is the
+  name of the attribute that you want the value of
+
+.. warning::
+    These pseudo-elements are Scrapy-/Parsel-specific.
+    They will most probably not work with other libraries like `lxml`_ or `PyQuery`_.
+
+
+Examples:
+
+* ``title::text`` selects children text nodes of a descendant ``<title>`` element::
+
+    >>> selector.css('title::text')
+    [<Selector xpath=u'descendant-or-self::title/text()' data=u'Example website'>]
+
+
+* ``*::text`` selects all descendant text nodes of the current selector context::
+
+    >>> selector.css('*::text')
+    [<Selector xpath=u'descendant-or-self::text()' data=u'\n '>,...
+
+* ``a::attr(href)`` selects the *href* attribute value of descendant links::
+
+    >>> selector.css('a::attr(href)').extract()
+    [u'image1.html',
+     u'image2.html',
+     u'image3.html',
+     u'image4.html',
+     u'image5.html']
+
+.. note::
+    You cannot chain these pseudo-elements. But in practice it would not
+    make much sense: text nodes do not have attributes, and attribute values
+    are string values already and do not have children nodes.
+
+
+.. _CSS Selectors: https://www.w3.org/TR/css3-selectors/#selectors
+
 .. _topics-selectors-nesting-selectors:
 
 Nesting selectors
@@ -447,7 +496,7 @@ But using the ``.`` to mean the node, works::
 .. _`XPath string function`: http://www.w3.org/TR/xpath/#section-String-Functions
 
 Beware of the difference between //node[1] and (//node)[1]
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 ``//node[1]`` selects all the nodes occurring first under their respective parents.
 
