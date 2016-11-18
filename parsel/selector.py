@@ -77,14 +77,14 @@ class SelectorList(list):
         """
         return self.__class__(flatten([x.xpath(xpath, namespaces=namespaces, **kwargs) for x in self]))
 
-    def css(self, xpath):
+    def css(self, query):
         """
         Call the ``.css()`` method for each element in this list and return
         their results flattened as another :class:`SelectorList`.
 
         ``query`` is the same argument as the one in :meth:`Selector.css`
         """
-        return self.__class__(flatten([x.css(xpath) for x in self]))
+        return self.__class__(flatten([x.css(query) for x in self]))
 
     def re(self, regex):
         """
