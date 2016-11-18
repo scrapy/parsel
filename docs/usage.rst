@@ -598,6 +598,18 @@ Let's download the atom feed using `requests`_ and create a selector::
     >>> text = requests.get('https://github.com/blog.atom').text
     >>> sel = Selector(text=text, type='xml')
 
+This is how the file starts::
+
+    <?xml version="1.0" encoding="UTF-8"?>
+    <feed xml:lang="en-US"
+          xmlns="http://www.w3.org/2005/Atom"
+          xmlns:media="http://search.yahoo.com/mrss/">
+      <id>tag:github.com,2008:/blog</id>
+      ...
+
+You can see two namespace declarations: a default "http://www.w3.org/2005/Atom"
+and another one using the "media:" prefix for "http://search.yahoo.com/mrss/".
+
 We can try selecting all ``<link>`` objects and then see that it doesn't work
 (because the Atom XML namespace is obfuscating those nodes)::
 
@@ -627,6 +639,38 @@ of relevance, are:
 
 .. _Google Base XML feed: https://support.google.com/merchants/answer/160589?hl=en&ref_topic=2473799
 .. _requests: http://www.python-requests.org/
+
+
+Ad-hoc namespaces references
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+:class:`~parsel.selector.Selector` objects also allow passing namespaces
+references along with the query, through a ``namespaces`` argument,
+with the prefixes you declare being used in your XPath or CSS query.
+
+Let's use the same Atom feed from Github::
+
+    >>> import requests
+    >>> from parsel import Selector
+    >>> text = requests.get('https://github.com/blog.atom').text
+    >>> sel = Selector(text=text, type='xml')
+
+And try to select the links again, now using an "atom:" prefix
+for the "link" node test::
+
+    >>> sel.xpath("//atom:link", namespaces={"atom": "http://www.w3.org/2005/Atom"})
+    [<Selector xpath='//atom:link' data='<link xmlns="http://www.w3.org/2005/Atom'>,
+     <Selector xpath='//atom:link' data='<link xmlns="http://www.w3.org/2005/Atom'>,
+     ...
+
+You can pass several namespaces (here we're using shorter 1-letter prefixes)::
+
+    >>> sel.xpath("//a:entry/m:thumbnail/@url",
+    ...               namespaces={"a": "http://www.w3.org/2005/Atom",
+    ...                           "m": "http://search.yahoo.com/mrss/"}).extract()
+    ['https://avatars1.githubusercontent.com/u/11529908?v=3&s=60',
+     'https://avatars0.githubusercontent.com/u/15114852?v=3&s=60',
+     ...
 
 
 Similar libraries
