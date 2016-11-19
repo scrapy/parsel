@@ -86,8 +86,8 @@ def extract_regex(regex, text):
         m = regex.search(text)
         if not m:
             return []
-        return [replace_entities(m.group('extract'), keep=['lt', 'amp'])]
-
-    # full regex or numbered groups
-    strings = regex.findall(text)
-    return [replace_entities(s, keep=['lt', 'amp']) for s in flatten(strings)]
+        strings = m.group('extract')
+    else:
+        # full regex or numbered groups
+        strings = flatten(regex.findall(text))
+    return [replace_entities(s, keep=['lt', 'amp']) for s in strings]
