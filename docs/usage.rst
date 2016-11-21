@@ -304,6 +304,7 @@ XPath specification.
 
 .. _Location Paths: http://www.w3.org/TR/xpath#location-paths
 
+
 Using EXSLT extensions
 ----------------------
 
@@ -774,6 +775,27 @@ get right (or legible) without a variable reference::
     >>> selector.xpath('//p[contains(., $mystring)]',
     ...                mystring='''He said: "I don't know''').extract_first()
     u'<p>He said: "I don\'t know why, but I like mixing single and double quotes!"</p>'
+
+
+Converting CSS to XPath
+-----------------------
+
+When you're using an API that only accepts XPath expressions, it's sometimes
+useful to convert CSS to XPath. This allow you to take advantage of the
+conciseness of CSS to query elements by classes and the easeness of
+manipulating XPath expressions at the same time.
+
+On those occasions, use the function :meth:`~parsel.css2xpath`::
+
+    >>> from parsel import css2xpath
+    >>> css2xpath('h1.title')
+    u"descendant-or-self::h1[@class and contains(concat(' ', normalize-space(@class), ' '), ' title ')]"
+    >>> css2xpath('.profile-data') + '//h2'
+    u"descendant-or-self::*[@class and contains(concat(' ', normalize-space(@class), ' '), ' profile-data ')]//h2"
+
+As you can see from the examples above, it returns the translated CSS query
+into an XPath expression as a string, which you can use as-is or combine to
+build a more complex expression, before feeding to a function expecting XPath.
 
 
 Similar libraries
