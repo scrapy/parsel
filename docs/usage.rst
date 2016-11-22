@@ -731,6 +731,44 @@ You can pass several namespaces (here we're using shorter 1-letter prefixes)::
      ...
 
 
+Variables in XPath expressions
+------------------------------
+
+XPath allows you to reference variables in your XPath expressions, using
+the ``$somevariable`` syntax. This is somewhat similar to parameterized
+queries or prepared statements in the SQL world where you replace
+some arguments in your queries with placeholders like ``?``,
+which are then substituted with values passed with the query.
+
+Here's an example to match an element based on its normalized string-value::
+
+    >>> str_to_match = "Name: My image 3"
+    >>> selector.xpath('//a[normalize-space(.)=$match]',
+    ...                match=str_to_match).extract_first()
+    u'<a href="image3.html">Name: My image 3 <br><img src="image3_thumb.jpg"></a>'
+
+All variable references must have a binding value when calling ``.xpath()``
+(otherwise you'll get a ``ValueError: XPath error:`` exception).
+This is done by passing as many named arguments as necessary.
+
+Here's another example using a position range passed as two integers::
+
+    >>> start, stop = 2, 4
+    >>> selector.xpath('//a[position()>=$_from and position()<=$_to]',
+    ...                _from=start, _to=stop).extract()
+    [u'<a href="image2.html">Name: My image 2 <br><img src="image2_thumb.jpg"></a>',
+     u'<a href="image3.html">Name: My image 3 <br><img src="image3_thumb.jpg"></a>',
+     u'<a href="image4.html">Name: My image 4 <br><img src="image4_thumb.jpg"></a>']
+
+Named variables can be useful when strings need to be escaped for single
+or double quotes characters. The example below would be a bit tricky to
+get right (or legible) without a variable reference::
+
+    >>> selector.xpath('//p[contains(., $mystring)]',
+    ...                mystring='''He said: "I don't know''').extract_first()
+    u'<p>He said: "I don\'t know why, but I like mixing single and double quotes!"</p>'
+
+
 Similar libraries
 =================
 
