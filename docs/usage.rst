@@ -822,8 +822,7 @@ Parsel is built on top of the `lxml`_ library, which means they're very similar
 in speed and parsing accuracy. The advantage of using Parsel over `lxml`_ is
 that Parsel is simpler to use and extend, unlike the `lxml`_ API which is much
 bigger because the `lxml`_ library can be used for many other tasks, besides
-selecting markup documents. Also, Parsel allows you to use CSS, by translating
-CSS to XPath using the `cssselect`_ library.
+selecting markup documents.
 
 
 .. _BeautifulSoup: http://www.crummy.com/software/BeautifulSoup/
