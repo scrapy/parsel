@@ -11,6 +11,23 @@ from .utils import flatten, iflatten, extract_regex
 from .csstranslator import HTMLTranslator, GenericTranslator
 
 
+def css_star_nth_of_type(context, a, b, preceding=True):
+    node = context.context_node
+    num_siblings = len(list(node.itersiblings(node.tag, preceding=preceding)))
+    if a:
+        return (num_siblings // a) == (b-1)
+    else:
+        return num_siblings == (b-1)
+
+
+def css_star_nth_last_of_type(context, a, b):
+    return css_star_nth_of_type(context, a, b, preceding=False)
+
+ns = etree.FunctionNamespace(None)
+ns['star-nth-of-type'] = css_star_nth_of_type
+ns['star-nth-last-of-type'] = css_star_nth_of_type
+
+
 class SafeXMLParser(etree.XMLParser):
     def __init__(self, *args, **kwargs):
         kwargs.setdefault('resolve_entities', False)

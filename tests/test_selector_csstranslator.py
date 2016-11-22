@@ -146,6 +146,11 @@ class CSSSelectorTest(unittest.TestCase):
         self.assertEqual(self.x('p::text'), [u'lorem ipsum text'])
         self.assertEqual(self.x('p ::text'), [u'lorem ipsum text', u'hi', u'there', u'guy'])
 
+    def test_text_star_nth_pseudo_class(self):
+        self.assertEqual(len(self.x('div *:nth-of-type(2)')), 5)
+        self.assertEqual(self.x('*:nth-last-of-type(7)::attr(id)'),
+                                ['checkbox-disabled-checked'])
+
     def test_attribute_function(self):
         self.assertEqual(self.x('#p-b2::attr(id)'), [u'p-b2'])
         self.assertEqual(self.x('.cool-footer::attr(class)'), [u'cool-footer'])

@@ -2,7 +2,7 @@ from cssselect import GenericTranslator as OriginalGenericTranslator
 from cssselect import HTMLTranslator as OriginalHTMLTranslator
 from cssselect.xpath import XPathExpr as OriginalXPathExpr
 from cssselect.xpath import _unicode_safe_getattr, ExpressionError
-from cssselect.parser import FunctionalPseudoElement
+from cssselect.parser import FunctionalPseudoElement, parse_series
 
 
 class XPathExpr(OriginalXPathExpr):
@@ -89,6 +89,29 @@ class TranslatorMixin(object):
         """Support selecting text nodes using ::text pseudo-element"""
         return XPathExpr.from_xpath(xpath, textnode=True)
 
+    def xpath_star_nth_of_type_function(self, xpath, function, last=False):
+        try:
+            a, b = parse_series(function.arguments)
+        except ValueError:
+            raise ExpressionError("Invalid series: '%r'" % function.arguments)
+        if not last:
+            xp_format = 'star-nth-of-type({}, {})'
+        else:
+            xp_format = 'star-nth-last-of-type({}, {})'
+        return xpath.add_condition(xp_format.format(a, b))
+
+    def xpath_nth_of_type_function(self, xpath, function):
+        if xpath.element == '*':
+            return self.xpath_star_nth_of_type_function(xpath, function)
+        return self.xpath_nth_child_function(xpath, function,
+                                             add_name_test=False)
+
+    def xpath_nth_last_of_type_function(self, xpath, function):
+        if xpath.element == '*':
+            return self.xpath_star_nth_of_type_function(xpath, function,
+                                                        last=True)
+        return self.xpath_nth_child_function(xpath, function, last=True,
+                                             add_name_test=False)
 
 class GenericTranslator(TranslatorMixin, OriginalGenericTranslator):
     pass
