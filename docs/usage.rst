@@ -764,6 +764,13 @@ Named variables can be useful when strings need to be escaped for single
 or double quotes characters. The example below would be a bit tricky to
 get right (or legible) without a variable reference::
 
+    >>> html = u'''<html>
+    ... <body>
+    ...   <p>He said: "I don't know why, but I like mixing single and double quotes!"</p>
+    ... </body>
+    ... </html>'''
+    >>> selector = Selector(text=html)
+    >>>
     >>> selector.xpath('//p[contains(., $mystring)]',
     ...                mystring='''He said: "I don't know''').extract_first()
     u'<p>He said: "I don\'t know why, but I like mixing single and double quotes!"</p>'
