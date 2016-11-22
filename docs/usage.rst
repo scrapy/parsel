@@ -785,7 +785,7 @@ useful to convert CSS to XPath. This allows you to take advantage of the
 conciseness of CSS to query elements by classes and the easeness of
 manipulating XPath expressions at the same time.
 
-On those occasions, use the function :meth:`~parsel.css2xpath`::
+On those occasions, use the function :func:`~parsel.csstranslator.css2xpath`::
 
     >>> from parsel import css2xpath
     >>> css2xpath('h1.title')
