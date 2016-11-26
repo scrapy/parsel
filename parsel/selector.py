@@ -97,7 +97,8 @@ class SelectorList(list):
         """
         Call the ``.re()`` method for the first element in this list and
         return the result in an unicode string. If the list is empty or the
-        regex doesn't match anything, return the default value.
+        regex doesn't match anything, return the default value (``None`` if
+        the argument is not provided).
         """
         for el in iflatten(x.re(regex) for x in self):
             return el
