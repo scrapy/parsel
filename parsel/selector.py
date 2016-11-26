@@ -93,13 +93,16 @@ class SelectorList(list):
         """
         return flatten([x.re(regex) for x in self])
 
-    def re_first(self, regex):
+    def re_first(self, regex, default=None):
         """
         Call the ``.re()`` method for the first element in this list and
-        return the result in an unicode string.
+        return the result in an unicode string. If the list is empty or the
+        regex doesn't match anything, return the default value.
         """
         for el in iflatten(x.re(regex) for x in self):
             return el
+        else:
+            return default
 
     def extract(self):
         """
