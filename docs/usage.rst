@@ -159,6 +159,64 @@ Now we're going to get the base URL and some image links::
      u'image4_thumb.jpg',
      u'image5_thumb.jpg']
 
+.. _topics-selectors-css-extensions:
+
+Extensions to CSS Selectors
+---------------------------
+
+Per W3C standards, `CSS selectors`_ do not support selecting text nodes
+or attribute values.
+But selecting these is so essential in a web scraping context
+that Parsel implements a couple of **non-standard pseudo-elements**:
+
+* to select text nodes, use ``::text``
+* to select attribute values, use ``::attr(name)`` where *name* is the
+  name of the attribute that you want the value of
+
+.. warning::
+    These pseudo-elements are Scrapy-/Parsel-specific.
+    They will most probably not work with other libraries like `lxml`_ or `PyQuery`_.
+
+
+Examples:
+
+* ``title::text`` selects children text nodes of a descendant ``<title>`` element::
+
+    >>> selector.css('title::text').extract_first()
+    u'Example website'
+
+* ``*::text`` selects all descendant text nodes of the current selector context::
+
+    >>> selector.css('#images *::text').extract()
+    [u'\n   ',
+     u'Name: My image 1 ',
+     u'\n   ',
+     u'Name: My image 2 ',
+     u'\n   ',
+     u'Name: My image 3 ',
+     u'\n   ',
+     u'Name: My image 4 ',
+     u'\n   ',
+     u'Name: My image 5 ',
+     u'\n  ']
+
+* ``a::attr(href)`` selects the *href* attribute value of descendant links::
+
+    >>> selector.css('a::attr(href)').extract()
+    [u'image1.html',
+     u'image2.html',
+     u'image3.html',
+     u'image4.html',
+     u'image5.html']
+
+.. note::
+    You cannot chain these pseudo-elements. But in practice it would not
+    make much sense: text nodes do not have attributes, and attribute values
+    are string values already and do not have children nodes.
+
+
+.. _CSS Selectors: https://www.w3.org/TR/css3-selectors/#selectors
+
 .. _topics-selectors-nesting-selectors:
 
 Nesting selectors
@@ -245,6 +303,7 @@ For more details about relative XPaths see the `Location Paths`_ section in the
 XPath specification.
 
 .. _Location Paths: http://www.w3.org/TR/xpath#location-paths
+
 
 Using EXSLT extensions
 ----------------------
@@ -447,7 +506,7 @@ But using the ``.`` to mean the node, works::
 .. _`XPath string function`: http://www.w3.org/TR/xpath/#section-String-Functions
 
 Beware of the difference between //node[1] and (//node)[1]
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 ``//node[1]`` selects all the nodes occurring first under their respective parents.
 
@@ -598,6 +657,18 @@ Let's download the atom feed using `requests`_ and create a selector::
     >>> text = requests.get('https://github.com/blog.atom').text
     >>> sel = Selector(text=text, type='xml')
 
+This is how the file starts::
+
+    <?xml version="1.0" encoding="UTF-8"?>
+    <feed xml:lang="en-US"
+          xmlns="http://www.w3.org/2005/Atom"
+          xmlns:media="http://search.yahoo.com/mrss/">
+      <id>tag:github.com,2008:/blog</id>
+      ...
+
+You can see two namespace declarations: a default "http://www.w3.org/2005/Atom"
+and another one using the "media:" prefix for "http://search.yahoo.com/mrss/".
+
 We can try selecting all ``<link>`` objects and then see that it doesn't work
 (because the Atom XML namespace is obfuscating those nodes)::
 
@@ -629,6 +700,108 @@ of relevance, are:
 .. _requests: http://www.python-requests.org/
 
 
+Ad-hoc namespaces references
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+:class:`~parsel.selector.Selector` objects also allow passing namespaces
+references along with the query, through a ``namespaces`` argument,
+with the prefixes you declare being used in your XPath or CSS query.
+
+Let's use the same Atom feed from Github::
+
+    >>> import requests
+    >>> from parsel import Selector
+    >>> text = requests.get('https://github.com/blog.atom').text
+    >>> sel = Selector(text=text, type='xml')
+
+And try to select the links again, now using an "atom:" prefix
+for the "link" node test::
+
+    >>> sel.xpath("//atom:link", namespaces={"atom": "http://www.w3.org/2005/Atom"})
+    [<Selector xpath='//atom:link' data='<link xmlns="http://www.w3.org/2005/Atom'>,
+     <Selector xpath='//atom:link' data='<link xmlns="http://www.w3.org/2005/Atom'>,
+     ...
+
+You can pass several namespaces (here we're using shorter 1-letter prefixes)::
+
+    >>> sel.xpath("//a:entry/m:thumbnail/@url",
+    ...               namespaces={"a": "http://www.w3.org/2005/Atom",
+    ...                           "m": "http://search.yahoo.com/mrss/"}).extract()
+    ['https://avatars1.githubusercontent.com/u/11529908?v=3&s=60',
+     'https://avatars0.githubusercontent.com/u/15114852?v=3&s=60',
+     ...
+
+
+Variables in XPath expressions
+------------------------------
+
+XPath allows you to reference variables in your XPath expressions, using
+the ``$somevariable`` syntax. This is somewhat similar to parameterized
+queries or prepared statements in the SQL world where you replace
+some arguments in your queries with placeholders like ``?``,
+which are then substituted with values passed with the query.
+
+Here's an example to match an element based on its normalized string-value::
+
+    >>> str_to_match = "Name: My image 3"
+    >>> selector.xpath('//a[normalize-space(.)=$match]',
+    ...                match=str_to_match).extract_first()
+    u'<a href="image3.html">Name: My image 3 <br><img src="image3_thumb.jpg"></a>'
+
+All variable references must have a binding value when calling ``.xpath()``
+(otherwise you'll get a ``ValueError: XPath error:`` exception).
+This is done by passing as many named arguments as necessary.
+
+Here's another example using a position range passed as two integers::
+
+    >>> start, stop = 2, 4
+    >>> selector.xpath('//a[position()>=$_from and position()<=$_to]',
+    ...                _from=start, _to=stop).extract()
+    [u'<a href="image2.html">Name: My image 2 <br><img src="image2_thumb.jpg"></a>',
+     u'<a href="image3.html">Name: My image 3 <br><img src="image3_thumb.jpg"></a>',
+     u'<a href="image4.html">Name: My image 4 <br><img src="image4_thumb.jpg"></a>']
+
+Named variables can be useful when strings need to be escaped for single
+or double quotes characters. The example below would be a bit tricky to
+get right (or legible) without a variable reference::
+
+    >>> html = u'''<html>
+    ... <body>
+    ...   <p>He said: "I don't know why, but I like mixing single and double quotes!"</p>
+    ... </body>
+    ... </html>'''
+    >>> selector = Selector(text=html)
+    >>>
+    >>> selector.xpath('//p[contains(., $mystring)]',
+    ...                mystring='''He said: "I don't know''').extract_first()
+    u'<p>He said: "I don\'t know why, but I like mixing single and double quotes!"</p>'
+
+
+Converting CSS to XPath
+-----------------------
+
+.. autofunction:: parsel.css2xpath
+
+When you're using an API that only accepts XPath expressions, it's sometimes
+useful to convert CSS to XPath. This allows you to take advantage of the
+conciseness of CSS to query elements by classes and the easeness of
+manipulating XPath expressions at the same time.
+
+On those occasions, use the function :func:`~parsel.css2xpath`:
+
+::
+
+    >>> from parsel import css2xpath
+    >>> css2xpath('h1.title')
+    u"descendant-or-self::h1[@class and contains(concat(' ', normalize-space(@class), ' '), ' title ')]"
+    >>> css2xpath('.profile-data') + '//h2'
+    u"descendant-or-self::*[@class and contains(concat(' ', normalize-space(@class), ' '), ' profile-data ')]//h2"
+
+As you can see from the examples above, it returns the translated CSS query
+into an XPath expression as a string, which you can use as-is or combine to
+build a more complex expression, before feeding to a function expecting XPath.
+
+
 Similar libraries
 =================
 
@@ -649,8 +822,7 @@ Parsel is built on top of the `lxml`_ library, which means they're very similar
 in speed and parsing accuracy. The advantage of using Parsel over `lxml`_ is
 that Parsel is simpler to use and extend, unlike the `lxml`_ API which is much
 bigger because the `lxml`_ library can be used for many other tasks, besides
-selecting markup documents. Also, Parsel allows you to use CSS, by translating
-CSS to XPath using the `cssselect`_ library.
+selecting markup documents.
 
 
 .. _BeautifulSoup: http://www.crummy.com/software/BeautifulSoup/

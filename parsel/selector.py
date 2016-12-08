@@ -5,7 +5,7 @@ XPath selectors based on lxml
 import sys
 
 import six
-from lxml import etree
+from lxml import etree, html
 
 from .utils import flatten, iflatten, extract_regex, extract_regex_first
 from .csstranslator import HTMLTranslator, GenericTranslator
@@ -17,7 +17,7 @@ class SafeXMLParser(etree.XMLParser):
         super(SafeXMLParser, self).__init__(*args, **kwargs)
 
 _ctgroup = {
-    'html': {'_parser': etree.HTMLParser,
+    'html': {'_parser': html.HTMLParser,
              '_csstranslator': HTMLTranslator(),
              '_tostring_method': 'html'},
     'xml': {'_parser': SafeXMLParser,
@@ -58,23 +58,33 @@ class SelectorList(list):
         o = super(SelectorList, self).__getitem__(pos)
         return self.__class__(o) if isinstance(pos, slice) else o
 
-    def xpath(self, xpath):
+    def xpath(self, xpath, namespaces=None, **kwargs):
         """
         Call the ``.xpath()`` method for each element in this list and return
         their results flattened as another :class:`SelectorList`.
 
         ``query`` is the same argument as the one in :meth:`Selector.xpath`
-        """
-        return self.__class__(flatten([x.xpath(xpath) for x in self]))
 
-    def css(self, xpath):
+        ``namespaces`` is an optional ``prefix: namespace-uri`` mapping (dict)
+        for additional prefixes to those registered with ``register_namespace(prefix, uri)``.
+        Contrary to ``register_namespace()``, these prefixes are not
+        saved for future calls.
+
+        Any additional named arguments can be used to pass values for XPath
+        variables in the XPath expression, e.g.:
+
+            selector.xpath('//a[href=$url]', url="http://www.example.com")
+        """
+        return self.__class__(flatten([x.xpath(xpath, namespaces=namespaces, **kwargs) for x in self]))
+
+    def css(self, query):
         """
         Call the ``.css()`` method for each element in this list and return
         their results flattened as another :class:`SelectorList`.
 
         ``query`` is the same argument as the one in :meth:`Selector.css`
         """
-        return self.__class__(flatten([x.css(xpath) for x in self]))
+        return self.__class__(flatten([x.css(query) for x in self]))
 
     def re(self, regex):
         """
@@ -86,12 +96,14 @@ class SelectorList(list):
             results += x.re(regex)
         return results
 
-    def re_first(self, regex):
+    def re_first(self, regex, default=None):
         """
         Call the ``.re()`` method for the first element in this list and
-        return the result in an unicode string.
+        return the result in an unicode string. If the list is empty or the
+        regex doesn't match anything, return the default value (``None`` if
+        the argument is not provided).
         """
-        return next(x.re_first(regex) for x in self)
+        return next((x.re_first(regex) for x in self), default)
 
     def extract(self):
         """
@@ -163,22 +175,36 @@ class Selector(object):
     def _get_root(self, text, base_url=None):
         return create_root_node(text, self._parser, base_url=base_url)
 
-    def xpath(self, query):
+    def xpath(self, query, namespaces=None, **kwargs):
         """
         Find nodes matching the xpath ``query`` and return the result as a
         :class:`SelectorList` instance with all elements flattened. List
         elements implement :class:`Selector` interface too.
 
         ``query`` is a string containing the XPATH query to apply.
+
+        ``namespaces`` is an optional ``prefix: namespace-uri`` mapping (dict)
+        for additional prefixes to those registered with ``register_namespace(prefix, uri)``.
+        Contrary to ``register_namespace()``, these prefixes are not
+        saved for future calls.
+
+        Any additional named arguments can be used to pass values for XPath
+        variables in the XPath expression, e.g.:
+
+            selector.xpath('//a[href=$url]', url="http://www.example.com")
         """
         try:
             xpathev = self.root.xpath
         except AttributeError:
             return self.selectorlist_cls([])
 
+        nsp = dict(self.namespaces)
+        if namespaces is not None:
+            nsp.update(namespaces)
         try:
-            result = xpathev(query, namespaces=self.namespaces,
-                             smart_strings=self._lxml_smart_strings)
+            result = xpathev(query, namespaces=nsp,
+                             smart_strings=self._lxml_smart_strings,
+                             **kwargs)
         except etree.XPathError as exc:
             msg = u"XPath error: %s in %s" % (exc, query)
             msg = msg if six.PY3 else msg.encode('unicode_escape')

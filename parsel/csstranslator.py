@@ -96,3 +96,11 @@ class GenericTranslator(TranslatorMixin, OriginalGenericTranslator):
 
 class HTMLTranslator(TranslatorMixin, OriginalHTMLTranslator):
     pass
+
+
+_translator = HTMLTranslator()
+
+
+def css2xpath(query):
+    "Return translated XPath version of a given CSS query"
+    return _translator.css_to_xpath(query)

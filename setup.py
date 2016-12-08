@@ -16,7 +16,7 @@ test_requirements = [
 
 setup(
     name='parsel',
-    version='1.0.3',
+    version='1.1.0',
     description="Parsel is a library to extract data from HTML and XML using XPath and CSS selectors",
     long_description=readme + '\n\n' + history,
     author="Scrapy project",
@@ -30,7 +30,7 @@ setup(
     include_package_data=True,
     install_requires=[
         'w3lib>=1.8.0',
-        'lxml',
+        'lxml>=2.3',
         'six>=1.5.2',
         'cssselect>=0.9',
     ],
@@ -45,11 +45,12 @@ setup(
         'Topic :: Text Processing :: Markup',
         'Topic :: Text Processing :: Markup :: HTML',
         'Topic :: Text Processing :: Markup :: XML',
-        "Programming Language :: Python :: 2",
+        'Programming Language :: Python :: 2',
         'Programming Language :: Python :: 2.7',
         'Programming Language :: Python :: 3',
         'Programming Language :: Python :: 3.3',
         'Programming Language :: Python :: 3.4',
+        'Programming Language :: Python :: 3.5',
     ],
     setup_requires=['pytest-runner', 'pytest-benchmark'],
     tests_require=['pytest', 'pytest-benchmark'],
