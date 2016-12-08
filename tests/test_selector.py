@@ -250,6 +250,21 @@ class SelectorTestCase(unittest.TestCase):
         self.assertEqual(x.xpath("//ul/li").re("Age: (\d+)"),
                          ["10", "20"])
 
+    def test_re(self):
+        body = u"""<div>Name: Mary
+                    <ul>
+                        <li>Name: John</li>
+                        <li>Age: 10</li>
+                        <li>Name: Paul</li>
+                        <li>Age: 20</li>
+                    </ul>
+                    Age: 20
+                    </div>"""
+        x = self.sscls(text=body)
+
+        name_re = re.compile("Gender: (\w+)")
+        self.assertEqual(x.xpath("//ul/li").re(name_re), [])
+
     def test_re_intl(self):
         body = u'<div>Evento: cumplea\xf1os</div>'
         x = self.sscls(text=body)
@@ -269,11 +284,11 @@ class SelectorTestCase(unittest.TestCase):
 
         x = self.sscls(text=body)
         name_re_str = "Name: (\w+)"
-        self.assertEqual(x.re_first(name_re_str), "Mary")
+        self.assertEqual(x.re_first(name_re_str), ["Mary"])
         name_re = re.compile(name_re_str)
-        self.assertEqual(x.re_first(name_re), "Mary")
+        self.assertEqual(x.re_first(name_re), ["Mary"])
 
-    def test_re_first(self):
+    def test_re_first_only(self):
         """Test if Selector.re_first() returns first and only matched element"""
         body = u"""<div>Name: Mary
                     <ul>
@@ -288,12 +303,12 @@ class SelectorTestCase(unittest.TestCase):
 
         x = self.sscls(text=body)
         colour_re_str = "Colour: (\w+)"
-        self.assertEqual(x.re_first(colour_re_str), "Blue")
+        self.assertEqual(x.re_first(colour_re_str), ["Blue"])
         colour_re = re.compile(colour_re_str)
-        self.assertEqual(x.re_first(colour_re), "Blue")
+        self.assertEqual(x.re_first(colour_re), ["Blue"])
 
 
-    def test_re_first(self):
+    def test_re_first_no_match(self):
         """Test if Selector.re_first() returns None on no matching"""
         body = u"""<div>Name: Mary
                     <ul>
@@ -307,9 +322,12 @@ class SelectorTestCase(unittest.TestCase):
 
         x = self.sscls(text=body)
         gender_re_str = "Gender: (\w+)"
-        self.assertEqual(x.re_first(gender_re_str), None)
+        self.assertEqual(x.re_first(gender_re_str), [])
         gender_re = re.compile(gender_re_str)
-        self.assertEqual(x.re_first(gender_re), None)
+        self.assertEqual(x.re_first(gender_re), [])
+
+        no_groups_re_str = "Gender: \w+"
+        self.assertEqual(x.re_first(no_groups_re_str), [])
 
     def test_selector_over_text(self):
         hs = self.sscls(text=u'<root>lala</root>')

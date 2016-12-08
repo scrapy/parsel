@@ -64,14 +64,19 @@ def extract_regex_first(regex, text):
     if isinstance(regex, six.string_types):
         regex = re.compile(regex, re.UNICODE)
 
-    m = regex.search(text)
+    m = regex.search(text) # looks for the first location
 
-    if m:
-        if 'extract' in regex.groupindex:
-            return replace_entities(m.group('extract'), keep=['lt', 'amp'])
+    if not m:
+        return []
+        
+    if 'extract' in regex.groupindex:
+        return _replace_entities(m.group('extract'))
+    
+    # full regex or numbered groups
+    return [_replace_entities(group) for group in m.groups()]
 
-        return [replace_entities(group, keep=['lt', 'amp']) for group in m.groups()]
-
+def _replace_entities(text):
+    return replace_entities(text, keep=['lt', 'amp'])
 
 def extract_regex(regex, text):
     """Extract a list of unicode strings from the given text/encoding using the following policies:
@@ -86,8 +91,9 @@ def extract_regex(regex, text):
         m = regex.search(text)
         if not m:
             return []
-        strings = m.group('extract')
-    else:
-        # full regex or numbered groups
-        strings = flatten(regex.findall(text))
-    return [replace_entities(s, keep=['lt', 'amp']) for s in strings]
+        return [_replace_entities(m.group('extract'))]
+    
+    # full regex or numbered groups
+    strings = flatten(regex.findall(text))
+    return [_replace_entities(s) for s in strings]
+    
