@@ -67,12 +67,13 @@ def extract_regex_first(regex, text):
     m = regex.search(text) # looks for the first location
 
     if not m:
-        return []
+        return None    
         
-    if 'extract' in regex.groupindex:
-        return _replace_entities(m.group('extract'))
-    
-    # full regex or numbered groups
+    if 'extract' in regex.groupindex:                
+        return _replace_entities(m.group('extract'))            
+    elif not m.groups():        
+        return m.group(0) # full regex
+    # numbered groups
     return [_replace_entities(group) for group in m.groups()]
 
 def _replace_entities(text):

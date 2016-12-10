@@ -132,14 +132,14 @@ class SelectorTestCase(unittest.TestCase):
 
         self.assertEqual(sel.xpath('/ul/li[@id="doesnt-exist"]/text()').extract_first(), None)
 
-    def test_extract_first_default(self):
+    def test_list_extract_first_default(self):
         """Test if extract_first() returns default value when no results found"""
         body = u'<ul><li id="1">1</li><li id="2">2</li></ul>'
         sel = self.sscls(text=body)
 
         self.assertEqual(sel.xpath('//div/text()').extract_first(default='missing'), 'missing')
 
-    def test_re_first(self):
+    def test_list_re_first(self):
         """Test if re_first() returns first matched element"""
         body = u'<ul><li id="1">1</li><li id="2">2</li></ul>'
         sel = self.sscls(text=body)
@@ -156,7 +156,14 @@ class SelectorTestCase(unittest.TestCase):
         self.assertEqual(sel.xpath('/ul/li/text()').re_first('\w+'), None)
         self.assertEqual(sel.xpath('/ul/li[@id="doesnt-exist"]/text()').re_first('\d'), None)
 
-    def test_extract_first_default(self):
+    def test_list_re_first_named(self):
+        """Test if re_first() with a named group returns first matched element"""
+        body = u'<ul><li id="1">1 abc</li><li id="2">2 def</li></ul>'
+        sel = self.sscls(text=body)
+        self.assertEqual(sel.xpath('//ul/li/text()').re_first('(?P<extract>\d) abc'), '1')
+        self.assertEqual(sel.xpath('//ul/li/text()').re_first('(?P<extract>\d) ghi'), None)
+
+    def test_list_re_first_default(self):
         """Test if re_first() returns default value when no results found"""
         body = u'<ul><li id="1">1</li><li id="2">2</li></ul>'
         sel = self.sscls(text=body)
@@ -385,7 +392,7 @@ class SelectorTestCase(unittest.TestCase):
         sel.root.make_links_absolute()
         self.assertEqual(u'http://example.com/file.html', sel.xpath('//a/@href').extract_first())
 
-    def test_re(self):
+    def test_list_re(self):
         body = u"""<div>Name: Mary
                     <ul>
                       <li>Name: John</li>
@@ -402,8 +409,12 @@ class SelectorTestCase(unittest.TestCase):
                          ["John", "Paul"])
         self.assertEqual(x.xpath("//ul/li").re("Age: (\d+)"),
                          ["10", "20"])
+        self.assertEqual(x.xpath("//ul/li").re("Age: (?P<extract>\d+)"),
+                         ["10", "20"])
+        self.assertEqual(x.xpath("//ul/li").re("Age: \d+"),
+                         ["Age: 10", "Age: 20"])
 
-    def test_re(self):
+    def test_list_re_no_match(self):
         body = u"""<div>Name: Mary
                     <ul>
                         <li>Name: John</li>
@@ -417,13 +428,15 @@ class SelectorTestCase(unittest.TestCase):
 
         name_re = re.compile("Gender: (\w+)")
         self.assertEqual(x.xpath("//ul/li").re(name_re), [])
+        self.assertEqual(x.xpath("//ul/li").re("Gender: (?P<extract>\w+)"), [])
+        self.assertEqual(x.xpath("//ul/li").re("no full match"), [])
 
-    def test_re_intl(self):
+    def test_list_re_intl(self):
         body = u'<div>Evento: cumplea\xf1os</div>'
         x = self.sscls(text=body)
         self.assertEqual(x.xpath("//div").re("Evento: (\w+)"), [u'cumplea\xf1os'])
 
-    def test_re_first(self):
+    def test_selector_re_first(self):
         """Test if Selector.re_first() returns first matched element"""
         body = u"""<div>Name: Mary
                     <ul>
@@ -440,8 +453,10 @@ class SelectorTestCase(unittest.TestCase):
         self.assertEqual(x.re_first(name_re_str), ["Mary"])
         name_re = re.compile(name_re_str)
         self.assertEqual(x.re_first(name_re), ["Mary"])
+        self.assertEqual(x.re_first("Name: (?P<extract>\w+)"), "Mary")
+        self.assertEqual(x.re_first("Name: \w+").strip(), "Name: Mary")
 
-    def test_re_first_only(self):
+    def test_selector_re_first_only(self):
         """Test if Selector.re_first() returns first and only matched element"""
         body = u"""<div>Name: Mary
                     <ul>
@@ -461,7 +476,7 @@ class SelectorTestCase(unittest.TestCase):
         self.assertEqual(x.re_first(colour_re), ["Blue"])
 
 
-    def test_re_first_no_match(self):
+    def test_selector_re_first_no_match(self):
         """Test if Selector.re_first() returns None on no matching"""
         body = u"""<div>Name: Mary
                     <ul>
@@ -475,12 +490,11 @@ class SelectorTestCase(unittest.TestCase):
 
         x = self.sscls(text=body)
         gender_re_str = "Gender: (\w+)"
-        self.assertEqual(x.re_first(gender_re_str), [])
+        self.assertEqual(x.re_first(gender_re_str), None)
         gender_re = re.compile(gender_re_str)
-        self.assertEqual(x.re_first(gender_re), [])
-
-        no_groups_re_str = "Gender: \w+"
-        self.assertEqual(x.re_first(no_groups_re_str), [])
+        self.assertEqual(x.re_first(gender_re), None)        
+        self.assertEqual(x.re_first("Gender: \w+"), None)
+        self.assertEqual(x.re_first("Gender: (?P<extract>\w+)"), None) 
 
     def test_selector_over_text(self):
         hs = self.sscls(text=u'<root>lala</root>')

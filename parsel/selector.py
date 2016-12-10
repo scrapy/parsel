@@ -98,7 +98,7 @@ class SelectorList(list):
 
     def re_first(self, regex, default=None):
         """
-        Call the ``.re()`` method for the first element in this list and
+        Call the ``.re_first()`` method for the first element in this list and
         return the result in an unicode string. If the list is empty or the
         regex doesn't match anything, return the default value (``None`` if
         the argument is not provided).
@@ -245,8 +245,10 @@ class Selector(object):
 
     def re_first(self, regex):
         """
-        Call the ``.re()`` method for the first element in this list and
-        return the result in an unicode string.
+        Apply the given regex and return the first match.
+
+        ``regex`` can be either a compiled regular expression or a string which
+        will be compiled to a regular expression using ``re.compile(regex)``
         """
         return extract_regex_first(regex, self.extract())
 
