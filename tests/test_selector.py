@@ -170,6 +170,17 @@ class SelectorTestCase(unittest.TestCase):
 
         self.assertEqual(sel.xpath('//div/text()').re_first('\w+', default='missing'), 'missing')
         self.assertEqual(sel.xpath('/ul/li/text()').re_first('\w+', default='missing'), 'missing')
+        self.assertEqual(sel.xpath('/ul/li/text()').re_first('(\w+)', default='missing'), 'missing')
+        self.assertEqual(sel.xpath('/ul/li/text()').re_first('(?P<extract>\w+)', default='missing'), 'missing')
+    
+    def test_list_re_first_default_correct(self):
+        """Test if re_first() returns correct value when results found"""
+        body = u'<ul><li id="1">1</li><li id="2">2</li></ul>'
+        sel = self.sscls(text=body)
+
+        self.assertEqual(sel.xpath('//ul/li/text()').re_first('\d', default='missing'), '1')
+        self.assertEqual(sel.xpath('//ul/li/text()').re_first('(\d)', default='missing'), ['1'])
+        self.assertEqual(sel.xpath('//ul/li/text()').re_first('(?P<extract>\d)', default='missing'), '1')
 
     def test_select_unicode_query(self):
         body = u"<p><input name='\xa9' value='1'/></p>"
