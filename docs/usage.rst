@@ -578,6 +578,8 @@ to use the ``.`` in the XPath expressions that will follow.
 API reference
 =============
 
+Selector objects
+----------------
 
 .. autoclass:: parsel.selector.Selector
     :members:
@@ -590,9 +592,10 @@ SelectorList objects
     :members:
 
 
+.. _selector-examples-html:
 
-Selector examples on HTML text
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Working on HTML
+---------------
 
 Here are some :class:`Selector` examples to illustrate several concepts.
 In all cases, we assume there is already a :class:`Selector` instantiated with
@@ -619,8 +622,8 @@ an HTML text like this::
 
 .. _selector-examples-xml:
 
-Selector examples on XML text
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Working on XML (and namespaces)
+-------------------------------
 
 Here are some examples to illustrate concepts for :class:`Selector` objects
 instantiated with an XML text like this::

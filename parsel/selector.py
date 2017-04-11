@@ -71,7 +71,7 @@ class SelectorList(list):
         saved for future calls.
 
         Any additional named arguments can be used to pass values for XPath
-        variables in the XPath expression, e.g.:
+        variables in the XPath expression, e.g.::
 
             selector.xpath('//a[href=$url]', url="http://www.example.com")
         """
@@ -189,7 +189,7 @@ class Selector(object):
         saved for future calls.
 
         Any additional named arguments can be used to pass values for XPath
-        variables in the XPath expression, e.g.:
+        variables in the XPath expression, e.g.::
 
             selector.xpath('//a[href=$url]', url="http://www.example.com")
         """
