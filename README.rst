@@ -47,3 +47,10 @@ Example::
             print(e.xpath('.//a/@href').extract_first())
     http://example.com
     http://scrapy.org
+
+CLI example::
+
+    $ curl http://scrapy.org/ | python -m parsel --xpath '//a/@href' | tail -3
+    https://twitter.com/ScrapyProject
+    http://scrapinghub.com
+    http://github.com/scrapy/scrapy/graphs/contributors

@@ -47,6 +47,12 @@ defines selectors to associate those styles with specific HTML elements.
 You can use either language you're more comfortable with, though you may find
 that in some specific cases `XPath`_ is more powerful than `CSS`_.
 
+There is also a command line interface where you can test CSS/XPath expressions
+against HTML content. See::
+
+    python -m parsel --help
+
+
 .. _XPath: http://www.w3.org/TR/xpath
 .. _CSS: http://www.w3.org/TR/selectors
 
