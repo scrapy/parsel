@@ -40,7 +40,12 @@ def create_root_node(text, parser_cls, base_url=None):
     """
     body = text.strip().encode('utf8') or b'<html/>'
     parser = parser_cls(recover=True, encoding='utf8')
-    return etree.fromstring(body, parser=parser, base_url=base_url)
+    result = etree.fromstring(body, parser=parser, base_url=base_url)
+    # If body only contains comments, such as <!-- hello world -->
+    # result will be None
+    if result == None:
+        body = b'<html/>'
+        return etree.fromstring(body, parser=parser, base_url=base_url)
 
 
 class SelectorList(list):
