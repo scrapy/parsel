@@ -7,7 +7,7 @@ import sys
 import six
 from lxml import etree, html
 
-from .utils import flatten, iflatten, extract_regex
+from .utils import flatten, iflatten, extract_regex, extract_regex_first
 from .csstranslator import HTMLTranslator, GenericTranslator
 
 
@@ -94,19 +94,19 @@ class SelectorList(list):
         Call the ``.re()`` method for each element in this list and return
         their results flattened, as a list of unicode strings.
         """
-        return flatten([x.re(regex) for x in self])
+        results = list()
+        for x in self:
+            results += x.re(regex)
+        return results
 
     def re_first(self, regex, default=None):
         """
-        Call the ``.re()`` method for the first element in this list and
+        Call the ``.re_first()`` method for the first element in this list and
         return the result in an unicode string. If the list is empty or the
         regex doesn't match anything, return the default value (``None`` if
         the argument is not provided).
         """
-        for el in iflatten(x.re(regex) for x in self):
-            return el
-        else:
-            return default
+        return next((x.re_first(regex) for x in self), default)
 
     def extract(self):
         """
@@ -245,6 +245,15 @@ class Selector(object):
         will be compiled to a regular expression using ``re.compile(regex)``
         """
         return extract_regex(regex, self.extract())
+
+    def re_first(self, regex):
+        """
+        Apply the given regex and return the first match.
+
+        ``regex`` can be either a compiled regular expression or a string which
+        will be compiled to a regular expression using ``re.compile(regex)``
+        """
+        return extract_regex_first(regex, self.extract())
 
     def extract(self):
         """

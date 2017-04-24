@@ -55,7 +55,7 @@ setup(
         'Programming Language :: Python :: Implementation :: CPython',
         'Programming Language :: Python :: Implementation :: PyPy',
     ],
-    setup_requires=['pytest-runner',],
-    tests_require=['pytest',],
+    setup_requires=['pytest-runner', 'pytest-benchmark'],
+    tests_require=['pytest', 'pytest-benchmark'],
     test_suite='tests',
 )
