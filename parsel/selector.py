@@ -40,7 +40,10 @@ def create_root_node(text, parser_cls, base_url=None):
     """
     body = text.strip().encode('utf8') or b'<html/>'
     parser = parser_cls(recover=True, encoding='utf8')
-    return etree.fromstring(body, parser=parser, base_url=base_url)
+    root = etree.fromstring(body, parser=parser, base_url=base_url)
+    if root is None:
+        root = etree.fromstring(b'<html/>', parser=parser, base_url=base_url)
+    return root
 
 
 class SelectorList(list):

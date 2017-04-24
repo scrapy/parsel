@@ -443,6 +443,10 @@ class SelectorTestCase(unittest.TestCase):
     def test_empty_bodies_shouldnt_raise_errors(self):
         self.sscls(text=u'').xpath('//text()').extract()
 
+    def test_bodies_with_comments_only(self):
+        sel = self.sscls(text=u'<!-- hello world -->', base_url='http://example.com')
+        self.assertEquals(u'http://example.com', sel.root.base)
+
     def test_null_bytes_shouldnt_raise_errors(self):
         text = u'<root>pre\x00post</root>'
         self.sscls(text).xpath('//text()').extract()
