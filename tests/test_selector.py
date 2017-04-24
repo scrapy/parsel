@@ -141,19 +141,19 @@ class SelectorTestCase(unittest.TestCase):
 
     def test_selector_get_alias(self):
         """Test if get() returns extracted value on a Selector"""
-        body = u'<ul><li id="1">1</li><li id="2">2</li></ul>'
+        body = u'<ul><li id="1">1</li><li id="2">2</li><li id="3">3</li></ul>'
         sel = self.sscls(text=body)
 
-        self.assertEqual(sel.xpath('//ul/li/text()')[0].get(),
-                         sel.xpath('//ul/li/text()')[0].extract()[0])
+        self.assertEqual(sel.xpath('//ul/li[position()>1]')[0].get(), u'<li id="2">2</li>')
+        self.assertEqual(sel.xpath('//ul/li[position()>1]/text()')[0].get(), u'2')
 
     def test_selectorlist_get_alias(self):
         """Test if get() returns first element for a selection call"""
-        body = u'<ul><li id="1">1</li><li id="2">2</li></ul>'
+        body = u'<ul><li id="1">1</li><li id="2">2</li><li id="3">3</li></ul>'
         sel = self.sscls(text=body)
 
-        self.assertEqual(sel.xpath('//ul/li/text()').get(),
-                         sel.xpath('//ul/li/text()').extract()[0])
+        self.assertEqual(sel.xpath('//ul/li').get(), u'<li id="1">1</li>')
+        self.assertEqual(sel.xpath('//ul/li/text()').get(), u'1')
 
     def test_re_first(self):
         """Test if re_first() returns first matched element"""
