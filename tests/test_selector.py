@@ -147,6 +147,14 @@ class SelectorTestCase(unittest.TestCase):
         self.assertEqual(sel.xpath('//ul/li[position()>1]')[0].get(), u'<li id="2">2</li>')
         self.assertEqual(sel.xpath('//ul/li[position()>1]/text()')[0].get(), u'2')
 
+    def test_selector_getall_alias(self):
+        """Test if get() returns extracted value on a Selector"""
+        body = u'<ul><li id="1">1</li><li id="2">2</li><li id="3">3</li></ul>'
+        sel = self.sscls(text=body)
+
+        self.assertListEqual(sel.xpath('//ul/li[position()>1]')[0].getall(), [u'<li id="2">2</li>'])
+        self.assertListEqual(sel.xpath('//ul/li[position()>1]/text()')[0].getall(), [u'2'])
+
     def test_selectorlist_get_alias(self):
         """Test if get() returns first element for a selection call"""
         body = u'<ul><li id="1">1</li><li id="2">2</li><li id="3">3</li></ul>'
@@ -261,7 +269,7 @@ class SelectorTestCase(unittest.TestCase):
                          ["<li>four</li>", "<li>five</li>", "<li>six</li>"])
         self.assertEqual(divtwo.xpath("./li").extract(), [])
 
-    def test_getall_alias(self):
+    def test_selectorlist_getall_alias(self):
         """Nested selector tests using getall()"""
         body = u"""<body>
                     <div class='one'>

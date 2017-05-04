@@ -264,6 +264,12 @@ class Selector(object):
                 return six.text_type(self.root)
     get = extract
 
+    def getall(self):
+        """
+        Serialize and return the matched node in a 1-element list of unicode strings.
+        """
+        return [self.get()]
+
     def register_namespace(self, prefix, uri):
         """
         Register the given namespace to be used in this :class:`Selector`.
