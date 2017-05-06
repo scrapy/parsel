@@ -139,6 +139,30 @@ class SelectorTestCase(unittest.TestCase):
 
         self.assertEqual(sel.xpath('//div/text()').extract_first(default='missing'), 'missing')
 
+    def test_selector_get_alias(self):
+        """Test if get() returns extracted value on a Selector"""
+        body = u'<ul><li id="1">1</li><li id="2">2</li><li id="3">3</li></ul>'
+        sel = self.sscls(text=body)
+
+        self.assertEqual(sel.xpath('//ul/li[position()>1]')[0].get(), u'<li id="2">2</li>')
+        self.assertEqual(sel.xpath('//ul/li[position()>1]/text()')[0].get(), u'2')
+
+    def test_selector_getall_alias(self):
+        """Test if get() returns extracted value on a Selector"""
+        body = u'<ul><li id="1">1</li><li id="2">2</li><li id="3">3</li></ul>'
+        sel = self.sscls(text=body)
+
+        self.assertListEqual(sel.xpath('//ul/li[position()>1]')[0].getall(), [u'<li id="2">2</li>'])
+        self.assertListEqual(sel.xpath('//ul/li[position()>1]/text()')[0].getall(), [u'2'])
+
+    def test_selectorlist_get_alias(self):
+        """Test if get() returns first element for a selection call"""
+        body = u'<ul><li id="1">1</li><li id="2">2</li><li id="3">3</li></ul>'
+        sel = self.sscls(text=body)
+
+        self.assertEqual(sel.xpath('//ul/li').get(), u'<li id="1">1</li>')
+        self.assertEqual(sel.xpath('//ul/li/text()').get(), u'1')
+
     def test_re_first(self):
         """Test if re_first() returns first matched element"""
         body = u'<ul><li id="1">1</li><li id="2">2</li></ul>'
@@ -244,6 +268,31 @@ class SelectorTestCase(unittest.TestCase):
         self.assertEqual(divtwo.xpath(".//li").extract(),
                          ["<li>four</li>", "<li>five</li>", "<li>six</li>"])
         self.assertEqual(divtwo.xpath("./li").extract(), [])
+
+    def test_selectorlist_getall_alias(self):
+        """Nested selector tests using getall()"""
+        body = u"""<body>
+                    <div class='one'>
+                      <ul>
+                        <li>one</li><li>two</li>
+                      </ul>
+                    </div>
+                    <div class='two'>
+                      <ul>
+                        <li>four</li><li>five</li><li>six</li>
+                      </ul>
+                    </div>
+                  </body>"""
+
+        x = self.sscls(text=body)
+        divtwo = x.xpath('//div[@class="two"]')
+        self.assertEqual(divtwo.xpath("//li").getall(),
+                         ["<li>one</li>", "<li>two</li>", "<li>four</li>", "<li>five</li>", "<li>six</li>"])
+        self.assertEqual(divtwo.xpath("./ul/li").getall(),
+                         ["<li>four</li>", "<li>five</li>", "<li>six</li>"])
+        self.assertEqual(divtwo.xpath(".//li").getall(),
+                         ["<li>four</li>", "<li>five</li>", "<li>six</li>"])
+        self.assertEqual(divtwo.xpath("./li").getall(), [])
 
     def test_mixed_nested_selectors(self):
         body = u'''<body>
