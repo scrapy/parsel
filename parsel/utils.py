@@ -65,8 +65,11 @@ def extract_regex(regex, text):
     if isinstance(regex, six.string_types):
         regex = re.compile(regex, re.UNICODE)
 
-    try:
-        strings = [regex.search(text).group('extract')]   # named group
-    except:
-        strings = regex.findall(text)    # full regex or numbered groups
+    if 'extract' in regex.groupindex:
+        # named group
+        searched = regex.search(text)
+        strings = [searched.group('extract')] if searched else []
+    else:
+        # full regex or numbered groups
+        strings = regex.findall(text)
     return [replace_entities(s, keep=['lt', 'amp']) for s in flatten(strings)]
