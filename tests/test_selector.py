@@ -180,6 +180,10 @@ class SelectorTestCase(unittest.TestCase):
         self.assertEqual(sel.xpath('/ul/li/text()').re_first('\w+'), None)
         self.assertEqual(sel.xpath('/ul/li[@id="doesnt-exist"]/text()').re_first('\d'), None)
 
+        self.assertEqual(sel.re_first(r'id="(\d+)'), '1')
+        self.assertEqual(sel.re_first(r'foo'), None)
+        self.assertEqual(sel.re_first(r'foo', default='bar'), 'bar')
+
     def test_extract_first_default(self):
         """Test if re_first() returns default value when no results found"""
         body = u'<ul><li id="1">1</li><li id="2">2</li></ul>'
