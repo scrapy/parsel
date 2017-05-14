@@ -452,6 +452,15 @@ class SelectorTestCase(unittest.TestCase):
         self.assertEqual(x.xpath("//ul/li").re("Age: (\d+)"),
                          ["10", "20"])
 
+        # Test named group, hit and miss
+        x = self.sscls(text=u'foobar')
+        self.assertEqual(x.re('(?P<extract>foo)'), ['foo'])
+        self.assertEqual(x.re('(?P<extract>baz)'), [])
+
+        # A purposely constructed test for an edge case
+        x = self.sscls(text=u'baz')
+        self.assertEqual(x.re('(?P<extract>foo)|(?P<bar>baz)'), [])
+
     def test_re_intl(self):
         body = u'<div>Evento: cumplea\xf1os</div>'
         x = self.sscls(text=body)

@@ -67,8 +67,12 @@ def extract_regex(regex, text):
 
     if 'extract' in regex.groupindex:
         # named group
-        searched = regex.search(text)
-        strings = [searched.group('extract')] if searched else []
+        try:
+            extracted = regex.search(text).group('extract')
+        except AttributeError:
+            strings = []
+        else:
+            strings = [extracted] if extracted is not None else []
     else:
         # full regex or numbered groups
         strings = regex.findall(text)
