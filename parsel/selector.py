@@ -93,6 +93,11 @@ class SelectorList(list):
         """
         Call the ``.re()`` method for each element in this list and return
         their results flattened, as a list of unicode strings.
+
+        By default, character entity references are replaced by their
+        corresponding character (except for ``&amp;`` and ``&lt;``.
+        Passing ``replace_entities`` as ``False`` switches off these
+        replacements.
         """
         return flatten([x.re(regex, replace_entities=replace_entities) for x in self])
 
@@ -102,6 +107,11 @@ class SelectorList(list):
         return the result in an unicode string. If the list is empty or the
         regex doesn't match anything, return the default value (``None`` if
         the argument is not provided).
+
+        By default, character entity references are replaced by their
+        corresponding character (except for ``&amp;`` and ``&lt;``.
+        Passing ``replace_entities`` as ``False`` switches off these
+        replacements.
         """
         for el in iflatten(x.re(regex, replace_entities=replace_entities) for x in self):
             return el
@@ -244,7 +254,12 @@ class Selector(object):
         matches.
 
         ``regex`` can be either a compiled regular expression or a string which
-        will be compiled to a regular expression using ``re.compile(regex)``
+        will be compiled to a regular expression using ``re.compile(regex)``.
+
+        By default, character entity references are replaced by their
+        corresponding character (except for ``&amp;`` and ``&lt;``.
+        Passing ``replace_entities`` as ``False`` switches off these
+        replacements.
         """
         return extract_regex(regex, self.extract(), replace_entities=replace_entities)
 
@@ -253,6 +268,11 @@ class Selector(object):
         Apply the given regex and return the first unicode string which
         matches. If there is no match, return the default value (``None`` if
         the argument is not provided).
+
+        By default, character entity references are replaced by their
+        corresponding character (except for ``&amp;`` and ``&lt;``.
+        Passing ``replace_entities`` as ``False`` switches off these
+        replacements.
         """
         return next(iflatten(self.re(regex, replace_entities=replace_entities)), default)
 
