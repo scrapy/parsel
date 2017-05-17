@@ -89,21 +89,31 @@ class SelectorList(list):
         """
         return self.__class__(flatten([x.css(query) for x in self]))
 
-    def re(self, regex):
+    def re(self, regex, replace_entities=True):
         """
         Call the ``.re()`` method for each element in this list and return
         their results flattened, as a list of unicode strings.
-        """
-        return flatten([x.re(regex) for x in self])
 
-    def re_first(self, regex, default=None):
+        By default, character entity references are replaced by their
+        corresponding character (except for ``&amp;`` and ``&lt;``.
+        Passing ``replace_entities`` as ``False`` switches off these
+        replacements.
+        """
+        return flatten([x.re(regex, replace_entities=replace_entities) for x in self])
+
+    def re_first(self, regex, default=None, replace_entities=True):
         """
         Call the ``.re()`` method for the first element in this list and
         return the result in an unicode string. If the list is empty or the
         regex doesn't match anything, return the default value (``None`` if
         the argument is not provided).
+
+        By default, character entity references are replaced by their
+        corresponding character (except for ``&amp;`` and ``&lt;``.
+        Passing ``replace_entities`` as ``False`` switches off these
+        replacements.
         """
-        for el in iflatten(x.re(regex) for x in self):
+        for el in iflatten(x.re(regex, replace_entities=replace_entities) for x in self):
             return el
         else:
             return default
@@ -238,23 +248,33 @@ class Selector(object):
     def _css2xpath(self, query):
         return self._csstranslator.css_to_xpath(query)
 
-    def re(self, regex):
+    def re(self, regex, replace_entities=True):
         """
         Apply the given regex and return a list of unicode strings with the
         matches.
 
         ``regex`` can be either a compiled regular expression or a string which
-        will be compiled to a regular expression using ``re.compile(regex)``
-        """
-        return extract_regex(regex, self.extract())
+        will be compiled to a regular expression using ``re.compile(regex)``.
 
-    def re_first(self, regex, default=None):
+        By default, character entity references are replaced by their
+        corresponding character (except for ``&amp;`` and ``&lt;``.
+        Passing ``replace_entities`` as ``False`` switches off these
+        replacements.
+        """
+        return extract_regex(regex, self.extract(), replace_entities=replace_entities)
+
+    def re_first(self, regex, default=None, replace_entities=True):
         """
         Apply the given regex and return the first unicode string which
         matches. If there is no match, return the default value (``None`` if
         the argument is not provided).
+
+        By default, character entity references are replaced by their
+        corresponding character (except for ``&amp;`` and ``&lt;``.
+        Passing ``replace_entities`` as ``False`` switches off these
+        replacements.
         """
-        return next(iflatten(self.re(regex)), default)
+        return next(iflatten(self.re(regex, replace_entities=replace_entities)), default)
 
     def extract(self):
         """

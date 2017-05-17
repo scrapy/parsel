@@ -455,7 +455,7 @@ class SelectorTestCase(unittest.TestCase):
                          ["John", "Paul"])
         self.assertEqual(x.xpath("//ul/li").re("Age: (\d+)"),
                          ["10", "20"])
-
+        
         # Test named group, hit and miss
         x = self.sscls(text=u'foobar')
         self.assertEqual(x.re('(?P<extract>foo)'), ['foo'])
@@ -464,6 +464,32 @@ class SelectorTestCase(unittest.TestCase):
         # A purposely constructed test for an edge case
         x = self.sscls(text=u'baz')
         self.assertEqual(x.re('(?P<extract>foo)|(?P<bar>baz)'), [])
+
+    def test_re_replace_entities(self):
+        body = u"""<script>{"foo":"bar &amp; &quot;baz&quot;"}</script>"""
+        x = self.sscls(text=body)
+        
+        name_re = re.compile('{"foo":(.*)}')
+
+        # by default, only &amp; and &lt; are preserved ;
+        # other entities are converted
+        expected = u'"bar &amp; "baz""'
+        self.assertEqual(x.xpath("//script/text()").re(name_re), [expected])
+        self.assertEqual(x.xpath("//script").re(name_re), [expected])
+        self.assertEqual(x.xpath("//script/text()")[0].re(name_re), [expected])
+        self.assertEqual(x.xpath("//script")[0].re(name_re), [expected])
+
+        # check that re_first() works the same way for single value output
+        self.assertEqual(x.xpath("//script").re_first(name_re), expected)
+        self.assertEqual(x.xpath("//script")[0].re_first(name_re), expected)
+
+        # switching off replace_entities will preserve &quot; also
+        expected = u'"bar &amp; &quot;baz&quot;"'
+        self.assertEqual(x.xpath("//script/text()").re(name_re, replace_entities=False), [expected])
+        self.assertEqual(x.xpath("//script")[0].re(name_re, replace_entities=False), [expected])
+
+        self.assertEqual(x.xpath("//script/text()").re_first(name_re, replace_entities=False), expected)
+        self.assertEqual(x.xpath("//script")[0].re_first(name_re, replace_entities=False), expected)
 
     def test_re_intl(self):
         body = u'<div>Evento: cumplea\xf1os</div>'
