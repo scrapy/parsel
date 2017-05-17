@@ -248,6 +248,14 @@ class Selector(object):
         """
         return extract_regex(regex, self.extract())
 
+    def re_first(self, regex, default=None):
+        """
+        Apply the given regex and return the first unicode string which
+        matches. If there is no match, return the default value (``None`` if
+        the argument is not provided).
+        """
+        return next(iflatten(self.re(regex)), default)
+
     def extract(self):
         """
         Serialize and return the matched nodes in a single unicode string.
