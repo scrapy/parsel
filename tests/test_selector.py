@@ -614,6 +614,19 @@ class SelectorTestCase(unittest.TestCase):
         sel = self.sscls(text=u'nothing', base_url='http://example.com')
         self.assertEquals(u'http://example.com', sel.root.base)
 
+    def test_custom_parser_cls(self):
+        from lxml import etree, html
+        text = u"<a>example</a>"
+        with self.assertRaisesRegexp(AttributeError, "has no attribute 'make_links_absolute'"):
+            sel = Selector(text, parser_cls=etree.HTMLParser)
+            sel.xpath('//a')[0].root.make_links_absolute
+
+        sel = Selector(text, parser_cls=html.HTMLParser)
+        self.assertIsNotNone(sel.xpath('//a')[0].root.make_links_absolute)
+
+        # default behavior is html.HTMLParser
+        sel = Selector(text)
+        self.assertIsNotNone(sel.xpath('//a')[0].root.make_links_absolute)
 
     def test_extending_selector(self):
         class MySelectorList(Selector.selectorlist_cls):
@@ -627,6 +640,7 @@ class SelectorTestCase(unittest.TestCase):
         self.assertIsInstance(sel.xpath('//div')[0], MySelector)
         self.assertIsInstance(sel.css('div'), MySelectorList)
         self.assertIsInstance(sel.css('div')[0], MySelector)
+
 
 class ExsltTestCase(unittest.TestCase):
 

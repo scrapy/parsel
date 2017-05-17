@@ -158,9 +158,9 @@ class Selector(object):
     selectorlist_cls = SelectorList
 
     def __init__(self, text=None, type=None, namespaces=None, root=None,
-                 base_url=None, _expr=None):
+                 base_url=None, _expr=None, parser_cls=None):
         self.type = st = _st(type or self._default_type)
-        self._parser = _ctgroup[st]['_parser']
+        self._parser = parser_cls or _ctgroup[st]['_parser']
         self._csstranslator = _ctgroup[st]['_csstranslator']
         self._tostring_method = _ctgroup[st]['_tostring_method']
 
