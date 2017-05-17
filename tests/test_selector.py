@@ -455,11 +455,20 @@ class SelectorTestCase(unittest.TestCase):
                          ["John", "Paul"])
         self.assertEqual(x.xpath("//ul/li").re("Age: (\d+)"),
                          ["10", "20"])
+        
+        # Test named group, hit and miss
+        x = self.sscls(text=u'foobar')
+        self.assertEqual(x.re('(?P<extract>foo)'), ['foo'])
+        self.assertEqual(x.re('(?P<extract>baz)'), [])
+
+        # A purposely constructed test for an edge case
+        x = self.sscls(text=u'baz')
+        self.assertEqual(x.re('(?P<extract>foo)|(?P<bar>baz)'), [])
 
     def test_re_replace_entities(self):
         body = u"""<script>{"foo":"bar &amp; &quot;baz&quot;"}</script>"""
         x = self.sscls(text=body)
-
+        
         name_re = re.compile('{"foo":(.*)}')
 
         # by default, only &amp; and &lt; are preserved ;
