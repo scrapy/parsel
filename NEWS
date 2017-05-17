@@ -3,14 +3,14 @@
 History
 -------
 
-1.2.0 (2017-05-XX)
+1.2.0 (2017-05-17)
 ~~~~~~~~~~~~~~~~~~
 
-* Add :meth:`~parsel.selector.SelectorList.get` and :meth:`~parsel.selector.SelectorList.getall`
-  methods as aliases for :meth:`~parsel.selector.SelectorList.extract_first`
-  and :meth:`~parsel.selector.SelectorList.extract` respectively
-* Add default value parameter to :meth:`~parsel.selector.SelectorList.re_first` method
-* Add :meth:`~parsel.selector.Selector.re_first` method to :class:`parsel.selector.Selector` class
+* Add ``SelectorList.get`` and ``SelectorList.getall``
+  methods as aliases for ``SelectorList.extract_first``
+  and ``SelectorList.extract`` respectively
+* Add default value parameter to ``SelectorList.re_first`` method
+* Add ``Selector.re_first`` method
 * Bug fix: detect ``None`` result from lxml parsing and fallback with an empty document
 * Rearrange XML/HTML examples in the selectors usage docs
 * Travis CI:

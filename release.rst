@@ -1,7 +1,8 @@
 Release procedures
 ------------------
 
-* Update NEWS file with the release notes
+* Update NEWS file with the release notes.
+  Review changes using: ``restview --pypi-strict <(cat README.rst NEWS | grep -v ':changelog')``
 * Run bumpversion with the proper release type
 * Push code and tags to GitHub to trigger build
 * Copy release notes to https://github.com/scrapy/parsel/releases
