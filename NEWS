@@ -3,6 +3,22 @@
 History
 -------
 
+1.2.0 (2017-05-XX)
+~~~~~~~~~~~~~~~~~~
+
+* Add :meth:`~parsel.selector.SelectorList.get` and :meth:`~parsel.selector.SelectorList.getall`
+  methods as aliases for :meth:`~parsel.selector.SelectorList.extract_first`
+  and :meth:`~parsel.selector.SelectorList.extract` respectively
+* Add default value parameter to :meth:`~parsel.selector.SelectorList.re_first` method
+* Add :meth:`~parsel.selector.Selector.re_first` method to :class:`parsel.selector.Selector` class
+* Bug fix: detect ``None`` result from lxml parsing and fallback with an empty document
+* Rearrange XML/HTML examples in the selectors usage docs
+* Travis CI:
+
+  * Test against Python 3.6
+  * Test against PyPy using "Portable PyPy for Linux" distribution
+
+
 1.1.0 (2016-11-22)
 ~~~~~~~~~~~~~~~~~~
 
@@ -22,11 +38,13 @@ History
 * Integrate py.test runs with setuptools (needed for Debian packaging)
 * Changelog is now called ``NEWS``
 
+
 1.0.2 (2016-04-26)
 ~~~~~~~~~~~~~~~~~~
 
 * Fix bug in exception handling causing original traceback to be lost
 * Added docstrings and other doc fixes
+
 
 1.0.1 (2015-08-24)
 ~~~~~~~~~~~~~~~~~~
