@@ -11,6 +11,8 @@ History
   and ``SelectorList.extract`` respectively
 * Add default value parameter to ``SelectorList.re_first`` method
 * Add ``Selector.re_first`` method
+* Add ``replace_entities`` argument on ``.re()`` and ``.re_first()``
+  to turn off replacing of character entity references
 * Bug fix: detect ``None`` result from lxml parsing and fallback with an empty document
 * Rearrange XML/HTML examples in the selectors usage docs
 * Travis CI:
