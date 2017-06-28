@@ -1,11 +1,11 @@
 from lxml import etree
-from six import iteritems
+from six import iteritems, get_function_code
 
 _XPATH_FUNCS = {}
 
 
 def register(func):
-    fname = func.func_name.replace('_', '-')
+    fname = get_function_code(func).co_name.replace('_', '-')
     _XPATH_FUNCS[fname] = func
     return func
 
