@@ -86,6 +86,7 @@ def extract_regex(regex, text, replace_entities=True):
 def selector_data_shorten(data, width):
     """Shortens the preview of extracted data by adding placeholder '...'
     """
-    if six.PY2:
+    if six.PY34:
+        return textwrap.shorten(data, width=width, placeholder="...")
+    else:
         return data[:40]
-    return textwrap.shorten(data, width=width, placeholder="...")
