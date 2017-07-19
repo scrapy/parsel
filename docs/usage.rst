@@ -50,6 +50,12 @@ that in some specific cases `XPath`_ is more powerful than `CSS`_.
 .. _XPath: http://www.w3.org/TR/xpath
 .. _CSS: http://www.w3.org/TR/selectors
 
+.. note::
+    HTML comments mentioned within <style> and <script> tags will be treated as raw text.
+    The reason is that it is a common practice to comment out the content of <style> 
+    and <script> elements to ensure that older, non-conforming user agents will not render them as text.
+    Therefore, markup and entities are be treated as raw text and passed to the application as is.
+
 
 Using selectors
 ===============
