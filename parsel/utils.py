@@ -1,6 +1,5 @@
 import re
 import six
-import textwrap
 from w3lib.html import replace_entities as w3lib_replace_entities
 
 
@@ -83,10 +82,7 @@ def extract_regex(regex, text, replace_entities=True):
         return strings
     return [w3lib_replace_entities(s, keep=['lt', 'amp']) for s in strings]
 
-def selector_data_shorten(data, width):
+def shorten_selector_data(data, width):
     """Shortens the preview of extracted data by adding placeholder '...'
     """
-    if six.PY34:
-        return textwrap.shorten(data, width=width, placeholder="...")
-    else:
-        return data[:40]
+    return data[:width - 3] + "..." if (len(data) > width - 3) else data
