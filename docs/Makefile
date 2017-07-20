@@ -2,6 +2,7 @@
 #
 
 # You can set these variables from the command line.
+PYTHON        = python
 SPHINXOPTS    =
 SPHINXBUILD   = sphinx-build
 PAPER         =
@@ -45,6 +46,7 @@ help:
 	@echo "  pseudoxml  to make pseudoxml-XML files for display purposes"
 	@echo "  linkcheck  to check all external links for integrity"
 	@echo "  doctest    to run all doctests embedded in the documentation (if enabled)"
+	@echo "  htmlview   to view the compiled HTML files in browser"
 
 clean:
 	rm -rf $(BUILDDIR)/*
@@ -175,3 +177,7 @@ pseudoxml:
 	$(SPHINXBUILD) -b pseudoxml $(ALLSPHINXOPTS) $(BUILDDIR)/pseudoxml
 	@echo
 	@echo "Build finished. The pseudo-XML files are in $(BUILDDIR)/pseudoxml."
+
+htmlview: html
+	 $(PYTHON) -c "import webbrowser, os; webbrowser.open('file://' + \
+	 os.path.realpath('_build/html/index.html'))"
