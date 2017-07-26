@@ -1,22 +1,24 @@
 from lxml import etree
-from six import iteritems, get_function_code
-
-_XPATH_FUNCS = {}
 
 
-def register(func):
-    fname = get_function_code(func).co_name.replace('_', '-')
-    _XPATH_FUNCS[fname] = func
-    return func
+def set_xpathfunc(fname, func):
+    """Register a custom extension function to use in XPath expressions.
+
+    The function receives a "context" parameter as well as any parameters
+    passed from the corresponding XPath expression.
+
+    """
+    ns_fns = etree.FunctionNamespace(None)
+    if func is not None:
+        ns_fns[fname] = func
+    else:
+        del ns_fns[fname]
 
 
 def setup():
-    fns = etree.FunctionNamespace(None)
-    for k, v in iteritems(_XPATH_FUNCS):
-        fns[k] = v
+    set_xpathfunc('has-class', has_class)
 
 
-@register
 def has_class(context, *classes):
     """has-class function.
 

@@ -1,5 +1,7 @@
 from parsel import Selector
+from parsel.xpathfuncs import set_xpathfunc
 import unittest
+
 
 class XPathFuncsTestCase(unittest.TestCase):
     def test_has_class_simple(self):
@@ -31,3 +33,27 @@ class XPathFuncsTestCase(unittest.TestCase):
         self.assertEqual(
             [x.extract() for x in sel.xpath('//p[has-class("foo")]/text()')],
             [u'First'])
+
+    def test_set_xpathfunc(self):
+
+        def myfunc(ctx):
+            myfunc.call_count += 1
+
+        myfunc.call_count = 0
+
+        body = u"""
+        <p CLASS="foo">First</p>
+        """
+        sel = Selector(text=body)
+        self.assertRaisesRegexp(
+            ValueError, 'Unregistered function in myfunc',
+            sel.xpath, 'myfunc()')
+
+        set_xpathfunc('myfunc', myfunc)
+        sel.xpath('myfunc()')
+        self.assertEqual(myfunc.call_count, 1)
+
+        set_xpathfunc('myfunc', None)
+        self.assertRaisesRegexp(
+            ValueError, 'Unregistered function in myfunc',
+            sel.xpath, 'myfunc()')
