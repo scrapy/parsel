@@ -4,8 +4,15 @@ from lxml import etree
 def set_xpathfunc(fname, func):
     """Register a custom extension function to use in XPath expressions.
 
-    The function receives a "context" parameter as well as any parameters
-    passed from the corresponding XPath expression.
+    The function ``func`` registered under ``fname`` identifier will be called
+    for every matching node, being passed a ``context`` parameter as well as
+    any parameters passed from the corresponding XPath expression.
+
+    If ``func`` is ``None``, the extension function will be removed.
+
+    See more `in lxml documentation`_.
+
+    .. _`in lxml documentation`: http://lxml.de/extensions.html#xpath-extension-functions
 
     """
     ns_fns = etree.FunctionNamespace(None)
