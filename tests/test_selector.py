@@ -588,8 +588,10 @@ class SelectorTestCase(unittest.TestCase):
 """
         sel = self.sscls(text=xml, type='xml')
         self.assertEqual(len(sel.xpath("//link")), 0)
+        self.assertEqual(len(sel.xpath("./namespace::*")), 3)
         sel.remove_namespaces()
         self.assertEqual(len(sel.xpath("//link")), 2)
+        self.assertEqual(len(sel.xpath("./namespace::*")), 1)
 
     def test_remove_attributes_namespaces(self):
         xml = u"""<?xml version="1.0" encoding="UTF-8"?>
