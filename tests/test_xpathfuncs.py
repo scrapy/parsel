@@ -52,7 +52,7 @@ class XPathFuncsTestCase(unittest.TestCase):
         sel = Selector(text=body)
         self.assertRaisesRegexp(
             ValueError, 'All strings must be XML compatible',
-            sel.xpath, 'has-class("héllö")')
+            sel.xpath, u'has-class("héllö")'.encode('utf-8'))
 
     def test_has_class_unicode(self):
         body = u"""
