@@ -1,5 +1,7 @@
 from lxml import etree
 
+from six import string_types
+
 
 def set_xpathfunc(fname, func):
     """Register a custom extension function to use in XPath expressions.
@@ -32,6 +34,16 @@ def has_class(context, *classes):
     Return True if all ``classes`` are present in element's class attr.
 
     """
+    if not context.eval_context.get('args_checked'):
+        if not classes:
+            raise ValueError(
+                'XPath error: has-class must have at least 1 argument')
+        for c in classes:
+            if not isinstance(c, string_types):
+                raise ValueError(
+                    'XPath error: has-class arguments must be strings')
+        context.eval_context['args_checked'] = True
+
     node_cls = context.context_node.get('class')
     if node_cls is None:
         return False

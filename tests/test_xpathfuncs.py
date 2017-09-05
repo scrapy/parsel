@@ -1,3 +1,5 @@
+# coding: utf-8
+
 from parsel import Selector
 from parsel.xpathfuncs import set_xpathfunc
 import unittest
@@ -23,6 +25,42 @@ class XPathFuncsTestCase(unittest.TestCase):
             [])
         self.assertEqual(
             [x.extract() for x in sel.xpath('//p[has-class("foo","bar-baz")]/text()')],
+            [u'First'])
+
+    def test_has_class_error_no_args(self):
+        body = u"""
+        <p CLASS="foo">First</p>
+        """
+        sel = Selector(text=body)
+        self.assertRaisesRegexp(
+            ValueError, 'has-class must have at least 1 argument',
+            sel.xpath, 'has-class()')
+
+    def test_has_class_error_invalid_arg_type(self):
+        body = u"""
+        <p CLASS="foo">First</p>
+        """
+        sel = Selector(text=body)
+        self.assertRaisesRegexp(
+            ValueError, 'has-class arguments must be strings',
+            sel.xpath, 'has-class(.)')
+
+    def test_has_class_error_invalid_unicode(self):
+        body = u"""
+        <p CLASS="foo">First</p>
+        """
+        sel = Selector(text=body)
+        self.assertRaisesRegexp(
+            ValueError, 'All strings must be XML compatible',
+            sel.xpath, 'has-class("héllö")')
+
+    def test_has_class_unicode(self):
+        body = u"""
+        <p CLASS="fóó">First</p>
+        """
+        sel = Selector(text=body)
+        self.assertEqual(
+            [x.extract() for x in sel.xpath(u'//p[has-class("fóó")]/text()')],
             [u'First'])
 
     def test_has_class_uppercase(self):
