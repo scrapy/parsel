@@ -450,6 +450,47 @@ inside another ``itemscope``.
 .. _regular expressions: http://exslt.org/regexp/index.html
 .. _set manipulation: http://exslt.org/set/index.html
 
+Other XPath extensions
+----------------------
+
+Parsel also defines a sorely missed XPath extension function ``has-class`` that
+returns ``True`` for nodes that have all of the specified HTML classes::
+
+    >>> from parsel import Selector
+    >>> sel = Selector("""
+    ...         <p class="foo bar-baz">First</p>
+    ...         <p class="foo">Second</p>
+    ...         <p class="bar">Third</p>
+    ...         <p>Fourth</p>
+    ... """)
+    ...
+    >>> sel = Selector(u"""
+    ...         <p class="foo bar-baz">First</p>
+    ...         <p class="foo">Second</p>
+    ...         <p class="bar">Third</p>
+    ...         <p>Fourth</p>
+    ... """)
+    ...
+    >>> sel.xpath('//p[has-class("foo")]')
+    [<Selector xpath='//p[has-class("foo")]' data=u'<p class="foo bar-baz">First</p>'>,
+     <Selector xpath='//p[has-class("foo")]' data=u'<p class="foo">Second</p>'>]
+    >>> sel.xpath('//p[has-class("foo", "bar-baz")]')
+    [<Selector xpath='//p[has-class("foo", "bar-baz")]' data=u'<p class="foo bar-baz">First</p>'>]
+    >>> sel.xpath('//p[has-class("foo", "bar")]')
+    []
+
+So XPath ``//p[has-class("foo", "bar-baz")]`` is roughly equivalent to CSS
+``p.foo.bar-baz``.  Please note, that it is slower in most of the cases,
+because it's a pure-Python function that's invoked for every node in question
+whereas the CSS lookup is translated into XPath and thus runs more efficiently,
+so performance-wise its uses are limited to situations that are not easily
+described with CSS selectors.
+
+Parsel also simplifies adding your own XPath extensions.
+
+.. autofunction:: parsel.xpathfuncs.set_xpathfunc
+
+
 
 Some XPath tips
 ---------------
