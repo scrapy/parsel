@@ -95,3 +95,64 @@ class XPathFuncsTestCase(unittest.TestCase):
         self.assertRaisesRegexp(
             ValueError, 'Unregistered function in myfunc',
             sel.xpath, 'myfunc()')
+
+    def test_rel_id_basic(self):
+        body = u"""
+        <foo><p id="foop">Foo</p></foo>
+        <bar><p id="barp">Bar</p></p>
+        """
+        sel = Selector(text=body)
+        self.assertEqual(
+            [x.extract() for x in sel.xpath('rel-id("foop")/text()')],
+            [u'Foo'],
+        )
+        self.assertEqual(
+            [x.extract() for x in sel.xpath('rel-id("foop", .)/text()')],
+            [u'Foo'],
+        )
+        self.assertEqual(
+            [x.extract() for x in sel.xpath('rel-id("foop", //foo)/text()')],
+            [u'Foo'],
+        )
+        self.assertEqual(
+            [x.extract() for x in sel.xpath('rel-id("foop", //p)/text()')],
+            [u'Foo'],
+        )
+        self.assertEqual(
+            [x.extract() for x in sel.xpath('rel-id("foop", //bar)/text()')],
+            [],
+        )
+        self.assertEqual(
+            [x.extract() for x in sel.xpath('//foo').xpath('rel-id("foop")/text()')],
+            [u'Foo'],
+        )
+        self.assertEqual(
+            [x.extract() for x in sel.xpath('//bar').xpath('rel-id("foop")/text()')],
+            [],
+        )
+        self.assertEqual(
+            [x.extract() for x in sel.xpath('rel-id("barp", //bar)/text()')],
+            [u'Bar'],
+        )
+        self.assertEqual(
+            [x.extract() for x in sel.xpath('rel-id("foop", //zzz)/text()')],
+            [],
+        )
+
+    def test_rel_id_error_invalid_id(self):
+        body = u"""
+        <p CLASS="foo">First</p>
+        """
+        sel = Selector(text=body)
+        self.assertRaisesRegexp(
+            ValueError, 'rel-id: first argument must be a string',
+            sel.xpath, u'rel-id(123)')
+
+    def test_rel_id_error_invalid_nodeset(self):
+        body = u"""
+        <p CLASS="foo">First</p>
+        """
+        sel = Selector(text=body)
+        self.assertRaisesRegexp(
+            ValueError, 'rel-id: second argument must be a nodeset',
+            sel.xpath, u'rel-id("123", true())')

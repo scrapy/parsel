@@ -26,6 +26,7 @@ def set_xpathfunc(fname, func):
 
 def setup():
     set_xpathfunc('has-class', has_class)
+    set_xpathfunc('rel-id', rel_id)
 
 
 def has_class(context, *classes):
@@ -52,3 +53,54 @@ def has_class(context, *classes):
         if ' ' + cls + ' ' not in node_cls:
             return False
     return True
+
+
+_id_xpath = etree.XPath('id($node_id)')
+
+
+def rel_id(context, node_id, nodeset=None):
+    """Relative lookup by ID (rel-id function).
+
+    Same as ``id`` function, but relative to some nodeset (current node by
+    default).
+
+    For example, the following XPath expressions will return the same result
+    (however, with different performance)::
+
+        document.xpath("id('foo')")        # fastest
+        document.xpath("rel-id('foo')")    # fast
+        document.xpath("//*[@id='foo']")   # slow, has to iterate
+
+    This function is useful in relative lookups, for example::
+
+        document.xpath("rel-id('bar', id('foo'))")  # fast
+        document.xpath("id('foo')//*[@id='bar']")   # slow, has to iterate
+
+    The above can also be done with::
+
+        document.xpath("id('foo')").xpath("rel-id('bar')")  # fast
+
+    which showcases the fact that the current node is the default nodeset.
+
+    """
+    if not context.eval_context.get('args_checked'):
+        if not isinstance(node_id, string_types):
+            raise ValueError(
+                'XPath error: rel-id: first argument must be a string')
+        if nodeset is not None and not isinstance(nodeset, list):
+            raise ValueError(
+                'XPath error: rel-id: second argument must be a nodeset')
+        context.eval_context['args_checked'] = True
+    if nodeset is None:
+        nodeset = {context.context_node}
+    else:
+        nodeset = set(nodeset)
+
+    result = _id_xpath(context.context_node, node_id=node_id)
+    should_return_result = (
+        not result or
+        nodeset.intersection(result) or
+        nodeset.intersection(result[0].iterancestors()))
+    if should_return_result:
+        return result
+    return []
