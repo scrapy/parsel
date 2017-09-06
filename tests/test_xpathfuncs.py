@@ -139,6 +139,21 @@ class XPathFuncsTestCase(unittest.TestCase):
             [],
         )
 
+    def test_rel_id_in_conditional(self):
+        body = u"""
+        <p><p id="foop">Foo</p></foo>
+        <p><p id="barp">Bar</p></p>
+        """
+        sel = Selector(text=body)
+        self.assertEqual(
+            [x.extract() for x in sel.xpath('//p[rel-id("foop")]//text()')],
+            [u'Foo'],
+        )
+        self.assertEqual(
+            [x.extract() for x in sel.xpath('//p[rel-id("barp")]//text()')],
+            [u'Bar'],
+        )
+
     def test_rel_id_error_invalid_id(self):
         body = u"""
         <p CLASS="foo">First</p>
