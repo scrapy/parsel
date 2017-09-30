@@ -294,7 +294,7 @@ class Selector(object):
                 'with_tail': False
             }
             _kwargs.update(kwargs)
-            return etree.tostring(self.root, **kwargs)
+            return etree.tostring(self.root, **_kwargs)
         except (AttributeError, TypeError):
             if self.root is True:
                 return u'1'
