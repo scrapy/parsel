@@ -118,21 +118,25 @@ class SelectorList(list):
         else:
             return default
 
-    def extract(self):
+    def extract(self, **kwargs):
         """
         Call the ``.extract()`` method for each element is this list and return
         their results flattened, as a list of unicode strings.
+        
+        see lxml.etree.tostring() for kwargs
         """
-        return [x.extract() for x in self]
+        return [x.extract(**kwargs) for x in self]
     getall = extract
 
-    def extract_first(self, default=None):
+    def extract_first(self, default=None, **kwargs):
         """
         Return the result of ``.extract()`` for the first element in this list.
         If the list is empty, return the default value.
+        
+        see lxml.etree.tostring() for kwargs
         """
         for x in self:
-            return x.extract()
+            return x.extract(**kwargs)
         else:
             return default
     get = extract_first
@@ -276,16 +280,21 @@ class Selector(object):
         """
         return next(iflatten(self.re(regex, replace_entities=replace_entities)), default)
 
-    def extract(self):
+    def extract(self, **kwargs):
         """
         Serialize and return the matched nodes in a single unicode string.
         Percent encoded content is unquoted.
+        
+        see lxml.etree.tostring() for kwargs
         """
         try:
-            return etree.tostring(self.root,
-                                  method=self._tostring_method,
-                                  encoding='unicode',
-                                  with_tail=False)
+            _kwargs = {
+                'method': self._tostring_method,
+                'encoding': 'unicode',
+                'with_tail': False
+            }
+            _kwargs.update(kwargs)
+            return etree.tostring(self.root, **kwargs)
         except (AttributeError, TypeError):
             if self.root is True:
                 return u'1'
