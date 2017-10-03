@@ -665,6 +665,16 @@ class SelectorTestCase(unittest.TestCase):
         self.assertIsInstance(sel.css('div'), MySelectorList)
         self.assertIsInstance(sel.css('div')[0], MySelector)
 
+    def test_xpath_object(self):
+        body = u"<p><input name='a' value='1'/><input name='b' value='2'/></p>"
+        sel = self.sscls(text=body)
+        xpathstr = '//input[@name=$name]/@value'
+        self.assertEquals(sel.xpath(xpathstr, name='a').extract(), [u'1'])
+
+        from lxml.etree import XPath
+        xpath = XPath(xpathstr)
+        self.assertEquals(sel.xpath(xpath, name='a').extract(), [u'1'])
+
 class ExsltTestCase(unittest.TestCase):
 
     sscls = Selector

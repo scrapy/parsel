@@ -208,22 +208,30 @@ class Selector(object):
 
             selector.xpath('//a[href=$url]', url="http://www.example.com")
         """
-        try:
-            xpathev = self.root.xpath
-        except AttributeError:
-            return self.selectorlist_cls([])
+        if isinstance(query, etree.XPath):
+            try:
+                result = query(self.root, **kwargs)
+            except etree.XPathError as exc:
+                msg = u"XPath error: %s in %s" % (exc, query.path)
+                msg = msg if six.PY3 else msg.encode('unicode_escape')
+                six.reraise(ValueError, ValueError(msg), sys.exc_info()[2])
+        else:
+            try:
+                xpathev = self.root.xpath
+            except AttributeError:
+                return self.selectorlist_cls([])
 
-        nsp = dict(self.namespaces)
-        if namespaces is not None:
-            nsp.update(namespaces)
-        try:
-            result = xpathev(query, namespaces=nsp,
-                             smart_strings=self._lxml_smart_strings,
-                             **kwargs)
-        except etree.XPathError as exc:
-            msg = u"XPath error: %s in %s" % (exc, query)
-            msg = msg if six.PY3 else msg.encode('unicode_escape')
-            six.reraise(ValueError, ValueError(msg), sys.exc_info()[2])
+            nsp = dict(self.namespaces)
+            if namespaces is not None:
+                nsp.update(namespaces)
+            try:
+                result = xpathev(query, namespaces=nsp,
+                                 smart_strings=self._lxml_smart_strings,
+                                 **kwargs)
+            except etree.XPathError as exc:
+                msg = u"XPath error: %s in %s" % (exc, query)
+                msg = msg if six.PY3 else msg.encode('unicode_escape')
+                six.reraise(ValueError, ValueError(msg), sys.exc_info()[2])
 
         if type(result) is not list:
             result = [result]
