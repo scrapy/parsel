@@ -16,6 +16,7 @@ class SafeXMLParser(etree.XMLParser):
         kwargs.setdefault('resolve_entities', False)
         super(SafeXMLParser, self).__init__(*args, **kwargs)
 
+
 _ctgroup = {
     'html': {'_parser': html.HTMLParser,
              '_csstranslator': HTMLTranslator(),
@@ -118,27 +119,29 @@ class SelectorList(list):
         else:
             return default
 
-    def extract(self, **kwargs):
+    def extract(self, format=None):
         """
         Call the ``.extract()`` method for each element is this list and return
         their results flattened, as a list of unicode strings.
         
-        see lxml.etree.tostring() for kwargs
+        ``format`` can take either ``xml`` or ``html`` values to pretty format the output. 
         """
-        return [x.extract(**kwargs) for x in self]
+        return [x.extract(format=format) for x in self]
+
     getall = extract
 
-    def extract_first(self, default=None, **kwargs):
+    def extract_first(self, default=None, format=None):
         """
         Return the result of ``.extract()`` for the first element in this list.
         If the list is empty, return the default value.
         
-        see lxml.etree.tostring() for kwargs
+        ``format`` can take either ``xml`` or ``html`` values to pretty format the output. 
         """
         for x in self:
-            return x.extract(**kwargs)
+            return x.extract(format=format)
         else:
             return default
+
     get = extract_first
 
 
@@ -280,21 +283,21 @@ class Selector(object):
         """
         return next(iflatten(self.re(regex, replace_entities=replace_entities)), default)
 
-    def extract(self, **kwargs):
+    def extract(self, format=None):
         """
         Serialize and return the matched nodes in a single unicode string.
         Percent encoded content is unquoted.
         
-        see lxml.etree.tostring() for kwargs
+        ``format`` can take either ``xml`` or ``html`` values to pretty format the output. 
         """
         try:
-            _kwargs = {
-                'method': self._tostring_method,
-                'encoding': 'unicode',
-                'with_tail': False
-            }
-            _kwargs.update(kwargs)
-            return etree.tostring(self.root, **_kwargs)
+            return etree.tostring(
+                self.root,
+                method=format or self._tostring_method,
+                encoding='unicode',
+                with_tail=False,
+                pretty_print=bool(format),
+            )
         except (AttributeError, TypeError):
             if self.root is True:
                 return u'1'
@@ -302,6 +305,7 @@ class Selector(object):
                 return u'0'
             else:
                 return six.text_type(self.root)
+
     get = extract
 
     def getall(self):
@@ -340,9 +344,11 @@ class Selector(object):
         given by the contents it selects.
         """
         return bool(self.extract())
+
     __nonzero__ = __bool__
 
     def __str__(self):
         data = repr(self.extract()[:40])
         return "<%s xpath=%r data=%s>" % (type(self).__name__, self._expr, data)
+
     __repr__ = __str__
