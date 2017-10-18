@@ -119,26 +119,26 @@ class SelectorList(list):
         else:
             return default
 
-    def extract(self, format=None):
+    def extract(self, format_as=None):
         """
         Call the ``.extract()`` method for each element is this list and return
         their results flattened, as a list of unicode strings.
         
-        ``format`` can take either ``xml`` or ``html`` values to pretty format the output. 
+        ``format_as`` can take either ``xml`` or ``html`` values to pretty format the output. 
         """
-        return [x.extract(format=format) for x in self]
+        return [x.extract(format_as=format_as) for x in self]
 
     getall = extract
 
-    def extract_first(self, default=None, format=None):
+    def extract_first(self, default=None, format_as=None):
         """
         Return the result of ``.extract()`` for the first element in this list.
         If the list is empty, return the default value.
         
-        ``format`` can take either ``xml`` or ``html`` values to pretty format the output. 
+        ``format_as`` can take either ``xml`` or ``html`` values to pretty format the output. 
         """
         for x in self:
-            return x.extract(format=format)
+            return x.extract(format_as=format_as)
         else:
             return default
 
@@ -283,20 +283,20 @@ class Selector(object):
         """
         return next(iflatten(self.re(regex, replace_entities=replace_entities)), default)
 
-    def extract(self, format=None):
+    def extract(self, format_as=None):
         """
         Serialize and return the matched nodes in a single unicode string.
         Percent encoded content is unquoted.
         
-        ``format`` can take either ``xml`` or ``html`` values to pretty format the output. 
+        ``format_as`` can take either ``xml`` or ``html`` values to pretty format the output. 
         """
         try:
             return etree.tostring(
                 self.root,
-                method=format or self._tostring_method,
+                method=format_as or self._tostring_method,
                 encoding='unicode',
                 with_tail=False,
-                pretty_print=bool(format),
+                pretty_print=bool(format_as),
             )
         except (AttributeError, TypeError):
             if self.root is True:
