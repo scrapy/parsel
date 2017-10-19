@@ -14,6 +14,10 @@ matrix:
     - python: 3.6
       env: TOXENV=py36
 
+before_install:
+  - mkdir -p $HOME/bin
+  - curl -fsSL https://testspace-client.s3.amazonaws.com/testspace-linux.tgz | tar -zxvf- -C $HOME/bin
+  - testspace config url $TS_ORG.testspace.com
 install:
   - |
       if [ "$TOXENV" = "pypy" ]; then
@@ -24,31 +28,34 @@ install:
           rm -rf "$PYENV_ROOT" && git clone --depth 1 https://github.com/yyuu/pyenv.git "$PYENV_ROOT"
         fi
         # get latest (portable) PyPy from pyenv directly (thanks to natural version sort option -V)
-        export PYPY_VERSION=`"$PYENV_ROOT/bin/pyenv" install --list |grep -o -E 'pypy-portable-[0-9][\.0-9]*$' |sort -V |tail -1`
+        export PYPY_VERSION=`"$PYENV_ROOT/bin/pyenv" install --list |grep -o -E 'pypy2.7-portable-[0-9][\.0-9]*$' |sort -V |tail -1`
         "$PYENV_ROOT/bin/pyenv" install --skip-existing "$PYPY_VERSION"
         virtualenv --python="$PYENV_ROOT/versions/$PYPY_VERSION/bin/python" "$HOME/virtualenvs/$PYPY_VERSION"
         source "$HOME/virtualenvs/$PYPY_VERSION/bin/activate"
       fi
   - pip install -U pip tox twine wheel codecov
-script: tox
+script: tox -- --junit-xml=testresults.xml parsel tests
 after_success:
   - codecov
+after_script:
+  - testspace [${TOXENV}]testresults.xml{tests}
 
-notifications:
-  irc:
-    use_notice: true
-    skip_join: true
-    channels:
-      - irc.freenode.org#scrapy
+# --- Temp removal for Testspace staging ---
+# notifications:
+#   irc:
+#     use_notice: true
+#     skip_join: true
+#     channels:
+#       - irc.freenode.org#scrapy
 
-deploy:
-  provider: pypi
-  distributions: sdist bdist_wheel
-  user: scrapy
-  password:
-    secure: kY3UdcidDTnwfBY9gGeUDK7g9k9Weg+AEo1CJYdQ8fBYQkIQBubbTiu1UGqOb0v/btySZDidp/jsGPLxlTZ34sG9jQEiteQILHJMjLzgcNNTSBsf8VIqTxcLpxS+RgeB2MyITOvYhxNMI4ezMXkm9TH7jL60gv/4BtiMOTpFzr8=
-  on:
-    tags: true
-    all_branches: true
-    repo: scrapy/parsel
-    condition: $TOXENV == py27
+# deploy:
+#   provider: pypi
+#   distributions: sdist bdist_wheel
+#   user: scrapy
+#   password:
+#     secure: kY3UdcidDTnwfBY9gGeUDK7g9k9Weg+AEo1CJYdQ8fBYQkIQBubbTiu1UGqOb0v/btySZDidp/jsGPLxlTZ34sG9jQEiteQILHJMjLzgcNNTSBsf8VIqTxcLpxS+RgeB2MyITOvYhxNMI4ezMXkm9TH7jL60gv/4BtiMOTpFzr8=
+#   on:
+#     tags: true
+#     all_branches: true
+#     repo: scrapy/parsel
+#     condition: $TOXENV == py27
