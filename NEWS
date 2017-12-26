@@ -3,6 +3,16 @@
 History
 -------
 
+1.3.0 (2017-12-XX)
+------------------
+
+* ``has-class`` XPath extension function;
+* ``parsel.xpathfuncs.set_xpathfunc`` is a simplified way to register
+  XPath extensions;
+* ``Selector.remove_namespaces`` now removes namespace declarations;
+* ``make htmlview`` command for easier Parsel docs development.
+
+
 1.2.0 (2017-05-17)
 ~~~~~~~~~~~~~~~~~~
 
