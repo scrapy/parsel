@@ -10,7 +10,9 @@ History
 * ``parsel.xpathfuncs.set_xpathfunc`` is a simplified way to register
   XPath extensions;
 * ``Selector.remove_namespaces`` now removes namespace declarations;
+* Python 3.3 support is dropped;
 * ``make htmlview`` command for easier Parsel docs development.
+* CI: PyPy installation is fixed; parsel now runs tests for PyPy3 as well.
 
 
 1.2.0 (2017-05-17)
