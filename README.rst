@@ -2,11 +2,13 @@
 Parsel
 ===============================
 
-.. image:: https://img.shields.io/travis/scrapy/parsel.svg
+.. image:: https://img.shields.io/travis/scrapy/parsel/master.svg
    :target: https://travis-ci.org/scrapy/parsel
+   :alt: Build Status
 
 .. image:: https://img.shields.io/pypi/v/parsel.svg
    :target: https://pypi.python.org/pypi/parsel
+   :alt: PyPI Version
 
 .. image:: https://img.shields.io/codecov/c/github/scrapy/parsel/master.svg
    :target: http://codecov.io/github/scrapy/parsel?branch=master
