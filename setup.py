@@ -16,7 +16,7 @@ test_requirements = [
 
 setup(
     name='parsel',
-    version='1.2.0',
+    version='1.3.0',
     description="Parsel is a library to extract data from HTML and XML using XPath and CSS selectors",
     long_description=readme + '\n\n' + history,
     author="Scrapy project",
