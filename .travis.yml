@@ -2,8 +2,8 @@ language: python
 branches:
   only:
     - master
-    - /^\d\.\d+$/
-    - /^\d\.\d+\.\d+(rc\d+|\.dev\d+)?$/
+    - /^v\d\.\d+$/
+    - /^v\d\.\d+\.\d+(rc\d+|\.dev\d+)?$/
 matrix:
   include:
     - python: 2.7
