@@ -86,6 +86,35 @@ class SelectorTestCase(unittest.TestCase):
             lng=lt)],
                          [u'a'])
 
+    def test_accessing_attributes(self):
+        body = u"""
+<html lang="en" version="1.0">
+    <body>
+        <ul id="some-list" class="list-cls" class="list-cls">
+            <li class="item-cls" id="list-item-1">
+            <li class="item-cls active" id="list-item-2">
+            <li class="item-cls" id="list-item-3">
+        </ul>
+    </body>
+</html>
+        """
+        sel = self.sscls(text=body)
+        self.assertEquals({'lang': 'en', 'version': '1.0'}, sel.attrs())
+
+        # .attrs on a SelectorList, brings the attributes of first-element only
+        self.assertEquals({'id': 'some-list', 'class': 'list-cls'}, sel.css('ul').attrs())
+        self.assertEquals({'class': 'item-cls', 'id': 'list-item-1'}, sel.css('li').attrs())
+
+        # for the attributes for all children, use attrs_all
+        self.assertEquals(
+            [{'class': 'item-cls', 'id': 'list-item-1'},
+             {'class': 'item-cls active', 'id': 'list-item-2'},
+             {'class': 'item-cls', 'id': 'list-item-3'}],
+            sel.css('li').attrs_all())
+
+        # for consistency, .attrs_all is also in Selector
+        self.assertEquals([{'class': 'item-cls', 'id': 'list-item-1'}], sel.css('li')[0].attrs_all())
+
     def test_representation_slice(self):
         body = u"<p><input name='{}' value='\xa9'/></p>".format(50 * 'b')
         sel = self.sscls(text=body)
