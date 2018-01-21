@@ -137,21 +137,6 @@ class SelectorList(list):
             return default
     get = extract_first
 
-    def attrs(self):
-        """Return the attributes dictionary for the first element.
-        If the list is empty, return an empty dict.
-        """
-        for x in self:
-            return x.attrs()
-        else:
-            return {}
-
-    def attrs_all(self):
-        """Return a list that contains the attributes dictionary for
-        each underlying element.
-        """
-        return [x.attrs() for x in self]
-
 
 class Selector(object):
     """
@@ -339,16 +324,11 @@ class Selector(object):
             # remove namespace declarations
             etree.cleanup_namespaces(self.root)
 
-    def attrs(self):
+    @property
+    def attrib(self):
         """Return the attributes dictionary for underlying element.
         """
         return self.root.attrib
-
-    def attrs_all(self):
-        """Return a list containing the attributes dictionary for underlying element.
-        For consistency with :meth:`SelectorList.attrs_all`
-        """
-        return [self.attrs()]
 
     def __bool__(self):
         """
