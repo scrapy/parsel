@@ -61,6 +61,9 @@ class SelectorList(list):
         o = super(SelectorList, self).__getitem__(pos)
         return self.__class__(o) if isinstance(pos, slice) else o
 
+    def __getstate__(self):
+        raise TypeError("can't pickle SelectorList objects")
+
     def xpath(self, xpath, namespaces=None, **kwargs):
         """
         Call the ``.xpath()`` method for each element in this list and return

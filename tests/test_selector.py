@@ -16,6 +16,15 @@ class SelectorTestCase(unittest.TestCase):
         sel = self.sscls(text=u'<html><body><p>some text</p></body></html>')
         self.assertRaises(TypeError, lambda s: pickle.dumps(s, protocol=2), sel)
 
+    def test_pickle_selector_list(self):
+        sel = self.sscls(text=u'<html><body><ul><li>1</li><li>2</li><li>3</li></ul></body></html>')
+        sel_list = sel.css('li')
+        empty_sel_list = sel.css('p')
+        self.assertIsInstance(sel_list, self.sscls.selectorlist_cls)
+        self.assertIsInstance(empty_sel_list, self.sscls.selectorlist_cls)
+        self.assertRaises(TypeError, lambda s: pickle.dumps(s, protocol=2), sel_list)
+        self.assertRaises(TypeError, lambda s: pickle.dumps(s, protocol=2), empty_sel_list)
+
     def test_simple_selection(self):
         """Simple selector tests"""
         body = u"<p><input name='a'value='1'/><input name='b'value='2'/></p>"
