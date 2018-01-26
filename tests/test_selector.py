@@ -3,12 +3,18 @@ import re
 import weakref
 import six
 import unittest
+import pickle
+
 from parsel import Selector
 
 
 class SelectorTestCase(unittest.TestCase):
 
     sscls = Selector
+
+    def test_pickle_selector(self):
+        sel = self.sscls(text=u'<html><body><p>some text</p></body></html>')
+        self.assertRaises(TypeError, lambda s: pickle.dumps(s, protocol=2), sel)
 
     def test_simple_selection(self):
         """Simple selector tests"""

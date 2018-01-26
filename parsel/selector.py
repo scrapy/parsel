@@ -187,6 +187,9 @@ class Selector(object):
         self.root = root
         self._expr = _expr
 
+    def __getstate__(self):
+        raise TypeError("can't pickle Selector objects")
+
     def _get_root(self, text, base_url=None):
         return create_root_node(text, self._parser, base_url=base_url)
 
