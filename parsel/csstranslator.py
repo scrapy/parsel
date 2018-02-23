@@ -1,3 +1,5 @@
+import functools
+
 from cssselect import GenericTranslator as OriginalGenericTranslator
 from cssselect import HTMLTranslator as OriginalHTMLTranslator
 from cssselect.xpath import XPathExpr as OriginalXPathExpr
@@ -100,7 +102,7 @@ class HTMLTranslator(TranslatorMixin, OriginalHTMLTranslator):
 
 _translator = HTMLTranslator()
 
-
+@functools.lru_cache(maxsize=128)
 def css2xpath(query):
     "Return translated XPath version of a given CSS query"
     return _translator.css_to_xpath(query)
