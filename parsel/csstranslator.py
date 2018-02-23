@@ -102,6 +102,7 @@ class HTMLTranslator(TranslatorMixin, OriginalHTMLTranslator):
 
 _translator = HTMLTranslator()
 
+
 @functools.lru_cache(maxsize=128)
 def css2xpath(query):
     "Return translated XPath version of a given CSS query"
