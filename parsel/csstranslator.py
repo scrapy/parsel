@@ -1,10 +1,10 @@
-import functools
+from functools import lru_cache
 
 from cssselect import GenericTranslator as OriginalGenericTranslator
 from cssselect import HTMLTranslator as OriginalHTMLTranslator
 from cssselect.xpath import XPathExpr as OriginalXPathExpr
 from cssselect.xpath import _unicode_safe_getattr, ExpressionError
-from cssselect.parser import FunctionalPseudoElement
+from cssselect.parser import parse, FunctionalPseudoElement
 
 
 class XPathExpr(OriginalXPathExpr):
@@ -93,17 +93,22 @@ class TranslatorMixin(object):
 
 
 class GenericTranslator(TranslatorMixin, OriginalGenericTranslator):
-    pass
-
+    @lru_cache(maxsize=256)
+    def css_to_xpath(self, css, prefix='descendant-or-self::'):
+        return ' | '.join(self.selector_to_xpath(selector, prefix,
+                                                 translate_pseudo_elements=True)
+                          for selector in parse(css))
 
 class HTMLTranslator(TranslatorMixin, OriginalHTMLTranslator):
-    pass
-
+    @lru_cache(maxsize=256)
+    def css_to_xpath(self, css, prefix='descendant-or-self::'):
+        return ' | '.join(self.selector_to_xpath(selector, prefix,
+                                                 translate_pseudo_elements=True)
+                          for selector in parse(css))
 
 _translator = HTMLTranslator()
 
 
-@functools.lru_cache(maxsize=128)
 def css2xpath(query):
     "Return translated XPath version of a given CSS query"
     return _translator.css_to_xpath(query)
