@@ -100,16 +100,12 @@ class TranslatorMixin(object):
 class GenericTranslator(TranslatorMixin, OriginalGenericTranslator):
     @lru_cache(maxsize=256)
     def css_to_xpath(self, css, prefix='descendant-or-self::'):
-        return ' | '.join(self.selector_to_xpath(selector, prefix,
-                                                 translate_pseudo_elements=True)
-                          for selector in parse(css))
+        return super(GenericTranslator, self).css_to_xpath(css, prefix)
 
 class HTMLTranslator(TranslatorMixin, OriginalHTMLTranslator):
     @lru_cache(maxsize=256)
     def css_to_xpath(self, css, prefix='descendant-or-self::'):
-        return ' | '.join(self.selector_to_xpath(selector, prefix,
-                                                 translate_pseudo_elements=True)
-                          for selector in parse(css))
+        return super(HTMLTranslator, self).css_to_xpath(css, prefix)
 
 _translator = HTMLTranslator()
 
