@@ -1,6 +1,6 @@
-import sys
+import six
 
-if sys.version_info[0] < 3:
+if six.PY2:
     from functools32 import lru_cache
 else:
     from functools import lru_cache
