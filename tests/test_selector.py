@@ -105,6 +105,8 @@ class SelectorTestCase(unittest.TestCase):
         # for a SelectorList, bring the attributes of first-element only
         self.assertEquals({'id': 'some-list', 'class': 'list-cls'}, sel.css('ul').attrib)
         self.assertEquals({'class': 'item-cls', 'id': 'list-item-1'}, sel.css('li').attrib)
+        self.assertEquals({}, sel.css('body').attrib)
+        self.assertEquals({}, sel.css('non-existing-element').attrib)
 
         self.assertEquals(
             [{'class': 'item-cls', 'id': 'list-item-1'},
