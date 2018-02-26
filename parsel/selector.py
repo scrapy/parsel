@@ -137,6 +137,16 @@ class SelectorList(list):
             return default
     get = extract_first
 
+    @property
+    def attrib(self):
+        """Return the attributes dictionary for the first element.
+        If the list is empty, return an empty dict.
+        """
+        for x in self:
+            return x.attrib
+        else:
+            return {}
+
 
 class Selector(object):
     """

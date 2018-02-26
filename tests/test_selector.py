@@ -102,6 +102,10 @@ class SelectorTestCase(unittest.TestCase):
         self.assertEquals({'lang': 'en', 'version': '1.0'}, sel.attrib)
         self.assertEquals({'id': 'some-list', 'class': 'list-cls'}, sel.css('ul')[0].attrib)
 
+        # for a SelectorList, bring the attributes of first-element only
+        self.assertEquals({'id': 'some-list', 'class': 'list-cls'}, sel.css('ul').attrib)
+        self.assertEquals({'class': 'item-cls', 'id': 'list-item-1'}, sel.css('li').attrib)
+
         self.assertEquals(
             [{'class': 'item-cls', 'id': 'list-item-1'},
              {'class': 'item-cls active', 'id': 'list-item-2'},
