@@ -3,7 +3,8 @@
 
 import sys
 
-from setuptools import setup
+from pkg_resources import parse_version
+from setuptools import setup, __version__ as setuptools_version
 
 
 with open('README.rst') as readme_file:
@@ -15,15 +16,28 @@ with open('NEWS') as history_file:
 test_requirements = [
 ]
 
-INSTALL_REQUIRES = [
+def has_environment_marker_platform_impl_support():
+    """Code extracted from 'pytest/setup.py'
+    https://github.com/pytest-dev/pytest/blob/7538680c/setup.py#L31
+    The first known release to support environment marker with range operators
+    it is 18.5, see:
+    https://setuptools.readthedocs.io/en/latest/history.html#id235
+    """
+    return parse_version(setuptools_version) >= parse_version('18.5')
+
+install_requires = [
     'w3lib>=1.8.0',
     'lxml>=2.3',
     'six>=1.5.2',
     'cssselect>=0.9'
 ]
+extras_require = {}
 
-if sys.version_info[0:2] < (3, 0):
-    INSTALL_REQUIRES.append("functools32")
+if not has_environment_marker_platform_impl_support():
+    if sys.version_info[0:2] < (3, 0):
+        install_requires.append("functools32")
+else:
+    extras_require[":python_version<'3.0'"] = ["functools32"]
 
 setup(
     name='parsel',
@@ -39,7 +53,8 @@ setup(
     package_dir={'parsel':
                  'parsel'},
     include_package_data=True,
-    install_requires=INSTALL_REQUIRES,
+    install_requires=install_requires,
+    extras_require=extras_require,
     license="BSD",
     zip_safe=False,
     keywords='parsel',
