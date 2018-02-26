@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
+import sys
 
 from setuptools import setup
 
@@ -13,6 +14,16 @@ with open('NEWS') as history_file:
 
 test_requirements = [
 ]
+
+INSTALL_REQUIRES = [
+    'w3lib>=1.8.0',
+    'lxml>=2.3',
+    'six>=1.5.2',
+    'cssselect>=0.9'
+]
+
+if sys.version_info[0:2] < (3, 0):
+    INSTALL_REQUIRES.append("functools32")
 
 setup(
     name='parsel',
@@ -28,12 +39,7 @@ setup(
     package_dir={'parsel':
                  'parsel'},
     include_package_data=True,
-    install_requires=[
-        'w3lib>=1.8.0',
-        'lxml>=2.3',
-        'six>=1.5.2',
-        'cssselect>=0.9',
-    ],
+    install_requires=INSTALL_REQUIRES,
     license="BSD",
     zip_safe=False,
     keywords='parsel',

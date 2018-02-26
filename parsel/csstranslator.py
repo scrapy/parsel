@@ -1,4 +1,9 @@
-from functools import lru_cache
+import sys
+
+if sys.version_info[0] < 3:
+    from functools32 import lru_cache
+else:
+    from functools import lru_cache
 
 from cssselect import GenericTranslator as OriginalGenericTranslator
 from cssselect import HTMLTranslator as OriginalHTMLTranslator
