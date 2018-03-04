@@ -1,7 +1,7 @@
 """
 XPath selectors based on lxml
 """
-
+import re
 import sys
 
 import six
@@ -288,17 +288,25 @@ class Selector(object):
         Serialize and return the matched nodes in a single unicode string.
         Percent encoded content is unquoted.
         
-        ``format_as`` can take either ``xml`` or ``html`` values to pretty format the output. 
+        ``format_as`` can take either ``xml`` or ``html`` values to pretty format the output.
         """
+        if format_as and format_as not in _ctgroup:
+            raise ValueError('format_as argument has to be one of: {}'.format(list(_ctgroup)))
         try:
-            return etree.tostring(
+            body = etree.tostring(
                 self.root,
                 method=format_as or self._tostring_method,
                 encoding='unicode',
                 with_tail=False,
                 pretty_print=bool(format_as),
             )
-        except (AttributeError, TypeError):
+            # if xml remove leading and trailing <html> and <body> tags
+            if format_as == 'xml' and body.strip().startswith('<html>'):
+                re_padding = re.compile('^\s{0,4}')
+                body = body.split('\n')[2:-3]
+                body = '\n'.join(re_padding.sub('', b) for b in body) + '\n'
+            return body
+        except (AttributeError, TypeError) as e:
             if self.root is True:
                 return u'1'
             elif self.root is False:

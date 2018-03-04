@@ -139,6 +139,41 @@ class SelectorTestCase(unittest.TestCase):
 
         self.assertEqual(sel.xpath('//div/text()').extract_first(default='missing'), 'missing')
 
+    def test_extract_format_as(self):
+        """Test if extract_first() returns first element"""
+        body = u'<ul><li><span>1</span></li><li><span>2</span></li></ul>'
+        # html
+        sel = self.sscls(text=body)
+        self.assertEqual(
+            sel.extract(format_as='xml'),
+            '<ul>\n  <li>\n    <span>1</span>\n  </li>\n  <li>\n    <span>2</span>\n  </li>\n</ul>\n')
+        self.assertEqual(
+            sel.xpath('//ul').extract(format_as='xml'),
+            ['<ul>\n  <li>\n    <span>1</span>\n  </li>\n  <li>\n    <span>2</span>\n  </li>\n</ul>\n'])
+        self.assertEqual(
+            sel.xpath('//ul').extract(format_as=None),
+            ['<ul><li><span>1</span></li><li><span>2</span></li></ul>'])
+        self.assertEqual(
+            sel.extract(format_as='html'),
+            '<html><body><ul>\n<li><span>1</span></li>\n<li><span>2</span></li>\n</ul></body></html>\n')
+        self.assertEqual(
+            sel.xpath('//ul').extract(format_as='html'),
+            ['<ul>\n<li><span>1</span></li>\n<li><span>2</span></li>\n</ul>\n'])
+        self.assertEqual(
+            sel.extract(format_as=None),
+            '<html><body><ul><li><span>1</span></li><li><span>2</span></li></ul></body></html>')
+        self.assertEqual(
+            sel.xpath('//ul').extract(format_as=None),
+            ['<ul><li><span>1</span></li><li><span>2</span></li></ul>'])
+        # xml
+        sel = self.sscls(text=body, type='xml')
+        self.assertEqual(
+            sel.extract(format_as='xml'),
+            '<ul>\n  <li>\n    <span>1</span>\n  </li>\n  <li>\n    <span>2</span>\n  </li>\n</ul>\n')
+        # errors
+        with self.assertRaises(ValueError):
+            sel.extract(format_as='json')
+
     def test_selector_get_alias(self):
         """Test if get() returns extracted value on a Selector"""
         body = u'<ul><li id="1">1</li><li id="2">2</li><li id="3">3</li></ul>'
@@ -455,7 +490,7 @@ class SelectorTestCase(unittest.TestCase):
                          ["John", "Paul"])
         self.assertEqual(x.xpath("//ul/li").re("Age: (\d+)"),
                          ["10", "20"])
-        
+
         # Test named group, hit and miss
         x = self.sscls(text=u'foobar')
         self.assertEqual(x.re('(?P<extract>foo)'), ['foo'])
@@ -468,7 +503,7 @@ class SelectorTestCase(unittest.TestCase):
     def test_re_replace_entities(self):
         body = u"""<script>{"foo":"bar &amp; &quot;baz&quot;"}</script>"""
         x = self.sscls(text=body)
-        
+
         name_re = re.compile('{"foo":(.*)}')
 
         # by default, only &amp; and &lt; are preserved ;
