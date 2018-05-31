@@ -1,8 +1,15 @@
+import six
+
+if six.PY2:
+    from functools32 import lru_cache
+else:
+    from functools import lru_cache
+
 from cssselect import GenericTranslator as OriginalGenericTranslator
 from cssselect import HTMLTranslator as OriginalHTMLTranslator
 from cssselect.xpath import XPathExpr as OriginalXPathExpr
 from cssselect.xpath import _unicode_safe_getattr, ExpressionError
-from cssselect.parser import FunctionalPseudoElement
+from cssselect.parser import parse, FunctionalPseudoElement
 
 
 class XPathExpr(OriginalXPathExpr):
@@ -91,11 +98,15 @@ class TranslatorMixin(object):
 
 
 class GenericTranslator(TranslatorMixin, OriginalGenericTranslator):
-    pass
+    @lru_cache(maxsize=256)
+    def css_to_xpath(self, css, prefix='descendant-or-self::'):
+        return super(GenericTranslator, self).css_to_xpath(css, prefix)
 
 
 class HTMLTranslator(TranslatorMixin, OriginalHTMLTranslator):
-    pass
+    @lru_cache(maxsize=256)
+    def css_to_xpath(self, css, prefix='descendant-or-self::'):
+        return super(HTMLTranslator, self).css_to_xpath(css, prefix)
 
 
 _translator = HTMLTranslator()
