@@ -338,7 +338,7 @@ class Selector(object):
     def attrib(self):
         """Return the attributes dictionary for underlying element.
         """
-        return self.root.attrib
+        return dict(self.root.attrib)
 
     def __bool__(self):
         """
