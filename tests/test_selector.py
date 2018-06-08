@@ -101,6 +101,34 @@ class SelectorTestCase(unittest.TestCase):
             lng=lt)],
                          [u'a'])
 
+    def test_accessing_attributes(self):
+        body = u"""
+<html lang="en" version="1.0">
+    <body>
+        <ul id="some-list" class="list-cls" class="list-cls">
+            <li class="item-cls" id="list-item-1">
+            <li class="item-cls active" id="list-item-2">
+            <li class="item-cls" id="list-item-3">
+        </ul>
+    </body>
+</html>
+        """
+        sel = self.sscls(text=body)
+        self.assertEquals({'lang': 'en', 'version': '1.0'}, sel.attrib)
+        self.assertEquals({'id': 'some-list', 'class': 'list-cls'}, sel.css('ul')[0].attrib)
+
+        # for a SelectorList, bring the attributes of first-element only
+        self.assertEquals({'id': 'some-list', 'class': 'list-cls'}, sel.css('ul').attrib)
+        self.assertEquals({'class': 'item-cls', 'id': 'list-item-1'}, sel.css('li').attrib)
+        self.assertEquals({}, sel.css('body').attrib)
+        self.assertEquals({}, sel.css('non-existing-element').attrib)
+
+        self.assertEquals(
+            [{'class': 'item-cls', 'id': 'list-item-1'},
+             {'class': 'item-cls active', 'id': 'list-item-2'},
+             {'class': 'item-cls', 'id': 'list-item-3'}],
+            [e.attrib for e in sel.css('li')])
+
     def test_representation_slice(self):
         body = u"<p><input name='{}' value='\xa9'/></p>".format(50 * 'b')
         sel = self.sscls(text=body)
