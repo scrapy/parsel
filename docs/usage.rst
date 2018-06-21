@@ -101,6 +101,28 @@ selectors. This API can be used for quickly selecting nested data::
      'image4_thumb.jpg',
      'image5_thumb.jpg']
 
+Instead of using '@src' XPath it is possible to query for attributes using
+``.attrib`` property of a :class:`~parsel.selector.Selector`::
+
+    >>> [img.attrib['src'] for img in selector.css('img')]
+    ['image1_thumb.jpg',
+     'image2_thumb.jpg',
+     'image3_thumb.jpg',
+     'image4_thumb.jpg',
+     'image5_thumb.jpg']
+
+As a shortcut, ``.attrib`` is also available on SelectorList directly;
+it returns attributes for the first matching element::
+
+    >>> selector.css('img').attrib['src']
+    'image1_thumb.jpg'
+
+This is most useful when only a single result is expected, e.g. when selecting
+by id, or selecting unique elements on a web page::
+
+    >>> selector.css('base').attrib['href']
+    'http://example.com/'
+
 To actually extract the textual data, you must call the selector ``.extract()``
 method, as follows::
 
@@ -131,6 +153,9 @@ Now we're going to get the base URL and some image links::
 
     >>> selector.css('base::attr(href)').extract()
     ['http://example.com/']
+
+    >>> selector.css('base').attrib['href']
+    'http://example.com/'
 
     >>> selector.xpath('//a[contains(@href, "image")]/@href').extract()
     ['image1.html',
@@ -215,6 +240,9 @@ Examples:
     make much sense: text nodes do not have attributes, and attribute values
     are string values already and do not have children nodes.
 
+.. note::
+    See also: :ref:`selecting-attributes`.
+
 
 .. _CSS Selectors: https://www.w3.org/TR/css3-selectors/#selectors
 
@@ -237,13 +265,56 @@ too. Here's an example::
 
     >>> for index, link in enumerate(links):
     ...     args = (index, link.xpath('@href').extract(), link.xpath('img/@src').extract())
-    ...     print 'Link number %d points to url %s and image %s' % args
+    ...     print('Link number %d points to url %s and image %s' % args)
 
-    Link number 0 points to url [u'image1.html'] and image [u'image1_thumb.jpg']
-    Link number 1 points to url [u'image2.html'] and image [u'image2_thumb.jpg']
-    Link number 2 points to url [u'image3.html'] and image [u'image3_thumb.jpg']
-    Link number 3 points to url [u'image4.html'] and image [u'image4_thumb.jpg']
-    Link number 4 points to url [u'image5.html'] and image [u'image5_thumb.jpg']
+    Link number 0 points to url ['image1.html'] and image ['image1_thumb.jpg']
+    Link number 1 points to url ['image2.html'] and image ['image2_thumb.jpg']
+    Link number 2 points to url ['image3.html'] and image ['image3_thumb.jpg']
+    Link number 3 points to url ['image4.html'] and image ['image4_thumb.jpg']
+    Link number 4 points to url ['image5.html'] and image ['image5_thumb.jpg']
+
+.. _selecting-attributes:
+
+Selecting element attributes
+----------------------------
+
+There are several ways to get a value of an attribute. First, one can use
+XPath syntax::
+
+    >>> selector.xpath("//a/@href").extract()
+    ['image1.html', 'image2.html', 'image3.html', 'image4.html', 'image5.html']
+
+XPath syntax has a few advantages: it is a standard XPath feature, and
+``@attributes`` can be used in other parts of an XPath expression - e.g.
+it is possible to filter by attribute value.
+
+parsel also provides an extension to CSS selectors (``::attr(...)``)
+which allows to get attribute values::
+
+    >>> selector.css('a::attr(href)').extract()
+    ['image1.html', 'image2.html', 'image3.html', 'image4.html', 'image5.html']
+
+In addition to that, there is a ``.attrib`` property of Selector.
+You can use it if you prefer to lookup attributes in Python
+code, without using XPath of CSS extension::
+
+    >>> [a.attrib['href'] for a in selector.css('a')]
+    ['image1.html', 'image2.html', 'image3.html', 'image4.html', 'image5.html']
+
+This property is also available on SelectorList; it returns a dictionary
+with attributes of a first matching element. It is convenient to use when
+a selector is expected to give a single result (e.g. when selecting by element
+ID, or when selecting an unique element on a page)::
+
+    >>> selector.css('base').attrib
+    {'href': 'http://example.com/'}
+    >>> selector.css('base').attrib['href']
+    'http://example.com/'
+
+``.attrib`` property of an empty SelectorList is empty::
+
+    >>> selector.css('foo').attrib
+    {}
 
 Using selectors with regular expressions
 ----------------------------------------
