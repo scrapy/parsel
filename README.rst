@@ -40,10 +40,10 @@ Example::
             </html>""")
     >>>
     >>> sel.css('h1::text').extract_first()
-    u'Hello, Parsel!'
+    'Hello, Parsel!'
     >>>
     >>> sel.css('h1::text').re('\w+')
-    [u'Hello', u'Parsel']
+    ['Hello', 'Parsel']
     >>>
     >>> for e in sel.css('ul > li'):
             print(e.xpath('.//a/@href').extract_first())
