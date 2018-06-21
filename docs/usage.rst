@@ -22,23 +22,23 @@ Creating a :class:`Selector` object is simple::
 .. note::
     One important thing to note is that if you're using Python 2,
     make sure to use an `unicode` object for the text argument.
-    :class:`~parsel.selector.Selector` expects text to be an `unicode` object in Python 2 or
-    an `str` object in Python 3.
+    :class:`~parsel.selector.Selector` expects text to be an `unicode`
+    object in Python 2 or an `str` object in Python 3.
 
 Once you have created the Selector object, you can use `CSS`_ or
 `XPath`_ expressions to select elements::
 
     >>> sel.css('h1')
-    [<Selector xpath=u'descendant-or-self::h1' data=u'<h1>Hello, Parsel!</h1>'>]
+    [<Selector xpath='descendant-or-self::h1' data='<h1>Hello, Parsel!</h1>'>]
     >>> sel.xpath('//h1')  # the same, but now with XPath
-    [<Selector xpath='//h1' data=u'<h1>Hello, Parsel!</h1>'>]
+    [<Selector xpath='//h1' data='<h1>Hello, Parsel!</h1>'>]
 
 And extract data from those elements::
 
     >>> sel.xpath('//h1/text()').extract()
-    [u'Hello, Parsel!']
+    ['Hello, Parsel!']
     >>> sel.css('h1::text').extract_first()
-    u'Hello, Parsel!'
+    'Hello, Parsel!'
 
 `XPath`_ is a language for selecting nodes in XML documents, which can also be
 used with HTML. `CSS`_ is a language for applying styles to HTML documents. It
@@ -83,34 +83,35 @@ So, by looking at the :ref:`HTML code <topics-selectors-htmlcode>` of that
 page, let's construct an XPath for selecting the text inside the title tag::
 
     >>> selector.xpath('//title/text()')
-    [<Selector xpath='//title/text()' data=u'Example website'>]
+    [<Selector xpath='//title/text()' data='Example website'>]
 
 You can also ask the same thing using CSS instead::
 
     >>> selector.css('title::text')
-    [<Selector xpath=u'descendant-or-self::title/text()' data=u'Example website'>]
+    [<Selector xpath='descendant-or-self::title/text()' data='Example website'>]
 
 As you can see, ``.xpath()`` and ``.css()`` methods return a
 :class:`~parsel.selector.SelectorList` instance, which is a list of new
 selectors. This API can be used for quickly selecting nested data::
 
     >>> selector.css('img').xpath('@src').extract()
-    [u'image1_thumb.jpg',
-     u'image2_thumb.jpg',
-     u'image3_thumb.jpg',
-     u'image4_thumb.jpg',
-     u'image5_thumb.jpg']
+    ['image1_thumb.jpg',
+     'image2_thumb.jpg',
+     'image3_thumb.jpg',
+     'image4_thumb.jpg',
+     'image5_thumb.jpg']
 
 To actually extract the textual data, you must call the selector ``.extract()``
 method, as follows::
 
     >>> selector.xpath('//title/text()').extract()
-    [u'Example website']
+    ['Example website']
 
-If you want to extract only first matched element, you can call the selector ``.extract_first()``::
+If you want to extract only first matched element, you can call the
+selector ``.extract_first()``::
 
     >>> selector.xpath('//div[@id="images"]/a/text()').extract_first()
-    u'Name: My image 1 '
+    'Name: My image 1 '
 
 It returns ``None`` if no element was found::
 
@@ -121,43 +122,43 @@ Notice that CSS selectors can select text or attribute nodes using CSS3
 pseudo-elements::
 
     >>> selector.css('title::text').extract()
-    [u'Example website']
+    ['Example website']
 
 Now we're going to get the base URL and some image links::
 
     >>> selector.xpath('//base/@href').extract()
-    [u'http://example.com/']
+    ['http://example.com/']
 
     >>> selector.css('base::attr(href)').extract()
-    [u'http://example.com/']
+    ['http://example.com/']
 
     >>> selector.xpath('//a[contains(@href, "image")]/@href').extract()
-    [u'image1.html',
-     u'image2.html',
-     u'image3.html',
-     u'image4.html',
-     u'image5.html']
+    ['image1.html',
+     'image2.html',
+     'image3.html',
+     'image4.html',
+     'image5.html']
 
     >>> selector.css('a[href*=image]::attr(href)').extract()
-    [u'image1.html',
-     u'image2.html',
-     u'image3.html',
-     u'image4.html',
-     u'image5.html']
+    ['image1.html',
+     'image2.html',
+     'image3.html',
+     'image4.html',
+     'image5.html']
 
     >>> selector.xpath('//a[contains(@href, "image")]/img/@src').extract()
-    [u'image1_thumb.jpg',
-     u'image2_thumb.jpg',
-     u'image3_thumb.jpg',
-     u'image4_thumb.jpg',
-     u'image5_thumb.jpg']
+    ['image1_thumb.jpg',
+     'image2_thumb.jpg',
+     'image3_thumb.jpg',
+     'image4_thumb.jpg',
+     'image5_thumb.jpg']
 
     >>> selector.css('a[href*=image] img::attr(src)').extract()
-    [u'image1_thumb.jpg',
-     u'image2_thumb.jpg',
-     u'image3_thumb.jpg',
-     u'image4_thumb.jpg',
-     u'image5_thumb.jpg']
+    ['image1_thumb.jpg',
+     'image2_thumb.jpg',
+     'image3_thumb.jpg',
+     'image4_thumb.jpg',
+     'image5_thumb.jpg']
 
 .. _topics-selectors-css-extensions:
 
@@ -183,31 +184,31 @@ Examples:
 * ``title::text`` selects children text nodes of a descendant ``<title>`` element::
 
     >>> selector.css('title::text').extract_first()
-    u'Example website'
+    'Example website'
 
 * ``*::text`` selects all descendant text nodes of the current selector context::
 
     >>> selector.css('#images *::text').extract()
-    [u'\n   ',
-     u'Name: My image 1 ',
-     u'\n   ',
-     u'Name: My image 2 ',
-     u'\n   ',
-     u'Name: My image 3 ',
-     u'\n   ',
-     u'Name: My image 4 ',
-     u'\n   ',
-     u'Name: My image 5 ',
-     u'\n  ']
+    ['\n   ',
+     'Name: My image 1 ',
+     '\n   ',
+     'Name: My image 2 ',
+     '\n   ',
+     'Name: My image 3 ',
+     '\n   ',
+     'Name: My image 4 ',
+     '\n   ',
+     'Name: My image 5 ',
+     '\n  ']
 
 * ``a::attr(href)`` selects the *href* attribute value of descendant links::
 
     >>> selector.css('a::attr(href)').extract()
-    [u'image1.html',
-     u'image2.html',
-     u'image3.html',
-     u'image4.html',
-     u'image5.html']
+    ['image1.html',
+     'image2.html',
+     'image3.html',
+     'image4.html',
+     'image5.html']
 
 .. note::
     You cannot chain these pseudo-elements. But in practice it would not
@@ -228,11 +229,11 @@ too. Here's an example::
 
     >>> links = selector.xpath('//a[contains(@href, "image")]')
     >>> links.extract()
-    [u'<a href="image1.html">Name: My image 1 <br><img src="image1_thumb.jpg"></a>',
-     u'<a href="image2.html">Name: My image 2 <br><img src="image2_thumb.jpg"></a>',
-     u'<a href="image3.html">Name: My image 3 <br><img src="image3_thumb.jpg"></a>',
-     u'<a href="image4.html">Name: My image 4 <br><img src="image4_thumb.jpg"></a>',
-     u'<a href="image5.html">Name: My image 5 <br><img src="image5_thumb.jpg"></a>']
+    ['<a href="image1.html">Name: My image 1 <br><img src="image1_thumb.jpg"></a>',
+     '<a href="image2.html">Name: My image 2 <br><img src="image2_thumb.jpg"></a>',
+     '<a href="image3.html">Name: My image 3 <br><img src="image3_thumb.jpg"></a>',
+     '<a href="image4.html">Name: My image 4 <br><img src="image4_thumb.jpg"></a>',
+     '<a href="image5.html">Name: My image 5 <br><img src="image5_thumb.jpg"></a>']
 
     >>> for index, link in enumerate(links):
     ...     args = (index, link.xpath('@href').extract(), link.xpath('img/@src').extract())
@@ -256,17 +257,17 @@ Here's an example used to extract image names from the :ref:`HTML code
 <topics-selectors-htmlcode>` above::
 
     >>> selector.xpath('//a[contains(@href, "image")]/text()').re(r'Name:\s*(.*)')
-    [u'My image 1',
-     u'My image 2',
-     u'My image 3',
-     u'My image 4',
-     u'My image 5']
+    ['My image 1',
+     'My image 2',
+     'My image 3',
+     'My image 4',
+     'My image 5']
 
 There's an additional helper reciprocating ``.extract_first()`` for ``.re()``,
 named ``.re_first()``. Use it to extract just the first matching string::
 
     >>> selector.xpath('//a[contains(@href, "image")]/text()').re_first(r'Name:\s*(.*)')
-    u'My image 1'
+    'My image 1'
 
 .. _topics-selectors-relative-xpaths:
 
@@ -341,9 +342,9 @@ Example selecting links in list item with a "class" attribute ending with a digi
     ... """
     >>> sel = Selector(text=doc)
     >>> sel.xpath('//li//@href').extract()
-    [u'link1.html', u'link2.html', u'link3.html', u'link4.html', u'link5.html']
+    ['link1.html', 'link2.html', 'link3.html', 'link4.html', 'link5.html']
     >>> sel.xpath('//li[re:test(@class, "item-\d$")]//@href').extract()
-    [u'link1.html', u'link2.html', u'link4.html', u'link5.html']
+    ['link1.html', 'link2.html', 'link4.html', 'link5.html']
     >>>
 
 .. warning:: C library ``libxslt`` doesn't natively support EXSLT regular
@@ -419,26 +420,26 @@ with groups of itemscopes and corresponding itemprops::
     ...     print "    properties:", props.extract()
     ...     print
 
-    current scope: [u'http://schema.org/Product']
-        properties: [u'name', u'aggregateRating', u'offers', u'description', u'review', u'review']
+    current scope: ['http://schema.org/Product']
+        properties: ['name', 'aggregateRating', 'offers', 'description', 'review', 'review']
 
-    current scope: [u'http://schema.org/AggregateRating']
-        properties: [u'ratingValue', u'reviewCount']
+    current scope: ['http://schema.org/AggregateRating']
+        properties: ['ratingValue', 'reviewCount']
 
-    current scope: [u'http://schema.org/Offer']
-        properties: [u'price', u'availability']
+    current scope: ['http://schema.org/Offer']
+        properties: ['price', 'availability']
 
-    current scope: [u'http://schema.org/Review']
-        properties: [u'name', u'author', u'datePublished', u'reviewRating', u'description']
+    current scope: ['http://schema.org/Review']
+        properties: ['name', 'author', 'datePublished', 'reviewRating', 'description']
 
-    current scope: [u'http://schema.org/Rating']
-        properties: [u'worstRating', u'ratingValue', u'bestRating']
+    current scope: ['http://schema.org/Rating']
+        properties: ['worstRating', 'ratingValue', 'bestRating']
 
-    current scope: [u'http://schema.org/Review']
-        properties: [u'name', u'author', u'datePublished', u'reviewRating', u'description']
+    current scope: ['http://schema.org/Review']
+        properties: ['name', 'author', 'datePublished', 'reviewRating', 'description']
 
-    current scope: [u'http://schema.org/Rating']
-        properties: [u'worstRating', u'ratingValue', u'bestRating']
+    current scope: ['http://schema.org/Rating']
+        properties: ['worstRating', 'ratingValue', 'bestRating']
 
     >>>
 
@@ -472,10 +473,10 @@ returns ``True`` for nodes that have all of the specified HTML classes::
     ... """)
     ...
     >>> sel.xpath('//p[has-class("foo")]')
-    [<Selector xpath='//p[has-class("foo")]' data=u'<p class="foo bar-baz">First</p>'>,
-     <Selector xpath='//p[has-class("foo")]' data=u'<p class="foo">Second</p>'>]
+    [<Selector xpath='//p[has-class("foo")]' data='<p class="foo bar-baz">First</p>'>,
+     <Selector xpath='//p[has-class("foo")]' data='<p class="foo">Second</p>'>]
     >>> sel.xpath('//p[has-class("foo", "bar-baz")]')
-    [<Selector xpath='//p[has-class("foo", "bar-baz")]' data=u'<p class="foo bar-baz">First</p>'>]
+    [<Selector xpath='//p[has-class("foo", "bar-baz")]' data='<p class="foo bar-baz">First</p>'>]
     >>> sel.xpath('//p[has-class("foo", "bar")]')
     []
 
@@ -523,16 +524,16 @@ Example::
 Converting a *node-set* to string::
 
     >>> sel.xpath('//a//text()').extract() # take a peek at the node-set
-    [u'Click here to go to the ', u'Next Page']
+    ['Click here to go to the ', 'Next Page']
     >>> sel.xpath("string(//a[1]//text())").extract() # convert it to string
-    [u'Click here to go to the ']
+    ['Click here to go to the ']
 
 A *node* converted to a string, however, puts together the text of itself plus of all its descendants::
 
     >>> sel.xpath("//a[1]").extract() # select the first node
-    [u'<a href="#">Click here to go to the <strong>Next Page</strong></a>']
+    ['<a href="#">Click here to go to the <strong>Next Page</strong></a>']
     >>> sel.xpath("string(//a[1])").extract() # convert it to string
-    [u'Click here to go to the Next Page']
+    ['Click here to go to the Next Page']
 
 So, using the ``.//text()`` node-set won't select anything in this case::
 
@@ -542,7 +543,7 @@ So, using the ``.//text()`` node-set won't select anything in this case::
 But using the ``.`` to mean the node, works::
 
     >>> sel.xpath("//a[contains(., 'Next Page')]").extract()
-    [u'<a href="#">Click here to go to the <strong>Next Page</strong></a>']
+    ['<a href="#">Click here to go to the <strong>Next Page</strong></a>']
 
 .. _`XPath string function`: http://www.w3.org/TR/xpath/#section-String-Functions
 
@@ -572,22 +573,22 @@ Example::
 This gets all first ``<li>``  elements under whatever it is its parent::
 
     >>> xp("//li[1]")
-    [u'<li>1</li>', u'<li>4</li>']
+    ['<li>1</li>', '<li>4</li>']
 
 And this gets the first ``<li>``  element in the whole document::
 
     >>> xp("(//li)[1]")
-    [u'<li>1</li>']
+    ['<li>1</li>']
 
 This gets all first ``<li>``  elements under an ``<ul>``  parent::
 
     >>> xp("//ul/li[1]")
-    [u'<li>1</li>', u'<li>4</li>']
+    ['<li>1</li>', '<li>4</li>']
 
 And this gets the first ``<li>``  element under an ``<ul>``  parent in the whole document::
 
     >>> xp("(//ul/li)[1]")
-    [u'<li>1</li>']
+    ['<li>1</li>']
 
 When querying by class, consider using CSS
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -608,7 +609,7 @@ you can just select by class using CSS and then switch to XPath when needed::
     >>> from parsel import Selector
     >>> sel = Selector(text='<div class="hero shout"><time datetime="2014-07-23 19:00">Special date</time></div>')
     >>> sel.css('.shout').xpath('./time/@datetime').extract()
-    [u'2014-07-23 19:00']
+    ['2014-07-23 19:00']
 
 This is cleaner than using the verbose XPath trick shown above. Just remember
 to use the ``.`` in the XPath expressions that will follow.
@@ -724,8 +725,8 @@ nodes can be accessed directly by their names::
 
     >>> sel.remove_namespaces()
     >>> sel.xpath("//link")
-    [<Selector xpath='//link' data=u'<link xmlns="http://www.w3.org/2005/Atom'>,
-     <Selector xpath='//link' data=u'<link xmlns="http://www.w3.org/2005/Atom'>,
+    [<Selector xpath='//link' data='<link xmlns="http://www.w3.org/2005/Atom'>,
+     <Selector xpath='//link' data='<link xmlns="http://www.w3.org/2005/Atom'>,
      ...
 
 If you wonder why the namespace removal procedure isn't called always by default
@@ -790,7 +791,7 @@ Here's an example to match an element based on its normalized string-value::
     >>> str_to_match = "Name: My image 3"
     >>> selector.xpath('//a[normalize-space(.)=$match]',
     ...                match=str_to_match).extract_first()
-    u'<a href="image3.html">Name: My image 3 <br><img src="image3_thumb.jpg"></a>'
+    '<a href="image3.html">Name: My image 3 <br><img src="image3_thumb.jpg"></a>'
 
 All variable references must have a binding value when calling ``.xpath()``
 (otherwise you'll get a ``ValueError: XPath error:`` exception).
@@ -801,9 +802,9 @@ Here's another example using a position range passed as two integers::
     >>> start, stop = 2, 4
     >>> selector.xpath('//a[position()>=$_from and position()<=$_to]',
     ...                _from=start, _to=stop).extract()
-    [u'<a href="image2.html">Name: My image 2 <br><img src="image2_thumb.jpg"></a>',
-     u'<a href="image3.html">Name: My image 3 <br><img src="image3_thumb.jpg"></a>',
-     u'<a href="image4.html">Name: My image 4 <br><img src="image4_thumb.jpg"></a>']
+    ['<a href="image2.html">Name: My image 2 <br><img src="image2_thumb.jpg"></a>',
+     '<a href="image3.html">Name: My image 3 <br><img src="image3_thumb.jpg"></a>',
+     '<a href="image4.html">Name: My image 4 <br><img src="image4_thumb.jpg"></a>']
 
 Named variables can be useful when strings need to be escaped for single
 or double quotes characters. The example below would be a bit tricky to
@@ -818,7 +819,7 @@ get right (or legible) without a variable reference::
     >>>
     >>> selector.xpath('//p[contains(., $mystring)]',
     ...                mystring='''He said: "I don't know''').extract_first()
-    u'<p>He said: "I don\'t know why, but I like mixing single and double quotes!"</p>'
+    '<p>He said: "I don\'t know why, but I like mixing single and double quotes!"</p>'
 
 
 Converting CSS to XPath
@@ -837,9 +838,9 @@ On those occasions, use the function :func:`~parsel.css2xpath`:
 
     >>> from parsel import css2xpath
     >>> css2xpath('h1.title')
-    u"descendant-or-self::h1[@class and contains(concat(' ', normalize-space(@class), ' '), ' title ')]"
+    "descendant-or-self::h1[@class and contains(concat(' ', normalize-space(@class), ' '), ' title ')]"
     >>> css2xpath('.profile-data') + '//h2'
-    u"descendant-or-self::*[@class and contains(concat(' ', normalize-space(@class), ' '), ' profile-data ')]//h2"
+    "descendant-or-self::*[@class and contains(concat(' ', normalize-space(@class), ' '), ' profile-data ')]//h2"
 
 As you can see from the examples above, it returns the translated CSS query
 into an XPath expression as a string, which you can use as-is or combine to
