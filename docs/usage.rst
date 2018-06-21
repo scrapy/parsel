@@ -296,7 +296,7 @@ which allows to get attribute values::
 
 In addition to that, there is a ``.attrib`` property of Selector.
 You can use it if you prefer to lookup attributes in Python
-code, without using XPath of CSS extension::
+code, without using XPaths or CSS extensions::
 
     >>> [a.attrib['href'] for a in selector.css('a')]
     ['image1.html', 'image2.html', 'image3.html', 'image4.html', 'image5.html']
