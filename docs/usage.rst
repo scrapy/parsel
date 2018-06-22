@@ -35,10 +35,10 @@ Once you have created the Selector object, you can use `CSS`_ or
 
 And extract data from those elements::
 
-    >>> sel.xpath('//h1/text()').extract()
-    ['Hello, Parsel!']
     >>> sel.css('h1::text').get()
     'Hello, Parsel!'
+    >>> sel.xpath('//h1/text()').getall()
+    ['Hello, Parsel!']
 
 `XPath`_ is a language for selecting nodes in XML documents, which can also be
 used with HTML. `CSS`_ is a language for applying styles to HTML documents. It
@@ -91,12 +91,16 @@ You can also ask the same thing using CSS instead::
     [<Selector xpath='descendant-or-self::title/text()' data='Example website'>]
 
 To actually extract the textual data, you must call the selector ``.get()``
-or ``.extract()`` method, as follows::
+or ``.getall()`` methods, as follows::
 
-    >>> selector.xpath('//title/text()').extract()
+    >>> selector.xpath('//title/text()').getall()
     ['Example website']
     >>> selector.xpath('//title/text()').get()
     'Example website'
+
+``.get()`` always returns a single result; if there are several matches,
+content of a first match is returned; if there are no matches, None
+is returned. ``.getall()`` returns a list with all results.
 
 Notice that CSS selectors can select text or attribute nodes using CSS3
 pseudo-elements::
@@ -108,7 +112,7 @@ As you can see, ``.xpath()`` and ``.css()`` methods return a
 :class:`~parsel.selector.SelectorList` instance, which is a list of new
 selectors. This API can be used for quickly selecting nested data::
 
-    >>> selector.css('img').xpath('@src').extract()
+    >>> selector.css('img').xpath('@src').getall()
     ['image1_thumb.jpg',
      'image2_thumb.jpg',
      'image3_thumb.jpg',
@@ -160,28 +164,28 @@ Now we're going to get the base URL and some image links::
     >>> selector.css('base').attrib['href']
     'http://example.com/'
 
-    >>> selector.xpath('//a[contains(@href, "image")]/@href').extract()
+    >>> selector.xpath('//a[contains(@href, "image")]/@href').getall()
     ['image1.html',
      'image2.html',
      'image3.html',
      'image4.html',
      'image5.html']
 
-    >>> selector.css('a[href*=image]::attr(href)').extract()
+    >>> selector.css('a[href*=image]::attr(href)').getall()
     ['image1.html',
      'image2.html',
      'image3.html',
      'image4.html',
      'image5.html']
 
-    >>> selector.xpath('//a[contains(@href, "image")]/img/@src').extract()
+    >>> selector.xpath('//a[contains(@href, "image")]/img/@src').getall()
     ['image1_thumb.jpg',
      'image2_thumb.jpg',
      'image3_thumb.jpg',
      'image4_thumb.jpg',
      'image5_thumb.jpg']
 
-    >>> selector.css('a[href*=image] img::attr(src)').extract()
+    >>> selector.css('a[href*=image] img::attr(src)').getall()
     ['image1_thumb.jpg',
      'image2_thumb.jpg',
      'image3_thumb.jpg',
@@ -216,7 +220,7 @@ Examples:
 
 * ``*::text`` selects all descendant text nodes of the current selector context::
 
-    >>> selector.css('#images *::text').extract()
+    >>> selector.css('#images *::text').getall()
     ['\n   ',
      'Name: My image 1 ',
      '\n   ',
@@ -231,7 +235,7 @@ Examples:
 
 * ``a::attr(href)`` selects the *href* attribute value of descendant links::
 
-    >>> selector.css('a::attr(href)').extract()
+    >>> selector.css('a::attr(href)').getall()
     ['image1.html',
      'image2.html',
      'image3.html',
@@ -259,7 +263,7 @@ of the same type, so you can call the selection methods for those selectors
 too. Here's an example::
 
     >>> links = selector.xpath('//a[contains(@href, "image")]')
-    >>> links.extract()
+    >>> links.getall()
     ['<a href="image1.html">Name: My image 1 <br><img src="image1_thumb.jpg"></a>',
      '<a href="image2.html">Name: My image 2 <br><img src="image2_thumb.jpg"></a>',
      '<a href="image3.html">Name: My image 3 <br><img src="image3_thumb.jpg"></a>',
@@ -284,7 +288,7 @@ Selecting element attributes
 There are several ways to get a value of an attribute. First, one can use
 XPath syntax::
 
-    >>> selector.xpath("//a/@href").extract()
+    >>> selector.xpath("//a/@href").getall()
     ['image1.html', 'image2.html', 'image3.html', 'image4.html', 'image5.html']
 
 XPath syntax has a few advantages: it is a standard XPath feature, and
@@ -294,7 +298,7 @@ it is possible to filter by attribute value.
 parsel also provides an extension to CSS selectors (``::attr(...)``)
 which allows to get attribute values::
 
-    >>> selector.css('a::attr(href)').extract()
+    >>> selector.css('a::attr(href)').getall()
     ['image1.html', 'image2.html', 'image3.html', 'image4.html', 'image5.html']
 
 In addition to that, there is a ``.attrib`` property of Selector.
@@ -416,9 +420,9 @@ Example selecting links in list item with a "class" attribute ending with a digi
     ... </div>
     ... """
     >>> sel = Selector(text=doc)
-    >>> sel.xpath('//li//@href').extract()
+    >>> sel.xpath('//li//@href').getall()
     ['link1.html', 'link2.html', 'link3.html', 'link4.html', 'link5.html']
-    >>> sel.xpath('//li[re:test(@class, "item-\d$")]//@href').extract()
+    >>> sel.xpath('//li[re:test(@class, "item-\d$")]//@href').getall()
     ['link1.html', 'link2.html', 'link4.html', 'link5.html']
     >>>
 
@@ -488,11 +492,11 @@ with groups of itemscopes and corresponding itemprops::
     ... """
     >>> sel = Selector(text=doc, type="html")
     >>> for scope in sel.xpath('//div[@itemscope]'):
-    ...     print("current scope:", scope.xpath('@itemtype').extract())
+    ...     print("current scope:", scope.xpath('@itemtype').getall())
     ...     props = scope.xpath('''
     ...                 set:difference(./descendant::*/@itemprop,
     ...                                .//*[@itemscope]/*/@itemprop)''')
-    ...     print("    properties: %s" % (props.extract()))
+    ...     print("    properties: %s" % (props.getall()))
     ...     print("")
 
     current scope: ['http://schema.org/Product']
@@ -598,26 +602,26 @@ Example::
 
 Converting a *node-set* to string::
 
-    >>> sel.xpath('//a//text()').extract() # take a peek at the node-set
+    >>> sel.xpath('//a//text()').getall() # take a peek at the node-set
     ['Click here to go to the ', 'Next Page']
-    >>> sel.xpath("string(//a[1]//text())").extract() # convert it to string
+    >>> sel.xpath("string(//a[1]//text())").getall() # convert it to string
     ['Click here to go to the ']
 
 A *node* converted to a string, however, puts together the text of itself plus of all its descendants::
 
-    >>> sel.xpath("//a[1]").extract() # select the first node
+    >>> sel.xpath("//a[1]").getall() # select the first node
     ['<a href="#">Click here to go to the <strong>Next Page</strong></a>']
-    >>> sel.xpath("string(//a[1])").extract() # convert it to string
+    >>> sel.xpath("string(//a[1])").getall() # convert it to string
     ['Click here to go to the Next Page']
 
 So, using the ``.//text()`` node-set won't select anything in this case::
 
-    >>> sel.xpath("//a[contains(.//text(), 'Next Page')]").extract()
+    >>> sel.xpath("//a[contains(.//text(), 'Next Page')]").getall()
     []
 
 But using the ``.`` to mean the node, works::
 
-    >>> sel.xpath("//a[contains(., 'Next Page')]").extract()
+    >>> sel.xpath("//a[contains(., 'Next Page')]").getall()
     ['<a href="#">Click here to go to the <strong>Next Page</strong></a>']
 
 .. _`XPath string function`: http://www.w3.org/TR/xpath/#section-String-Functions
@@ -643,7 +647,7 @@ Example::
     ....:         <li>5</li>
     ....:         <li>6</li>
     ....:     </ul>""")
-    >>> xp = lambda x: sel.xpath(x).extract()
+    >>> xp = lambda x: sel.xpath(x).getall()
 
 This gets all first ``<li>``  elements under whatever it is its parent::
 
@@ -683,11 +687,58 @@ you can just select by class using CSS and then switch to XPath when needed::
 
     >>> from parsel import Selector
     >>> sel = Selector(text='<div class="hero shout"><time datetime="2014-07-23 19:00">Special date</time></div>')
-    >>> sel.css('.shout').xpath('./time/@datetime').extract()
+    >>> sel.css('.shout').xpath('./time/@datetime').getall()
     ['2014-07-23 19:00']
 
 This is cleaner than using the verbose XPath trick shown above. Just remember
 to use the ``.`` in the XPath expressions that will follow.
+
+.. _old-extraction-api:
+
+extract() and extract_first()
+-----------------------------
+
+If you're a long-time parsel (or Scrapy) user, you're probably familiar
+with ``.extract()`` and ``.extract_first()`` selector methods. These methods
+are still supported by parsel, there are no plans to deprecate them.
+
+However, ``parsel`` usage docs are now written using ``.get()`` and
+``.getall()`` methods. We feel that these new methods result in a more concise
+and readable code.
+
+The following examples show how these methods map to each other.
+
+1. ``SelectorList.get()`` is the same as ``SelectorList.extract_first()``::
+
+     >>> selector.css('a::attr(href)').get()
+     'image1.html'
+     >>> selector.css('a::attr(href)').extract_first()
+     'image1.html'
+
+2. ``SelectorList.getall()`` is the same as ``SelectorList.extract()``::
+
+     >>> selector.css('a::attr(href)').getall()
+     ['image1.html', 'image2.html', 'image3.html', 'image4.html', 'image5.html']
+     >>> selector.css('a::attr(href)').extract()
+     ['image1.html', 'image2.html', 'image3.html', 'image4.html', 'image5.html']
+
+2. ``Selector.get()`` is the same as ``Selector.extract()``::
+
+     >>> selector.css('a::attr(href)')[0].get()
+     'image1.html'
+     >>> selector.css('a::attr(href)')[0].extract()
+     'image1.html'
+
+4. For consistency, there is also ``Selector.getall()``, which returns a list::
+
+    >>> selector.css('a::attr(href)')[0].getall()
+    ['image1.html']
+
+So, the main difference is that output of ``.get()`` and ``.getall()`` methods
+is more predictable: ``.get()`` always returns a single result, ``.getall()``
+always returns a list of all extracted results. With ``.extract()`` method
+it was not always obvious if a result is a list or not; to get a single
+result either ``.extract()`` or ``.extract_first()`` should be called.
 
 
 .. _topics-selectors-ref:
@@ -729,8 +780,8 @@ a :class:`~parsel.selector.Selector` instantiated with an HTML text like this::
 2. Extract the text of all ``<h1>`` elements from an HTML text,
    returning a list of unicode strings::
 
-      sel.xpath("//h1").extract()         # this includes the h1 tag
-      sel.xpath("//h1/text()").extract()  # this excludes the h1 tag
+      sel.xpath("//h1").getall()         # this includes the h1 tag
+      sel.xpath("//h1/text()").getall()  # this excludes the h1 tag
 
 3. Iterate over all ``<p>`` tags and print their class attribute::
 
@@ -759,7 +810,7 @@ like this::
    a namespace::
 
       sel.register_namespace("g", "http://base.google.com/ns/1.0")
-      sel.xpath("//g:price").extract()
+      sel.xpath("//g:price").getall()
 
 .. _removing-namespaces:
 
@@ -849,7 +900,7 @@ You can pass several namespaces (here we're using shorter 1-letter prefixes)::
 
     >>> sel.xpath("//a:entry/m:thumbnail/@url",
     ...               namespaces={"a": "http://www.w3.org/2005/Atom",
-    ...                           "m": "http://search.yahoo.com/mrss/"}).extract()
+    ...                           "m": "http://search.yahoo.com/mrss/"}).getall()
     ['https://avatars1.githubusercontent.com/u/11529908?v=3&s=60',
      'https://avatars0.githubusercontent.com/u/15114852?v=3&s=60',
      ...
@@ -879,7 +930,7 @@ Here's another example using a position range passed as two integers::
 
     >>> start, stop = 2, 4
     >>> selector.xpath('//a[position()>=$_from and position()<=$_to]',
-    ...                _from=start, _to=stop).extract()
+    ...                _from=start, _to=stop).getall()
     ['<a href="image2.html">Name: My image 2 <br><img src="image2_thumb.jpg"></a>',
      '<a href="image3.html">Name: My image 3 <br><img src="image3_thumb.jpg"></a>',
      '<a href="image4.html">Name: My image 4 <br><img src="image4_thumb.jpg"></a>']
