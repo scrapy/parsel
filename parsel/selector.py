@@ -121,24 +121,24 @@ class SelectorList(list):
         else:
             return default
 
-    def extract(self):
+    def getall(self):
         """
-        Call the ``.extract()`` method for each element is this list and return
+        Call the ``.get()`` method for each element is this list and return
         their results flattened, as a list of unicode strings.
         """
-        return [x.extract() for x in self]
-    getall = extract
+        return [x.get() for x in self]
+    extract = getall
 
-    def extract_first(self, default=None):
+    def get(self, default=None):
         """
-        Return the result of ``.extract()`` for the first element in this list.
+        Return the result of ``.get()`` for the first element in this list.
         If the list is empty, return the default value.
         """
         for x in self:
-            return x.extract()
+            return x.get()
         else:
             return default
-    get = extract_first
+    extract_first = get
 
     @property
     def attrib(self):
@@ -277,7 +277,7 @@ class Selector(object):
         Passing ``replace_entities`` as ``False`` switches off these
         replacements.
         """
-        return extract_regex(regex, self.extract(), replace_entities=replace_entities)
+        return extract_regex(regex, self.get(), replace_entities=replace_entities)
 
     def re_first(self, regex, default=None, replace_entities=True):
         """
@@ -292,7 +292,7 @@ class Selector(object):
         """
         return next(iflatten(self.re(regex, replace_entities=replace_entities)), default)
 
-    def extract(self):
+    def get(self):
         """
         Serialize and return the matched nodes in a single unicode string.
         Percent encoded content is unquoted.
@@ -309,7 +309,7 @@ class Selector(object):
                 return u'0'
             else:
                 return six.text_type(self.root)
-    get = extract
+    extract = get
 
     def getall(self):
         """
@@ -352,10 +352,10 @@ class Selector(object):
         otherwise.  In other words, the boolean value of a :class:`Selector` is
         given by the contents it selects.
         """
-        return bool(self.extract())
+        return bool(self.get())
     __nonzero__ = __bool__
 
     def __str__(self):
-        data = repr(self.extract()[:40])
+        data = repr(self.get()[:40])
         return "<%s xpath=%r data=%s>" % (type(self).__name__, self._expr, data)
     __repr__ = __str__
