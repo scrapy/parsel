@@ -37,7 +37,7 @@ And extract data from those elements::
 
     >>> sel.xpath('//h1/text()').extract()
     ['Hello, Parsel!']
-    >>> sel.css('h1::text').extract_first()
+    >>> sel.css('h1::text').get()
     'Hello, Parsel!'
 
 `XPath`_ is a language for selecting nodes in XML documents, which can also be
@@ -90,6 +90,20 @@ You can also ask the same thing using CSS instead::
     >>> selector.css('title::text')
     [<Selector xpath='descendant-or-self::title/text()' data='Example website'>]
 
+To actually extract the textual data, you must call the selector ``.get()``
+or ``.extract()`` method, as follows::
+
+    >>> selector.xpath('//title/text()').extract()
+    ['Example website']
+    >>> selector.xpath('//title/text()').get()
+    'Example website'
+
+Notice that CSS selectors can select text or attribute nodes using CSS3
+pseudo-elements::
+
+    >>> selector.css('title::text').get()
+    'Example website'
+
 As you can see, ``.xpath()`` and ``.css()`` methods return a
 :class:`~parsel.selector.SelectorList` instance, which is a list of new
 selectors. This API can be used for quickly selecting nested data::
@@ -101,8 +115,20 @@ selectors. This API can be used for quickly selecting nested data::
      'image4_thumb.jpg',
      'image5_thumb.jpg']
 
-Instead of using '@src' XPath it is possible to query for attributes using
-``.attrib`` property of a :class:`~parsel.selector.Selector`::
+If you want to extract only first matched element, you can call the
+selector ``.get()`` (or its alias ``.extract_first()`` commonly used in
+previous parsel versions)::
+
+    >>> selector.xpath('//div[@id="images"]/a/text()').get()
+    'Name: My image 1 '
+
+It returns ``None`` if no element was found::
+
+    >>> selector.xpath('//div[@id="not-exists"]/text()').get() is None
+    True
+
+Instead of using e.g. ``'@src'`` XPath it is possible to query for attributes
+using ``.attrib`` property of a :class:`~parsel.selector.Selector`::
 
     >>> [img.attrib['src'] for img in selector.css('img')]
     ['image1_thumb.jpg',
@@ -123,36 +149,13 @@ by id, or selecting unique elements on a web page::
     >>> selector.css('base').attrib['href']
     'http://example.com/'
 
-To actually extract the textual data, you must call the selector ``.extract()``
-method, as follows::
-
-    >>> selector.xpath('//title/text()').extract()
-    ['Example website']
-
-If you want to extract only first matched element, you can call the
-selector ``.extract_first()``::
-
-    >>> selector.xpath('//div[@id="images"]/a/text()').extract_first()
-    'Name: My image 1 '
-
-It returns ``None`` if no element was found::
-
-    >>> selector.xpath('//div[@id="not-exists"]/text()').extract_first() is None
-    True
-
-Notice that CSS selectors can select text or attribute nodes using CSS3
-pseudo-elements::
-
-    >>> selector.css('title::text').extract()
-    ['Example website']
-
 Now we're going to get the base URL and some image links::
 
-    >>> selector.xpath('//base/@href').extract()
-    ['http://example.com/']
+    >>> selector.xpath('//base/@href').get()
+    'http://example.com/'
 
-    >>> selector.css('base::attr(href)').extract()
-    ['http://example.com/']
+    >>> selector.css('base::attr(href)').get()
+    'http://example.com/'
 
     >>> selector.css('base').attrib['href']
     'http://example.com/'
@@ -208,7 +211,7 @@ Examples:
 
 * ``title::text`` selects children text nodes of a descendant ``<title>`` element::
 
-    >>> selector.css('title::text').extract_first()
+    >>> selector.css('title::text').get()
     'Example website'
 
 * ``*::text`` selects all descendant text nodes of the current selector context::
@@ -264,14 +267,14 @@ too. Here's an example::
      '<a href="image5.html">Name: My image 5 <br><img src="image5_thumb.jpg"></a>']
 
     >>> for index, link in enumerate(links):
-    ...     args = (index, link.xpath('@href').extract(), link.xpath('img/@src').extract())
-    ...     print('Link number %d points to url %s and image %s' % args)
+    ...     args = (index, link.xpath('@href').get(), link.xpath('img/@src').get())
+    ...     print('Link number %d points to url %r and image %r' % args)
 
-    Link number 0 points to url ['image1.html'] and image ['image1_thumb.jpg']
-    Link number 1 points to url ['image2.html'] and image ['image2_thumb.jpg']
-    Link number 2 points to url ['image3.html'] and image ['image3_thumb.jpg']
-    Link number 3 points to url ['image4.html'] and image ['image4_thumb.jpg']
-    Link number 4 points to url ['image5.html'] and image ['image5_thumb.jpg']
+    Link number 0 points to url 'image1.html' and image 'image1_thumb.jpg'
+    Link number 1 points to url 'image2.html' and image 'image2_thumb.jpg'
+    Link number 2 points to url 'image3.html' and image 'image3_thumb.jpg'
+    Link number 3 points to url 'image4.html' and image 'image4_thumb.jpg'
+    Link number 4 points to url 'image5.html' and image 'image5_thumb.jpg'
 
 .. _selecting-attributes:
 
@@ -334,8 +337,9 @@ Here's an example used to extract image names from the :ref:`HTML code
      'My image 4',
      'My image 5']
 
-There's an additional helper reciprocating ``.extract_first()`` for ``.re()``,
-named ``.re_first()``. Use it to extract just the first matching string::
+There's an additional helper reciprocating ``.get()`` (and its
+alias ``.extract_first()``) for ``.re()``, named ``.re_first()``.
+Use it to extract just the first matching string::
 
     >>> selector.xpath('//a[contains(@href, "image")]/text()').re_first(r'Name:\s*(.*)')
     'My image 1'
@@ -359,17 +363,17 @@ it actually extracts all ``<p>`` elements from the document, not only those
 inside ``<div>`` elements::
 
     >>> for p in divs.xpath('//p'):  # this is wrong - gets all <p> from the whole document
-    ...     print p.extract()
+    ...     print(p.get())
 
 This is the proper way to do it (note the dot prefixing the ``.//p`` XPath)::
 
     >>> for p in divs.xpath('.//p'):  # extracts all <p> inside
-    ...     print p.extract()
+    ...     print(p.get())
 
 Another common case would be to extract all direct ``<p>`` children::
 
     >>> for p in divs.xpath('p'):
-    ...     print p.extract()
+    ...     print(p.get())
 
 For more details about relative XPaths see the `Location Paths`_ section in the
 XPath specification.
@@ -484,12 +488,12 @@ with groups of itemscopes and corresponding itemprops::
     ... """
     >>> sel = Selector(text=doc, type="html")
     >>> for scope in sel.xpath('//div[@itemscope]'):
-    ...     print "current scope:", scope.xpath('@itemtype').extract()
+    ...     print("current scope:", scope.xpath('@itemtype').extract())
     ...     props = scope.xpath('''
     ...                 set:difference(./descendant::*/@itemprop,
     ...                                .//*[@itemscope]/*/@itemprop)''')
-    ...     print "    properties:", props.extract()
-    ...     print
+    ...     print("    properties: %s" % (props.extract()))
+    ...     print("")
 
     current scope: ['http://schema.org/Product']
         properties: ['name', 'aggregateRating', 'offers', 'description', 'review', 'review']
@@ -730,7 +734,7 @@ an HTML text like this::
 3. Iterate over all ``<p>`` tags and print their class attribute::
 
       for node in sel.xpath("//p"):
-          print node.xpath("@class").extract()
+          print(node.attrib['class'])
 
 
 .. _selector-examples-xml:
@@ -861,7 +865,7 @@ Here's an example to match an element based on its normalized string-value::
 
     >>> str_to_match = "Name: My image 3"
     >>> selector.xpath('//a[normalize-space(.)=$match]',
-    ...                match=str_to_match).extract_first()
+    ...                match=str_to_match).get()
     '<a href="image3.html">Name: My image 3 <br><img src="image3_thumb.jpg"></a>'
 
 All variable references must have a binding value when calling ``.xpath()``
@@ -889,7 +893,7 @@ get right (or legible) without a variable reference::
     >>> selector = Selector(text=html)
     >>>
     >>> selector.xpath('//p[contains(., $mystring)]',
-    ...                mystring='''He said: "I don't know''').extract_first()
+    ...                mystring='''He said: "I don't know''').get()
     '<p>He said: "I don\'t know why, but I like mixing single and double quotes!"</p>'
 
 

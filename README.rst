@@ -39,13 +39,13 @@ Example::
             </body>
             </html>""")
     >>>
-    >>> sel.css('h1::text').extract_first()
+    >>> sel.css('h1::text').get()
     'Hello, Parsel!'
     >>>
     >>> sel.css('h1::text').re('\w+')
     ['Hello', 'Parsel']
     >>>
     >>> for e in sel.css('ul > li'):
-            print(e.xpath('.//a/@href').extract_first())
+    ...     print(e.xpath('.//a/@href').get())
     http://example.com
     http://scrapy.org
