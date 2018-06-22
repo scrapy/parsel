@@ -3,6 +3,21 @@
 History
 -------
 
+1.5.0 (2018-06-22)
+~~~~~~~~~~~~~~~~~~
+
+* New ``Selector.attrib`` and ``SelectorList.attrib`` properties which make
+  it easier to get attributes of HTML elements.
+* CSS selectors became faster: compilation results are cached
+  (LRU cache is used for ``css2xpath``), so there is
+  less overhead when the same CSS expression is used several times.
+* ``.get()`` and ``.getall()`` selector methods are documented and recommended
+  over ``.extract_first()`` and ``.extract()``.
+* ``.extract()`` and  ``.extract_first()`` are now implemented using
+  ``.get()`` and ``.getall()``, not the other way around. It can be
+  **backwards incompatible** in case of custom Selector subclasses.
+* various documentation tweaks and improvements.
+
 1.4.0 (2018-02-08)
 ~~~~~~~~~~~~~~~~~~
 
