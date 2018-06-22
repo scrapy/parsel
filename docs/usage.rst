@@ -13,7 +13,7 @@ is straightforward: you just need to create a
 parse, and use the available methods for selecting parts from the text and
 extracting data out of the result.
 
-Creating a :class:`Selector` object is simple::
+Creating a :class:`~parsel.selector.Selector` object is simple::
 
     >>> from parsel import Selector
     >>> text = u"<html><body><h1>Hello, Parsel!</h1></body></html>"
@@ -351,7 +351,7 @@ Working with relative XPaths
 
 Keep in mind that if you are nesting selectors and use an XPath that starts
 with ``/``, that XPath will be absolute to the document and not relative to the
-``Selector`` you're calling it from.
+selector you're calling it from.
 
 For example, suppose you want to extract all ``<p>`` elements inside ``<div>``
 elements. First, you would get all ``<div>`` elements::
@@ -714,14 +714,15 @@ SelectorList objects
 Working on HTML
 ---------------
 
-Here are some :class:`Selector` examples to illustrate several concepts.
-In all cases, we assume there is already a :class:`Selector` instantiated with
-an HTML text like this::
+Here are some :class:`~parsel.selector.Selector` examples to illustrate
+several concepts. In all cases, we assume there is already
+a :class:`~parsel.selector.Selector` instantiated with an HTML text like this::
 
       sel = Selector(text=html_text)
 
 1. Select all ``<h1>`` elements from an HTML text, returning a list of
-   :class:`Selector` objects (ie. a :class:`SelectorList` object)::
+   :class:`~parsel.selector.Selector` objects
+   (ie. a :class:`~parsel.selector.SelectorList` object)::
 
       sel.xpath("//h1")
 
@@ -742,13 +743,15 @@ an HTML text like this::
 Working on XML (and namespaces)
 -------------------------------
 
-Here are some examples to illustrate concepts for :class:`Selector` objects
-instantiated with an XML text like this::
+Here are some examples to illustrate concepts for
+:class:`~parsel.selector.Selector` objects instantiated with an XML text
+like this::
 
       sel = Selector(text=xml_text, type='xml')
 
 1. Select all ``<product>`` elements from an XML text, returning a list
-   of :class:`Selector` objects (ie. a :class:`SelectorList` object)::
+   of :class:`~parsel.selector.Selector` objects
+   (ie. a :class:`~parsel.selector.SelectorList` object)::
 
       sel.xpath("//product")
 
