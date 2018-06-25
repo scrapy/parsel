@@ -5,6 +5,9 @@ import six
 import unittest
 import pickle
 
+from lxml import etree
+from pkg_resources import parse_version
+
 from parsel import Selector
 
 
@@ -498,7 +501,7 @@ class SelectorTestCase(unittest.TestCase):
                          ["John", "Paul"])
         self.assertEqual(x.xpath("//ul/li").re("Age: (\d+)"),
                          ["10", "20"])
-        
+
         # Test named group, hit and miss
         x = self.sscls(text=u'foobar')
         self.assertEqual(x.re('(?P<extract>foo)'), ['foo'])
@@ -511,7 +514,7 @@ class SelectorTestCase(unittest.TestCase):
     def test_re_replace_entities(self):
         body = u"""<script>{"foo":"bar &amp; &quot;baz&quot;"}</script>"""
         x = self.sscls(text=body)
-        
+
         name_re = re.compile('{"foo":(.*)}')
 
         # by default, only &amp; and &lt; are preserved ;
@@ -707,6 +710,69 @@ class SelectorTestCase(unittest.TestCase):
         self.assertIsInstance(sel.xpath('//div')[0], MySelector)
         self.assertIsInstance(sel.css('div'), MySelectorList)
         self.assertIsInstance(sel.css('div')[0], MySelector)
+
+    def test_deep_nesting(self):
+        lxml_version = parse_version(etree.__version__)
+        lxml_huge_tree_version = parse_version("4.2")
+
+        content = """
+        <html>
+        <body>
+        <span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span>
+        <span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span>
+        <span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span>
+        <span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span>
+        <span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span>
+        <span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span>
+        <span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span>
+        <span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span>
+        <span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span>
+        <span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span>
+        <span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span>
+        <span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span>
+        <span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span>
+        <span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span>
+        <span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span>
+        <span><span><span><span><span><span><span><span><span><span><span><span>
+        hello world
+        </span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span>
+        </span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span>
+        </span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span>
+        </span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span>
+        </span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span>
+        </span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span>
+        </span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span>
+        </span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span>
+        </span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span>
+        </span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span>
+        </span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span>
+        </span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span>
+        </span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span>
+        </span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span>
+        </span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span>
+        </span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span>
+        </span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span>
+        </span></span></span></span></span></span></span></span></span></span>
+        <table>
+         <tr><td>some test</td></tr>
+        </table>
+        </body>
+        </html>
+        """
+
+        if lxml_version < lxml_huge_tree_version:
+            # If there is no huge_tree support don't run this test, but expect a ValueError
+            self.assertRaises(ValueError, lambda: Selector(text=content))
+            return
+
+        sel = Selector(text=content)
+        nest_level = 282
+        self.assertEqual(len(sel.css("span")), nest_level)
+        self.assertEqual(len(sel.css("td")), 1)
+
+        # Without huge_tree support a value error is expected
+        self.assertRaises(ValueError, lambda: Selector(text=content, huge_tree=False))
+
 
 class ExsltTestCase(unittest.TestCase):
 
