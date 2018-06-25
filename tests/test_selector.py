@@ -715,7 +715,7 @@ class SelectorTestCase(unittest.TestCase):
         lxml_version = parse_version(etree.__version__)
         lxml_huge_tree_version = parse_version("4.2")
 
-        content = """
+        content = u"""
         <html>
         <body>
         <span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span>
