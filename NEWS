@@ -3,8 +3,8 @@
 History
 -------
 
-1.5.0 (2018-06-22)
-~~~~~~~~~~~~~~~~~~
+1.5.0 (TBA)
+~~~~~~~~~~~
 
 * New ``Selector.attrib`` and ``SelectorList.attrib`` properties which make
   it easier to get attributes of HTML elements.
@@ -13,10 +13,28 @@ History
   less overhead when the same CSS expression is used several times.
 * ``.get()`` and ``.getall()`` selector methods are documented and recommended
   over ``.extract_first()`` and ``.extract()``.
-* ``.extract()`` and  ``.extract_first()`` are now implemented using
-  ``.get()`` and ``.getall()``, not the other way around. It can be
-  **backwards incompatible** in case of custom Selector subclasses.
-* various documentation tweaks and improvements.
+* Various documentation tweaks and improvements.
+
+One more change is that ``.extract()`` and  ``.extract_first()`` methods
+are now implemented using ``.get()`` and ``.getall()``, not the other
+way around, and instead of calling ``Selector.extract`` all other methods
+now call ``Selector.get`` internally. It can be **backwards incompatible**
+in case of custom Selector subclasses which override ``Selector.extract``
+without doing the same for ``Selector.get``. If you have such Selector
+subclass, make sure ``get`` method is also overridden. For example, this::
+
+    class MySelector(parsel.Selector):
+        def extract(self):
+            return super().extract() + " foo"
+
+should be changed to this::
+
+    class MySelector(parsel.Selector):
+        def get(self):
+            return super().get() + " foo"
+        extract = get
+
+
 
 1.4.0 (2018-02-08)
 ~~~~~~~~~~~~~~~~~~
