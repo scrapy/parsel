@@ -703,7 +703,7 @@ with ``.extract()`` and ``.extract_first()`` selector methods. These methods
 are still supported by parsel, there are no plans to deprecate them.
 
 However, ``parsel`` usage docs are now written using ``.get()`` and
-``.getall()`` methods. We feel that these new methods result in a more concise
+``.getall()`` methods. We feel that these new methods result in more concise
 and readable code.
 
 The following examples show how these methods map to each other.
@@ -722,7 +722,7 @@ The following examples show how these methods map to each other.
      >>> selector.css('a::attr(href)').extract()
      ['image1.html', 'image2.html', 'image3.html', 'image4.html', 'image5.html']
 
-2. ``Selector.get()`` is the same as ``Selector.extract()``::
+3. ``Selector.get()`` is the same as ``Selector.extract()``::
 
      >>> selector.css('a::attr(href)')[0].get()
      'image1.html'
@@ -734,11 +734,13 @@ The following examples show how these methods map to each other.
     >>> selector.css('a::attr(href)')[0].getall()
     ['image1.html']
 
-So, the main difference is that output of ``.get()`` and ``.getall()`` methods
-is more predictable: ``.get()`` always returns a single result, ``.getall()``
-always returns a list of all extracted results. With ``.extract()`` method
-it was not always obvious if a result is a list or not; to get a single
-result either ``.extract()`` or ``.extract_first()`` should be called.
+With the ``.extract()`` method it was not always obvious if a result is a list
+or not; to get a single result either ``.extract()`` or ``.extract_first()``
+needed to be called, depending whether you had a ``Selector`` or ``SelectorList``.
+
+So, the main difference is that the outputs of ``.get()`` and ``.getall()``
+are more predictable: ``.get()`` always returns a single result,
+``.getall()`` always returns a list of all extracted results.
 
 
 .. _topics-selectors-ref:
