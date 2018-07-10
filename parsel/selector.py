@@ -11,11 +11,16 @@ from pkg_resources import parse_version
 from .utils import flatten, iflatten, extract_regex
 from .csstranslator import HTMLTranslator, GenericTranslator
 
+lxml_version = parse_version(etree.__version__)
+lxml_huge_tree_version = parse_version("4.2")
+LXML_SUPPORTS_HUGE_TREE = lxml_version >= lxml_huge_tree_version
+
 
 class SafeXMLParser(etree.XMLParser):
     def __init__(self, *args, **kwargs):
         kwargs.setdefault('resolve_entities', False)
         super(SafeXMLParser, self).__init__(*args, **kwargs)
+
 
 _ctgroup = {
     'html': {'_parser': html.HTMLParser,
@@ -39,11 +44,9 @@ def _st(st):
 def create_root_node(text, parser_cls, base_url=None, huge_tree=True):
     """Create root node for text using given parser class.
     """
-    lxml_version = parse_version(etree.__version__)
-    lxml_huge_tree_version = parse_version("4.2")
 
     body = text.strip().encode('utf8') or b'<html/>'
-    if huge_tree and lxml_version >= lxml_huge_tree_version:
+    if huge_tree and LXML_SUPPORTS_HUGE_TREE:
         parser = parser_cls(recover=True, encoding='utf8', huge_tree=True)
         root = etree.fromstring(body, parser=parser, base_url=base_url)
     else:
