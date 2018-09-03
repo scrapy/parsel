@@ -824,26 +824,31 @@ namespaces altogether and just work with element names, to write more
 simple/convenient XPaths. You can use the
 :meth:`Selector.remove_namespaces` method for that.
 
-Let's show an example that illustrates this with Github blog atom feed.
+Let's show an example that illustrates this with the Python Insider blog atom feed.
 
 Let's download the atom feed using `requests`_ and create a selector::
 
     >>> import requests
     >>> from parsel import Selector
-    >>> text = requests.get('https://github.com/blog.atom').text
+    >>> text = requests.get('https://feeds.feedburner.com/PythonInsider').text
     >>> sel = Selector(text=text, type='xml')
 
 This is how the file starts::
 
     <?xml version="1.0" encoding="UTF-8"?>
-    <feed xml:lang="en-US"
-          xmlns="http://www.w3.org/2005/Atom"
-          xmlns:media="http://search.yahoo.com/mrss/">
-      <id>tag:github.com,2008:/blog</id>
+    <?xml-stylesheet ...
+    <feed xmlns="http://www.w3.org/2005/Atom"
+          xmlns:openSearch="http://a9.com/-/spec/opensearchrss/1.0/"
+          xmlns:blogger="http://schemas.google.com/blogger/2008"
+          xmlns:georss="http://www.georss.org/georss"
+          xmlns:gd="http://schemas.google.com/g/2005"
+          xmlns:thr="http://purl.org/syndication/thread/1.0"
+          xmlns:feedburner="http://rssnamespace.org/feedburner/ext/1.0">
       ...
 
-You can see two namespace declarations: a default "http://www.w3.org/2005/Atom"
-and another one using the "media:" prefix for "http://search.yahoo.com/mrss/".
+You can see several namespace declarations including a default
+"http://www.w3.org/2005/Atom" and another one using the "gd:" prefix for
+"http://schemas.google.com/g/2005".
 
 We can try selecting all ``<link>`` objects and then see that it doesn't work
 (because the Atom XML namespace is obfuscating those nodes)::
@@ -856,8 +861,8 @@ nodes can be accessed directly by their names::
 
     >>> sel.remove_namespaces()
     >>> sel.xpath("//link")
-    [<Selector xpath='//link' data='<link xmlns="http://www.w3.org/2005/Atom'>,
-     <Selector xpath='//link' data='<link xmlns="http://www.w3.org/2005/Atom'>,
+    [<Selector xpath='//link' data='<link rel="alternate" type="text/html" h'>,
+     <Selector xpath='//link' data='<link rel="next" type="application/atom+'>,
      ...
 
 If you wonder why the namespace removal procedure isn't called always by default
@@ -883,11 +888,11 @@ Ad-hoc namespaces references
 references along with the query, through a ``namespaces`` argument,
 with the prefixes you declare being used in your XPath or CSS query.
 
-Let's use the same Atom feed from Github::
+Let's use the same Python Insider Atom feed::
 
     >>> import requests
     >>> from parsel import Selector
-    >>> text = requests.get('https://github.com/blog.atom').text
+    >>> text = requests.get('https://feeds.feedburner.com/PythonInsider').text
     >>> sel = Selector(text=text, type='xml')
 
 And try to select the links again, now using an "atom:" prefix
@@ -900,11 +905,11 @@ for the "link" node test::
 
 You can pass several namespaces (here we're using shorter 1-letter prefixes)::
 
-    >>> sel.xpath("//a:entry/m:thumbnail/@url",
-    ...               namespaces={"a": "http://www.w3.org/2005/Atom",
-    ...                           "m": "http://search.yahoo.com/mrss/"}).getall()
-    ['https://avatars1.githubusercontent.com/u/11529908?v=3&s=60',
-     'https://avatars0.githubusercontent.com/u/15114852?v=3&s=60',
+    >>> sel.xpath("//a:entry/a:author/g:image/@src",
+    ...           namespaces={"a": "http://www.w3.org/2005/Atom",
+    ...                       "g": "http://schemas.google.com/g/2005"}).getall()
+    ['http://photos1.blogger.com/blogger/4554/1119/400/beethoven_10.jpg',
+     '//lh3.googleusercontent.com/-7xisiK0EArc/AAAAAAAAAAI/AAAAAAAAAuM/-r6o6A8RKCM/s512-c/photo.jpg',
      ...
 
 
