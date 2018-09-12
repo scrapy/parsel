@@ -273,7 +273,7 @@ class Selector(object):
         will be compiled to a regular expression using ``re.compile(regex)``.
 
         By default, character entity references are replaced by their
-        corresponding character (except for ``&amp;`` and ``&lt;``.
+        corresponding character (except for ``&amp;`` and ``&lt;``).
         Passing ``replace_entities`` as ``False`` switches off these
         replacements.
         """
@@ -286,7 +286,7 @@ class Selector(object):
         the argument is not provided).
 
         By default, character entity references are replaced by their
-        corresponding character (except for ``&amp;`` and ``&lt;``.
+        corresponding character (except for ``&amp;`` and ``&lt;``).
         Passing ``replace_entities`` as ``False`` switches off these
         replacements.
         """

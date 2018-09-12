@@ -119,7 +119,7 @@ selectors. This API can be used for quickly selecting nested data::
      'image4_thumb.jpg',
      'image5_thumb.jpg']
 
-If you want to extract only first matched element, you can call the
+If you want to extract only the first matched element, you can call the
 selector ``.get()`` (or its alias ``.extract_first()`` commonly used in
 previous parsel versions)::
 
