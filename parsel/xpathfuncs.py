@@ -1,3 +1,4 @@
+import re
 from lxml import etree
 
 from six import string_types
@@ -48,6 +49,7 @@ def has_class(context, *classes):
     if node_cls is None:
         return False
     node_cls = ' ' + node_cls + ' '
+    node_cls = re.sub('\s+', ' ', node_cls)
     for cls in classes:
         if ' ' + cls + ' ' not in node_cls:
             return False
