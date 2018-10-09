@@ -3,6 +3,11 @@ from lxml import etree
 
 from six import string_types
 
+from w3lib.html import HTML5_WHITESPACE
+
+regex = '[{}]+'.format(HTML5_WHITESPACE)
+replace_html5_whitespaces = re.compile(regex).sub
+
 
 def set_xpathfunc(fname, func):
     """Register a custom extension function to use in XPath expressions.
@@ -49,7 +54,7 @@ def has_class(context, *classes):
     if node_cls is None:
         return False
     node_cls = ' ' + node_cls + ' '
-    node_cls = re.sub('\s+', ' ', node_cls)
+    node_cls = replace_html5_whitespaces(' ', node_cls)
     for cls in classes:
         if ' ' + cls + ' ' not in node_cls:
             return False
