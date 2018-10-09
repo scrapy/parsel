@@ -26,7 +26,7 @@ def has_environment_marker_platform_impl_support():
     return parse_version(setuptools_version) >= parse_version('18.5')
 
 install_requires = [
-    'w3lib>=1.8.0',
+    'w3lib>=1.19.0',
     'lxml>=2.3',
     'six>=1.5.2',
     'cssselect>=0.9'
