@@ -694,7 +694,6 @@ class SelectorTestCase(unittest.TestCase):
         sel = self.sscls(text=u'nothing', base_url='http://example.com')
         self.assertEqual(u'http://example.com', sel.root.base)
 
-
     def test_extending_selector(self):
         class MySelectorList(Selector.selectorlist_cls):
             pass
@@ -707,6 +706,11 @@ class SelectorTestCase(unittest.TestCase):
         self.assertIsInstance(sel.xpath('//div')[0], MySelector)
         self.assertIsInstance(sel.css('div'), MySelectorList)
         self.assertIsInstance(sel.css('div')[0], MySelector)
+
+    def test_replacement_null_char_from_body(self):
+        text = u'<html>\x00<body><p>Grainy</p></body></html>'
+        self.assertEqual(u'<html><body><p>Grainy</p></body></html>',
+                          self.sscls(text).extract())
 
 class ExsltTestCase(unittest.TestCase):
 
