@@ -3,6 +3,15 @@
 History
 -------
 
+1.5.1 (2018-10-25)
+~~~~~~~~~~~~~~~~~~
+
+* ``has-class`` XPath function handles newlines and other separators
+  in class names properly;
+* fixed parsing of HTML documents with null bytes;
+* documentation improvements;
+* Python 3.7 tests are run on CI; other test improvements.
+
 1.5.0 (2018-07-04)
 ~~~~~~~~~~~~~~~~~~
 
