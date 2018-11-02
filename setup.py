@@ -29,7 +29,8 @@ install_requires = [
     'w3lib>=1.19.0',
     'lxml>=2.3',
     'six>=1.5.2',
-    'cssselect>=0.9'
+    'cssselect>=0.9',
+    'html-text>=0.4.1',
 ]
 extras_require = {}
 

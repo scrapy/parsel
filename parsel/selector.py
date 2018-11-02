@@ -150,6 +150,15 @@ class SelectorList(list):
         else:
             return {}
 
+    def text(self, clean_html=True, guess_punct_space=True, guess_layout=True,
+             sep='\n'):
+        return sep.join(
+            x.text(clean_html=clean_html,
+                   guess_punct_space=guess_punct_space,
+                   guess_layout=guess_layout)
+            for x in self
+        )
+
 
 class Selector(object):
     """
@@ -162,7 +171,7 @@ class Selector(object):
     If ``type`` is ``None``, the selector defaults to ``"html"``.
     """
 
-    __slots__ = ['text', 'namespaces', 'type', '_expr', 'root',
+    __slots__ = ['namespaces', 'type', '_expr', 'root',
                  '__weakref__', '_parser', '_csstranslator', '_tostring_method']
 
     _default_type = None
@@ -345,6 +354,20 @@ class Selector(object):
         """Return the attributes dictionary for underlying element.
         """
         return dict(self.root.attrib)
+
+    def text(self, clean_html=True, guess_punct_space=True, guess_layout=True):
+        from html_text.html_text import _clean_html, _html_to_text
+        tree = _clean_html(self.root) if clean_html else self.root
+        return _html_to_text(tree,
+                             guess_punct_space=guess_punct_space,
+                             guess_layout=guess_layout)
+
+    # def cleaned(self):
+    #     from html_text.html_text import _clean_html
+    #     root = _clean_html(self.root)
+    #     return self.__class__(root=root, _expr=self._expr,
+    #                           namespaces=self.namespaces,
+    #                           type=self.type)
 
     def __bool__(self):
         """
