@@ -6,6 +6,8 @@ import sys
 
 import six
 from lxml import etree, html
+from lxml.html.clean import Cleaner
+import html_text
 
 from .utils import flatten, iflatten, extract_regex
 from .csstranslator import HTMLTranslator, GenericTranslator
@@ -121,21 +123,42 @@ class SelectorList(list):
         else:
             return default
 
-    def getall(self):
+    def getall(self, text=False, cleaner='auto',
+               guess_punct_space=True, guess_layout=True):
         """
         Call the ``.get()`` method for each element is this list and return
         their results flattened, as a list of unicode strings.
+
+        ``text``, ``cleaner``, ``guess_punct_space`` and ``guess_layout``
+        options are passed to :meth:`~.Selector.get`; see
+        :meth:`~.Selector.get` for more details.
         """
-        return [x.get() for x in self]
+        return [
+            x.get(
+                text=text,
+                cleaner=cleaner,
+                guess_punct_space=guess_punct_space,
+                guess_layout=guess_layout
+            )
+            for x in self
+        ]
     extract = getall
 
-    def get(self, default=None):
+    def get(self, default=None, text=False, cleaner='auto',
+            guess_punct_space=True, guess_layout=True):
         """
         Return the result of ``.get()`` for the first element in this list.
-        If the list is empty, return the default value.
+        If the list is empty, return the ``default`` value.
+
+        ``text``, ``cleaner``, ``guess_punct_space`` and ``guess_layout``
+        options are passed to :meth:`Selector.get`; see :meth:`~.Selector.get`
+        for more details.
         """
         for x in self:
-            return x.get()
+            return x.get(text=text,
+                         cleaner=cleaner,
+                         guess_punct_space=guess_punct_space,
+                         guess_layout=guess_layout)
         else:
             return default
     extract_first = get
@@ -149,15 +172,6 @@ class SelectorList(list):
             return x.attrib
         else:
             return {}
-
-    def text(self, clean_html=True, guess_punct_space=True, guess_layout=True,
-             sep='\n'):
-        return sep.join(
-            x.text(clean_html=clean_html,
-                   guess_punct_space=guess_punct_space,
-                   guess_layout=guess_layout)
-            for x in self
-        )
 
 
 class Selector(object):
@@ -188,6 +202,8 @@ class Selector(object):
     }
     _lxml_smart_strings = False
     selectorlist_cls = SelectorList
+    _text_cleaner = html_text.cleaner
+    _html_cleaner = Cleaner()
 
     def __init__(self, text=None, type=None, namespaces=None, root=None,
                  base_url=None, _expr=None):
@@ -301,30 +317,87 @@ class Selector(object):
         """
         return next(iflatten(self.re(regex, replace_entities=replace_entities)), default)
 
-    def get(self):
+    def get(self, text=False, cleaner='auto',
+            guess_punct_space=True, guess_layout=True):
         """
         Serialize and return the matched nodes in a single unicode string.
         Percent encoded content is unquoted.
+
+        When ``text`` is False (default), HTML or XML is extracted. Pass
+        ``text=True`` to extract text content (html-text library is used).
+        Text extraction algorithm assumes that the document is an HTML
+        document, and uses HTML-specific rules.
+
+        ``cleaner`` argument allows to clean HTML before extracting the
+        content. Allowed values:
+
+        * "auto" (default) - don't clean when text=False, clean with
+          options tuned for text extraction when text=True;
+        * "text" - clean with options tuned for text extraction: elements
+          like ``<script>`` and ``<style>`` are removed, cleaning options
+          are tuned for speed, assuming text extraction is the end goal;
+        * "html" - use default ``lxml.html.clean.Cleaner``. This is useful
+          if you want to make .get() output more human-readable, but still
+          preserve HTML tags.
+        * None - don't clean, even when ``text=True``. Useful if you have
+          an already cleaned tree, e.g. after calling :meth:`Selector.cleaned`.
+        * custom ``lxml.html.clean.Cleaner`` objects are also supported.
+
+        ``guess_punct_space`` and ``guess_layout`` options allow to customize
+        text extraction algorithm. By default, when ``text=True``,
+        parsel tries to insert newlines and blank lines as appropriate,
+        and be smart about whitespaces around inline tags,
+        so that the text output looks similar to browser's.
+
+        Pass ``guess_punct_space=False`` to disable punctuation handling.
+        This option has no effect when ``text=False``.
+
+        Use ``guess_layout=False`` to avoid adding newlines - content will
+        be just a single line of text, using whitespaces as separators.
+        This option has no effect when ``text=False``.
         """
+        sel = self
+        if cleaner == 'auto':
+            if text:
+                sel = self.cleaned('text')
+        elif cleaner is not None:
+            sel = self.cleaned(cleaner)
+        tree = sel.root
+
+        if text:
+            return html_text.etree_to_text(tree,
+                guess_punct_space=guess_punct_space,
+                guess_layout=guess_layout
+            )
+
         try:
-            return etree.tostring(self.root,
+            return etree.tostring(tree,
                                   method=self._tostring_method,
                                   encoding='unicode',
                                   with_tail=False)
         except (AttributeError, TypeError):
-            if self.root is True:
+            if tree is True:
                 return u'1'
-            elif self.root is False:
+            elif tree is False:
                 return u'0'
             else:
-                return six.text_type(self.root)
+                return six.text_type(tree)
     extract = get
 
-    def getall(self):
+    def getall(self, text=False, cleaner='auto',
+               guess_punct_space=True, guess_layout=True):
         """
-        Serialize and return the matched node in a 1-element list of unicode strings.
+        Serialize and return the matched node in a 1-element list of unicode
+        strings.
+
+        See :meth:`~.Selector.get` for options.
         """
-        return [self.get()]
+        return [self.get(
+            text=text,
+            cleaner=cleaner,
+            guess_punct_space=guess_punct_space,
+            guess_layout=guess_layout,
+        )]
 
     def register_namespace(self, prefix, uri):
         """
@@ -355,19 +428,29 @@ class Selector(object):
         """
         return dict(self.root.attrib)
 
-    def text(self, clean_html=True, guess_punct_space=True, guess_layout=True):
-        from html_text.html_text import _clean_html, _html_to_text
-        tree = _clean_html(self.root) if clean_html else self.root
-        return _html_to_text(tree,
-                             guess_punct_space=guess_punct_space,
-                             guess_layout=guess_layout)
+    def cleaned(self, cleaner='html'):
+        """
+        Return a copy of a Selector, with underlying subtree cleaned.
+        Allowed values of ``cleaner`` argument:
 
-    # def cleaned(self):
-    #     from html_text.html_text import _clean_html
-    #     root = _clean_html(self.root)
-    #     return self.__class__(root=root, _expr=self._expr,
-    #                           namespaces=self.namespaces,
-    #                           type=self.type)
+        * "html" (default) - use default ``lxml.html.clean.Cleaner``;
+        * "text" - clean with options tuned for text extraction: elements
+          like ``<script>`` and ``<style>`` are removed, cleaning options
+          are tuned for speed, assuming text extraction is the end goal;
+        * custom ``lxml.html.clean.Cleaner`` objects are also supported.
+        """
+        if isinstance(cleaner, six.string_types):
+            if cleaner not in {'html', 'text'}:
+                raise ValueError("cleaner must be 'html', 'text' or "
+                                 "an lxml.html.clean.Cleaner instance")
+        if cleaner == 'html':
+            cleaner = self._html_cleaner
+        elif cleaner == 'text':
+            cleaner = self._text_cleaner
+        root = cleaner.clean_html(self.root)
+        return self.__class__(root=root, _expr=self._expr,
+                              namespaces=self.namespaces,
+                              type=self.type)
 
     def __bool__(self):
         """
