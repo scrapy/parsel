@@ -385,6 +385,37 @@ XPath specification.
 .. _Location Paths: https://www.w3.org/TR/xpath#location-paths
 
 
+Removing elements
+-----------------
+
+If for any reason you need to remove elements based on a Selector or
+a SelectorList, you can do it with the ``remove()`` method, available for both
+classes.
+
+Example removing an ad from a blog post:
+
+    >>> from parsel import Selector
+    >>> doc = u"""
+    ... <article>
+    ...     <div class="row">Content paragraph...</div>
+    ...     <div class="row">
+    ...         <div class="ad">
+    ...             Ad content...
+    ...             <a href="http://...">Link</a>
+    ...         </div>
+    ...     </div>
+    ...     <div class="row">More content...</div>
+    ... </article>
+    ... """
+    >>> sel = Selector(text=doc)
+    >>> sel.xpath('//div/text()').getall()
+    ['Content paragraph...', 'Ad content...', 'Link', 'More content...']
+    >>> sel.xpath('//div[@class="ad"]').remove()
+    >>> sel.xpath('//div//text()').getall()
+    ['Content paragraph...', 'More content...']
+    >>>
+
+
 Using EXSLT extensions
 ----------------------
 

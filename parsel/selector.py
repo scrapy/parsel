@@ -150,6 +150,13 @@ class SelectorList(list):
         else:
             return {}
 
+    def remove(self):
+        """
+        Remove matched nodes from the parent for each element in this list.
+        """
+        for x in self:
+            x.remove()
+
 
 class Selector(object):
     """
@@ -341,6 +348,12 @@ class Selector(object):
                     el.attrib[an.split('}', 1)[1]] = el.attrib.pop(an)
         # remove namespace declarations
         etree.cleanup_namespaces(self.root)
+
+    def remove(self):
+        """
+        Remove matched nodes from the parent element.
+        """
+        self.root.getparent().remove(self.root)
 
     @property
     def attrib(self):

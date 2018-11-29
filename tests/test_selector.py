@@ -745,6 +745,21 @@ class SelectorTestCase(unittest.TestCase):
         self.assertEqual(u'<html><body><p>Grainy</p></body></html>',
                           self.sscls(text).extract())
 
+    def test_remove_selector_list(self):
+        sel = self.sscls(text=u'<html><body><ul><li>1</li><li>2</li><li>3</li></ul></body></html>')
+        sel_list = sel.css('li')
+        sel_list.remove()
+        self.assertIsInstance(sel.css('li'), self.sscls.selectorlist_cls)
+        self.assertEqual(sel.css('li'), [])
+
+    def test_remove_selector(self):
+        sel = self.sscls(text=u'<html><body><ul><li>1</li><li>2</li><li>3</li></ul></body></html>')
+        sel_list = sel.css('li')
+        sel_list[0].remove()
+        self.assertIsInstance(sel.css('li'), self.sscls.selectorlist_cls)
+        self.assertEqual(sel.css('li::text').getall(), ['2', '3'])
+
+
 class ExsltTestCase(unittest.TestCase):
 
     sscls = Selector
