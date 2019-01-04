@@ -258,6 +258,8 @@ class Selector(object):
 
         In the background, CSS queries are translated into XPath queries using
         `cssselect`_ library and run ``.xpath()`` method.
+        
+        .. _cssselect: https://pypi.python.org/pypi/cssselect/
         """
         return self.xpath(self._css2xpath(query))
 
