@@ -6,6 +6,7 @@ import sys
 
 import six
 from lxml import etree, html
+from lxml.html import html5parser
 
 from .utils import flatten, iflatten, extract_regex
 from .csstranslator import HTMLTranslator, GenericTranslator
@@ -23,6 +24,10 @@ _ctgroup = {
     'xml': {'_parser': SafeXMLParser,
             '_csstranslator': GenericTranslator(),
             '_tostring_method': 'xml'},
+    'html5': {'_parser': html5parser.HTMLParser,
+              '_csstranslator': HTMLTranslator(),
+              '_tostring_method': 'html',
+    },
 }
 
 
@@ -39,8 +44,12 @@ def create_root_node(text, parser_cls, base_url=None):
     """Create root node for text using given parser class.
     """
     body = text.strip().replace('\x00', '').encode('utf8') or b'<html/>'
-    parser = parser_cls(recover=True, encoding='utf8')
-    root = etree.fromstring(body, parser=parser, base_url=base_url)
+    if parser_cls != html5parser.HTMLParser:
+        parser = parser_cls(recover=True, encoding='utf8')
+        root = etree.fromstring(body, parser=parser, base_url=base_url)
+    else:
+        parser = parser_cls(namespaceHTMLElements=False)
+        root = html5parser.fromstring(body, parser=parser)
     if root is None:
         root = etree.fromstring(b'<html/>', parser=parser, base_url=base_url)
     return root
@@ -158,7 +167,7 @@ class Selector(object):
 
     ``text`` is a ``unicode`` object in Python 2 or a ``str`` object in Python 3
 
-    ``type`` defines the selector type, it can be ``"html"``, ``"xml"`` or ``None`` (default).
+    ``type`` defines the selector type, it can be ``"html"``, ``"xml"``, ``"html5"`` or ``None`` (default).
     If ``type`` is ``None``, the selector defaults to ``"html"``.
     """
 

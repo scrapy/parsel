@@ -498,7 +498,7 @@ class SelectorTestCase(unittest.TestCase):
                          ["John", "Paul"])
         self.assertEqual(x.xpath("//ul/li").re(r"Age: (\d+)"),
                          ["10", "20"])
-        
+
         # Test named group, hit and miss
         x = self.sscls(text=u'foobar')
         self.assertEqual(x.re('(?P<extract>foo)'), ['foo'])
@@ -511,7 +511,7 @@ class SelectorTestCase(unittest.TestCase):
     def test_re_replace_entities(self):
         body = u"""<script>{"foo":"bar &amp; &quot;baz&quot;"}</script>"""
         x = self.sscls(text=body)
-        
+
         name_re = re.compile('{"foo":(.*)}')
 
         # by default, only &amp; and &lt; are preserved ;
@@ -711,6 +711,39 @@ class SelectorTestCase(unittest.TestCase):
         text = u'<html>\x00<body><p>Grainy</p></body></html>'
         self.assertEqual(u'<html><body><p>Grainy</p></body></html>',
                           self.sscls(text).extract())
+
+    def test_characters_gt_and_lt(self):
+        """HTML5 parser tests: greater and less than symbols work as expected."""
+        lt_elem = '20 < 100'
+        gt_elem = '120 > 100'
+        body = u'''<html>
+                    <head></head>
+                    <body>
+                     <div id="distance">{0}</div>
+                    <body>
+                </html>'''
+
+        sel = self.sscls(text=body.format(lt_elem), type='html5')
+        lt_res = sel.xpath('//div[@id="distance"]/text()').get()
+        self.assertEqual(lt_res, lt_elem, msg='less than(<) parsing does not work as expected')
+
+        sel = self.sscls(text=body.format(gt_elem), type='html5')
+        gt_res = sel.xpath('//div[@id="distance"]/text()').get()
+        self.assertEqual(gt_res, gt_elem, msg='greater than(>) parsing does not work as expected')
+
+    def test_complete_tags(self):
+        """HTML5 parser complete/fill tags as expected."""
+        body = u'''<html>
+                    <head></head>
+                       <body>
+                        <li>one<div></li>
+                        <li>two</li>
+                       </body>
+                </html>'''
+        sel = self.sscls(text=body, type='html5')
+        res = sel.xpath('//div/text()').get()
+        self.assertEqual(res, None)
+
 
 class ExsltTestCase(unittest.TestCase):
 
