@@ -44,12 +44,18 @@ def create_root_node(text, parser_cls, base_url=None):
     """Create root node for text using given parser class.
     """
     body = text.strip().replace('\x00', '').encode('utf8') or b'<html/>'
-    if parser_cls != html5parser.HTMLParser:
+    root = None
+    if parser_cls == html5parser.HTMLParser:
+        try:
+            parser = parser_cls(namespaceHTMLElements=False)
+            root = parser.parse(body, useChardet=False, override_encoding='utf8').getroot()
+        except ValueError:
+            # In case that's not possible to parse with html5parser change to normal htmlparser
+            parser = html.HTMLParser(recover=True, encoding='utf8')
+            root = etree.fromstring(body, parser=parser, base_url=base_url)
+    else:
         parser = parser_cls(recover=True, encoding='utf8')
         root = etree.fromstring(body, parser=parser, base_url=base_url)
-    else:
-        parser = parser_cls(namespaceHTMLElements=False)
-        root = html5parser.fromstring(body, parser=parser)
     if root is None:
         root = etree.fromstring(b'<html/>', parser=parser, base_url=base_url)
     return root
