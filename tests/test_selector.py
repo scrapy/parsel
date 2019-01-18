@@ -786,6 +786,13 @@ class SelectorTestCase(unittest.TestCase):
         res = sel.xpath('//div').get()
         self.assertEqual(res, expected)
 
+    def test_control_characters(self):
+        """HTML5parser can't parse sequence characters."""
+        body = u'<p id="\x01">'
+        self.assertRaisesRegexp(TypeError, 'HTML5parser does not support control characters',
+                                self.sscls, body, 'html5')
+
+
 @ddt
 class ExsltTestCase(unittest.TestCase):
     sscls = Selector
