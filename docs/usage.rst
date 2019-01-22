@@ -530,6 +530,8 @@ inside another ``itemscope``.
 .. _regular expressions: http://exslt.org/regexp/index.html
 .. _set manipulation: http://exslt.org/set/index.html
 
+.. _topics-xpath-other-extensions:
+
 Other XPath extensions
 ----------------------
 
@@ -912,6 +914,7 @@ You can pass several namespaces (here we're using shorter 1-letter prefixes)::
      '//lh3.googleusercontent.com/-7xisiK0EArc/AAAAAAAAAAI/AAAAAAAAAuM/-r6o6A8RKCM/s512-c/photo.jpg',
      ...
 
+.. _topics-xpath-variables:
 
 Variables in XPath expressions
 ------------------------------
