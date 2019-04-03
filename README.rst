@@ -1,6 +1,6 @@
-===============================
+======
 Parsel
-===============================
+======
 
 .. image:: https://img.shields.io/travis/scrapy/parsel/master.svg
    :target: https://travis-ci.org/scrapy/parsel
@@ -15,21 +15,16 @@ Parsel
    :alt: Coverage report
 
 
-Parsel is a library to extract data from HTML and XML using XPath and CSS selectors
+Parsel is a BSD-licensed Python_ library to extract data from HTML_ and XML_
+using XPath_ and CSS_ selectors, optionally combined with
+`regular expressions`_.
 
-* Free software: BSD license
-* Documentation: https://parsel.readthedocs.org.
+Find the Parsel online documentation at https://parsel.readthedocs.org.
 
-Features
---------
-
-* Extract text using CSS or XPath selectors
-* Regular expression helper methods
-
-Example::
+.. code-block:: python
 
     >>> from parsel import Selector
-    >>> sel = Selector(text=u"""<html>
+    >>> selector = Selector(text=u"""<html>
             <body>
                 <h1>Hello, Parsel!</h1>
                 <ul>
@@ -38,14 +33,18 @@ Example::
                 </ul
             </body>
             </html>""")
-    >>>
-    >>> sel.css('h1::text').get()
+    >>> selector.css('h1::text').get()
     'Hello, Parsel!'
-    >>>
-    >>> sel.css('h1::text').re('\w+')
+    >>> selector.xpath('//h1/text()').re(r'\w+')
     ['Hello', 'Parsel']
-    >>>
-    >>> for e in sel.css('ul > li'):
-    ...     print(e.xpath('.//a/@href').get())
+    >>> for li in selector.css('ul > li'):
+    ...     print(li.xpath('.//@href').get())
     http://example.com
     http://scrapy.org
+
+.. _CSS: https://en.wikipedia.org/wiki/Cascading_Style_Sheets
+.. _HTML: https://en.wikipedia.org/wiki/HTML
+.. _Python: https://www.python.org/
+.. _regular expressions: https://docs.python.org/library/re.html
+.. _XML: https://en.wikipedia.org/wiki/XML
+.. _XPath: https://en.wikipedia.org/wiki/XPath
