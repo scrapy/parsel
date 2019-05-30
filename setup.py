@@ -30,7 +30,7 @@ install_requires = [
     'lxml>=2.3',
     'six>=1.5.2',
     'cssselect>=0.9',
-    'html-text>=0.4.1',
+    'html-text>=0.5.1',
 ]
 extras_require = {}
 
