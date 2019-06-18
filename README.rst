@@ -35,7 +35,7 @@ Example::
                 <ul>
                     <li><a href="http://example.com">Link 1</a></li>
                     <li><a href="http://scrapy.org">Link 2</a></li>
-                </ul
+                </ul>
             </body>
             </html>""")
     >>>
