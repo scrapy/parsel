@@ -625,28 +625,34 @@ class SelectorTestCase(unittest.TestCase):
     def test_remove_namespaces(self):
         xml = u"""<?xml version="1.0" encoding="UTF-8"?>
 <feed xmlns="http://www.w3.org/2005/Atom" xml:lang="en-US" xmlns:media="http://search.yahoo.com/mrss/">
-  <link type="text/html">
-  <link type="application/atom+xml">
+  <link type="text/html"/>
+  <entry>
+    <link type="text/html"/>
+  </entry>
+  <link type="application/atom+xml"/>
 </feed>
 """
         sel = self.sscls(text=xml, type='xml')
         self.assertEqual(len(sel.xpath("//link")), 0)
         self.assertEqual(len(sel.xpath("./namespace::*")), 3)
         sel.remove_namespaces()
-        self.assertEqual(len(sel.xpath("//link")), 2)
+        self.assertEqual(len(sel.xpath("//link")), 3)
         self.assertEqual(len(sel.xpath("./namespace::*")), 1)
 
     def test_remove_attributes_namespaces(self):
         xml = u"""<?xml version="1.0" encoding="UTF-8"?>
 <feed xmlns:atom="http://www.w3.org/2005/Atom" xml:lang="en-US" xmlns:media="http://search.yahoo.com/mrss/">
-  <link atom:type="text/html">
-  <link atom:type="application/atom+xml">
+  <link atom:type="text/html"/>
+  <entry>
+    <link atom:type="text/html"/>
+  </entry>
+  <link atom:type="application/atom+xml"/>
 </feed>
 """
         sel = self.sscls(text=xml, type='xml')
         self.assertEqual(len(sel.xpath("//link/@type")), 0)
         sel.remove_namespaces()
-        self.assertEqual(len(sel.xpath("//link/@type")), 2)
+        self.assertEqual(len(sel.xpath("//link/@type")), 3)
 
     def test_smart_strings(self):
         """Lxml smart strings return values"""
