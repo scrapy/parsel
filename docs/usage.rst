@@ -392,6 +392,10 @@ If for any reason you need to remove elements based on a Selector or
 a SelectorList, you can do it with the ``remove()`` method, available for both
 classes.
 
+.. warning:: this is a destructive action and cannot be undone. The original
+    content of the selector is removed from the elements tree. This could be useful
+    when trying to reduce the memory footprint of Responses.
+
 Example removing an ad from a blog post:
 
     >>> from parsel import Selector
