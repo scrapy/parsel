@@ -639,6 +639,33 @@ class SelectorTestCase(unittest.TestCase):
         self.assertEqual(len(sel.xpath("//link")), 3)
         self.assertEqual(len(sel.xpath("./namespace::*")), 1)
 
+    def test_remove_namespaces_embedded(self):
+        xml = u"""
+        <feed xmlns="http://www.w3.org/2005/Atom">
+          <link type="text/html"/>
+          <entry>
+            <link type="text/html"/>
+          </entry>
+          <svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="0 0 100 100">
+            <linearGradient id="gradient">
+              <stop class="begin" offset="0%" style="stop-color:yellow;"/>
+              <stop class="end" offset="80%" style="stop-color:green;"/>
+            </linearGradient>
+            <circle cx="50" cy="50" r="30" style="fill:url(#gradient)" />
+          </svg>
+        </feed>
+        """
+        sel = self.sscls(text=xml, type='xml')
+        self.assertEqual(len(sel.xpath("//link")), 0)
+        self.assertEqual(len(sel.xpath("//stop")), 0)
+        self.assertEqual(len(sel.xpath("./namespace::*")), 2)
+        self.assertEqual(len(sel.xpath("//f:link", namespaces={'f': 'http://www.w3.org/2005/Atom'})), 2)
+        self.assertEqual(len(sel.xpath("//s:stop", namespaces={'s': 'http://www.w3.org/2000/svg'})), 2)
+        sel.remove_namespaces()
+        self.assertEqual(len(sel.xpath("//link")), 2)
+        self.assertEqual(len(sel.xpath("//stop")), 2)
+        self.assertEqual(len(sel.xpath("./namespace::*")), 1)
+
     def test_remove_attributes_namespaces(self):
         xml = u"""<?xml version="1.0" encoding="UTF-8"?>
 <feed xmlns:atom="http://www.w3.org/2005/Atom" xml:lang="en-US" xmlns:media="http://search.yahoo.com/mrss/">
