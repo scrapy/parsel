@@ -7,7 +7,7 @@ import sys
 import six
 from lxml import etree, html
 
-from .utils import flatten, iflatten, extract_regex, shorten_selector_data
+from .utils import flatten, iflatten, extract_regex, shorten
 from .csstranslator import HTMLTranslator, GenericTranslator
 
 
@@ -358,6 +358,6 @@ class Selector(object):
     __nonzero__ = __bool__
 
     def __str__(self):
-        data = repr(shorten_selector_data(self.get(), width=40))
+        data = repr(shorten(self.get(), width=40))
         return "<%s xpath=%r data=%s>" % (type(self).__name__, self._expr, data)
     __repr__ = __str__

@@ -82,7 +82,13 @@ def extract_regex(regex, text, replace_entities=True):
         return strings
     return [w3lib_replace_entities(s, keep=['lt', 'amp']) for s in strings]
 
-def shorten_selector_data(data, width):
-    """Shortens the preview of extracted data by adding placeholder '...'
-    """
-    return data[:width - 3] + "..." if (len(data) > width - 3) else data
+
+def shorten(text, width, suffix='...'):
+    """Truncate the given text to fit in the given width."""
+    if len(text) <= width:
+        return text
+    if width > len(suffix):
+        return text[:width-len(suffix)] + suffix
+    if width >= 0:
+        return suffix[len(suffix)-width:]
+    raise ValueError('width must be equal or greater than 0')
