@@ -133,9 +133,9 @@ class SelectorTestCase(unittest.TestCase):
         body = u"<p><input name='{}' value='\xa9'/></p>".format(50 * 'b')
         sel = self.sscls(text=body)
 
-        representation = "<Selector xpath='//input/@name' data='{}'>".format(40 * 'b')
+        representation = "<Selector xpath='//input/@name' data='{}...'>".format(37 * 'b')
         if six.PY2:
-            representation = "<Selector xpath='//input/@name' data=u'{}'>".format(40 * 'b')
+            representation = "<Selector xpath='//input/@name' data=u'{}...'>".format(37 * 'b')
 
         self.assertEqual(
             [repr(it) for it in sel.xpath('//input/@name')],
