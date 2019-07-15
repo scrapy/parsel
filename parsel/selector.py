@@ -41,7 +41,7 @@ def _st(st):
         raise ValueError('Invalid type: %s' % st)
 
 
-def create_root_node(text, parser_cls, base_url=None, huge_tree=True):
+def create_root_node(text, parser_cls, base_url=None, huge_tree=LXML_SUPPORTS_HUGE_TREE):
     """Create root node for text using given parser class.
     """
 
@@ -197,7 +197,7 @@ class Selector(object):
     selectorlist_cls = SelectorList
 
     def __init__(self, text=None, type=None, namespaces=None, root=None,
-                 base_url=None, _expr=None, huge_tree=True):
+                 base_url=None, _expr=None, huge_tree=LXML_SUPPORTS_HUGE_TREE):
         self.type = st = _st(type or self._default_type)
         self._parser = _ctgroup[st]['_parser']
         self._csstranslator = _ctgroup[st]['_csstranslator']
@@ -219,7 +219,7 @@ class Selector(object):
     def __getstate__(self):
         raise TypeError("can't pickle Selector objects")
 
-    def _get_root(self, text, base_url=None, huge_tree=True):
+    def _get_root(self, text, base_url=None, huge_tree=LXML_SUPPORTS_HUGE_TREE):
         return create_root_node(text, self._parser, base_url=base_url, huge_tree=huge_tree)
 
     def xpath(self, query, namespaces=None, **kwargs):
