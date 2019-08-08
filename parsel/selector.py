@@ -339,8 +339,8 @@ class Selector(object):
             for an in el.attrib.keys():
                 if an.startswith('{'):
                     el.attrib[an.split('}', 1)[1]] = el.attrib.pop(an)
-            # remove namespace declarations
-            etree.cleanup_namespaces(self.root)
+        # remove namespace declarations
+        etree.cleanup_namespaces(self.root)
 
     @property
     def attrib(self):
