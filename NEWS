@@ -6,8 +6,7 @@ History
 1.5.2 (2019-08-09)
 ~~~~~~~~~~~~~~~~~~
 
-* :meth:`Selector.remove_namespaces <parsel.selector.Selector.remove_namespaces>`
-  received a significant performance improvement
+* ``Selector.remove_namespaces`` received a significant performance improvement
 * The value of ``data`` within the printable representation of a selector
   (``repr(selector)``) now ends in ``...`` when truncated, to make the
   truncation obvious.
