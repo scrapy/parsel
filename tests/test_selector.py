@@ -6,6 +6,7 @@ import unittest
 import pickle
 
 from parsel import Selector
+from parsel.selector import InvalidSelectorError
 
 
 class SelectorTestCase(unittest.TestCase):
@@ -758,6 +759,26 @@ class SelectorTestCase(unittest.TestCase):
         sel_list[0].remove()
         self.assertIsInstance(sel.css('li'), self.sscls.selectorlist_cls)
         self.assertEqual(sel.css('li::text').getall(), ['2', '3'])
+
+    def test_remove_invalid_selector_list(self):
+        sel = self.sscls(text=u'<html><body><ul><li>1</li><li>2</li><li>3</li></ul></body></html>')
+        sel_list = sel.css('li::text')
+        self.assertEqual(sel_list.getall(), ['1', '2', '3'])
+        with self.assertRaises(InvalidSelectorError):
+            sel_list.remove()
+
+        self.assertIsInstance(sel.css('li'), self.sscls.selectorlist_cls)
+        self.assertEqual(sel.css('li::text').getall(), ['1', '2', '3'])
+
+    def test_remove_invalid_selector(self):
+        sel = self.sscls(text=u'<html><body><ul><li>1</li><li>2</li><li>3</li></ul></body></html>')
+        sel_list = sel.css('li::text')
+        self.assertEqual(sel_list.getall(), ['1', '2', '3'])
+        with self.assertRaises(InvalidSelectorError):
+            sel_list[0].remove()
+
+        self.assertIsInstance(sel.css('li'), self.sscls.selectorlist_cls)
+        self.assertEqual(sel.css('li::text').getall(), ['1', '2', '3'])
 
 
 class ExsltTestCase(unittest.TestCase):

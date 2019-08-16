@@ -11,6 +11,11 @@ from .utils import flatten, iflatten, extract_regex, shorten
 from .csstranslator import HTMLTranslator, GenericTranslator
 
 
+class InvalidSelectorError(Exception):
+
+    pass
+
+
 class SafeXMLParser(etree.XMLParser):
     def __init__(self, *args, **kwargs):
         kwargs.setdefault('resolve_entities', False)
@@ -353,7 +358,16 @@ class Selector(object):
         """
         Remove matched nodes from the parent element.
         """
-        self.root.getparent().remove(self.root)
+        try:
+            parent = self.root.getparent()
+        except AttributeError:
+            raise InvalidSelectorError(
+                "The specified selector does not have a parent and could not be removed. "
+                "Make sure you're using a proper tag selector. "
+                "Try to use 'li' instead of 'li::text', for example."
+            )
+
+        parent.remove(self.root)
 
     @property
     def attrib(self):
