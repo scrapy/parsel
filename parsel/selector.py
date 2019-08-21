@@ -12,12 +12,10 @@ from .csstranslator import HTMLTranslator, GenericTranslator
 
 
 class CannotRemovePseudoElement(Exception):
-
     pass
 
 
 class CannotRemoveRootElement(Exception):
-
     pass
 
 
