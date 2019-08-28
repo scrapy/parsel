@@ -797,18 +797,25 @@ class SelectorTestCase(unittest.TestCase):
         </html>
         """
 
+        # If lxml doesn't support huge trees expect wrong results and a warning
         if lxml_version < lxml_huge_tree_version:
-            # If there is no huge_tree support don't run this test, but expect a ValueError
-            self.assertRaises(ValueError, lambda: Selector(text=content))
+            with self.assertWarnsRegex(UserWarning, r'huge_tree'):
+                sel = Selector(text=content)
+                self.assertEqual(len(sel.css("span")), 255)
+                self.assertEqual(len(sel.css("td")), 0)
             return
 
+        # Same goes for explicitly disabling huge trees
+        with self.assertWarnsRegex(UserWarning, r'huge_tree'):
+            sel = Selector(text=content, huge_tree=False)
+            self.assertEqual(len(sel.css("span")), 255)
+            self.assertEqual(len(sel.css("td")), 0)
+
+        # If huge trees are enabled, elements with a depth > 255 should be found
         sel = Selector(text=content)
         nest_level = 282
         self.assertEqual(len(sel.css("span")), nest_level)
         self.assertEqual(len(sel.css("td")), 1)
-
-        # Without huge_tree support a value error is expected
-        self.assertRaises(ValueError, lambda: Selector(text=content, huge_tree=False))
 
 
 class ExsltTestCase(unittest.TestCase):
