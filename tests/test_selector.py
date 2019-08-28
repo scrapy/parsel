@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 import re
+import warnings
 import weakref
 import six
 import unittest
@@ -799,16 +800,18 @@ class SelectorTestCase(unittest.TestCase):
 
         # If lxml doesn't support huge trees expect wrong results and a warning
         if lxml_version < lxml_huge_tree_version:
-            with self.assertWarnsRegex(UserWarning, r'huge_tree'):
+            with warnings.catch_warnings(record=True) as w:
                 sel = Selector(text=content)
-                self.assertEqual(len(sel.css("span")), 255)
+                self.assertIn("huge_tree", str(w[0].message))
+                self.assertLessEqual(len(sel.css("span")), 256)
                 self.assertEqual(len(sel.css("td")), 0)
             return
 
         # Same goes for explicitly disabling huge trees
-        with self.assertWarnsRegex(UserWarning, r'huge_tree'):
+        with warnings.catch_warnings(record=True) as w:
             sel = Selector(text=content, huge_tree=False)
-            self.assertEqual(len(sel.css("span")), 255)
+            self.assertIn("huge_tree", str(w[0].message))
+            self.assertLessEqual(len(sel.css("span")), 256)
             self.assertEqual(len(sel.css("td")), 0)
 
         # If huge trees are enabled, elements with a depth > 255 should be found
