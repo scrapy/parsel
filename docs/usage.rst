@@ -119,7 +119,7 @@ selectors. This API can be used for quickly selecting nested data::
      'image4_thumb.jpg',
      'image5_thumb.jpg']
 
-If you want to extract only first matched element, you can call the
+If you want to extract only the first matched element, you can call the
 selector ``.get()`` (or its alias ``.extract_first()`` commonly used in
 previous parsel versions)::
 
@@ -382,7 +382,7 @@ Another common case would be to extract all direct ``<p>`` children::
 For more details about relative XPaths see the `Location Paths`_ section in the
 XPath specification.
 
-.. _Location Paths: http://www.w3.org/TR/xpath#location-paths
+.. _Location Paths: https://www.w3.org/TR/xpath#location-paths
 
 
 Using EXSLT extensions
@@ -530,6 +530,8 @@ inside another ``itemscope``.
 .. _regular expressions: http://exslt.org/regexp/index.html
 .. _set manipulation: http://exslt.org/set/index.html
 
+.. _topics-xpath-other-extensions:
+
 Other XPath extensions
 ----------------------
 
@@ -582,7 +584,7 @@ you may want to take a look first at this `XPath tutorial`_.
 
 
 .. _`XPath tutorial`: http://www.zvon.org/comp/r/tut-XPath_1.html
-.. _`this post from ScrapingHub's blog`: http://blog.scrapinghub.com/2014/07/17/xpath-tips-from-the-web-scraping-trenches/
+.. _`this post from ScrapingHub's blog`: https://blog.scrapinghub.com/2014/07/17/xpath-tips-from-the-web-scraping-trenches/
 
 
 Using text nodes in a condition
@@ -624,7 +626,7 @@ But using the ``.`` to mean the node, works::
     >>> sel.xpath("//a[contains(., 'Next Page')]").getall()
     ['<a href="#">Click here to go to the <strong>Next Page</strong></a>']
 
-.. _`XPath string function`: http://www.w3.org/TR/xpath/#section-String-Functions
+.. _`XPath string function`: https://www.w3.org/TR/xpath/#section-String-Functions
 
 Beware of the difference between //node[1] and (//node)[1]
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -703,7 +705,7 @@ with ``.extract()`` and ``.extract_first()`` selector methods. These methods
 are still supported by parsel, there are no plans to deprecate them.
 
 However, ``parsel`` usage docs are now written using ``.get()`` and
-``.getall()`` methods. We feel that these new methods result in a more concise
+``.getall()`` methods. We feel that these new methods result in more concise
 and readable code.
 
 The following examples show how these methods map to each other.
@@ -722,7 +724,7 @@ The following examples show how these methods map to each other.
      >>> selector.css('a::attr(href)').extract()
      ['image1.html', 'image2.html', 'image3.html', 'image4.html', 'image5.html']
 
-2. ``Selector.get()`` is the same as ``Selector.extract()``::
+3. ``Selector.get()`` is the same as ``Selector.extract()``::
 
      >>> selector.css('a::attr(href)')[0].get()
      'image1.html'
@@ -734,11 +736,13 @@ The following examples show how these methods map to each other.
     >>> selector.css('a::attr(href)')[0].getall()
     ['image1.html']
 
-So, the main difference is that output of ``.get()`` and ``.getall()`` methods
-is more predictable: ``.get()`` always returns a single result, ``.getall()``
-always returns a list of all extracted results. With ``.extract()`` method
-it was not always obvious if a result is a list or not; to get a single
-result either ``.extract()`` or ``.extract_first()`` should be called.
+With the ``.extract()`` method it was not always obvious if a result is a list
+or not; to get a single result either ``.extract()`` or ``.extract_first()``
+needed to be called, depending whether you had a ``Selector`` or ``SelectorList``.
+
+So, the main difference is that the outputs of ``.get()`` and ``.getall()``
+are more predictable: ``.get()`` always returns a single result,
+``.getall()`` always returns a list of all extracted results.
 
 
 .. _topics-selectors-ref:
@@ -822,26 +826,31 @@ namespaces altogether and just work with element names, to write more
 simple/convenient XPaths. You can use the
 :meth:`Selector.remove_namespaces` method for that.
 
-Let's show an example that illustrates this with Github blog atom feed.
+Let's show an example that illustrates this with the Python Insider blog atom feed.
 
 Let's download the atom feed using `requests`_ and create a selector::
 
     >>> import requests
     >>> from parsel import Selector
-    >>> text = requests.get('https://github.com/blog.atom').text
+    >>> text = requests.get('https://feeds.feedburner.com/PythonInsider').text
     >>> sel = Selector(text=text, type='xml')
 
 This is how the file starts::
 
     <?xml version="1.0" encoding="UTF-8"?>
-    <feed xml:lang="en-US"
-          xmlns="http://www.w3.org/2005/Atom"
-          xmlns:media="http://search.yahoo.com/mrss/">
-      <id>tag:github.com,2008:/blog</id>
+    <?xml-stylesheet ...
+    <feed xmlns="http://www.w3.org/2005/Atom"
+          xmlns:openSearch="http://a9.com/-/spec/opensearchrss/1.0/"
+          xmlns:blogger="http://schemas.google.com/blogger/2008"
+          xmlns:georss="http://www.georss.org/georss"
+          xmlns:gd="http://schemas.google.com/g/2005"
+          xmlns:thr="http://purl.org/syndication/thread/1.0"
+          xmlns:feedburner="http://rssnamespace.org/feedburner/ext/1.0">
       ...
 
-You can see two namespace declarations: a default "http://www.w3.org/2005/Atom"
-and another one using the "media:" prefix for "http://search.yahoo.com/mrss/".
+You can see several namespace declarations including a default
+"http://www.w3.org/2005/Atom" and another one using the "gd:" prefix for
+"http://schemas.google.com/g/2005".
 
 We can try selecting all ``<link>`` objects and then see that it doesn't work
 (because the Atom XML namespace is obfuscating those nodes)::
@@ -854,8 +863,8 @@ nodes can be accessed directly by their names::
 
     >>> sel.remove_namespaces()
     >>> sel.xpath("//link")
-    [<Selector xpath='//link' data='<link xmlns="http://www.w3.org/2005/Atom'>,
-     <Selector xpath='//link' data='<link xmlns="http://www.w3.org/2005/Atom'>,
+    [<Selector xpath='//link' data='<link rel="alternate" type="text/html" h'>,
+     <Selector xpath='//link' data='<link rel="next" type="application/atom+'>,
      ...
 
 If you wonder why the namespace removal procedure isn't called always by default
@@ -881,11 +890,11 @@ Ad-hoc namespaces references
 references along with the query, through a ``namespaces`` argument,
 with the prefixes you declare being used in your XPath or CSS query.
 
-Let's use the same Atom feed from Github::
+Let's use the same Python Insider Atom feed::
 
     >>> import requests
     >>> from parsel import Selector
-    >>> text = requests.get('https://github.com/blog.atom').text
+    >>> text = requests.get('https://feeds.feedburner.com/PythonInsider').text
     >>> sel = Selector(text=text, type='xml')
 
 And try to select the links again, now using an "atom:" prefix
@@ -898,13 +907,14 @@ for the "link" node test::
 
 You can pass several namespaces (here we're using shorter 1-letter prefixes)::
 
-    >>> sel.xpath("//a:entry/m:thumbnail/@url",
-    ...               namespaces={"a": "http://www.w3.org/2005/Atom",
-    ...                           "m": "http://search.yahoo.com/mrss/"}).getall()
-    ['https://avatars1.githubusercontent.com/u/11529908?v=3&s=60',
-     'https://avatars0.githubusercontent.com/u/15114852?v=3&s=60',
+    >>> sel.xpath("//a:entry/a:author/g:image/@src",
+    ...           namespaces={"a": "http://www.w3.org/2005/Atom",
+    ...                       "g": "http://schemas.google.com/g/2005"}).getall()
+    ['http://photos1.blogger.com/blogger/4554/1119/400/beethoven_10.jpg',
+     '//lh3.googleusercontent.com/-7xisiK0EArc/AAAAAAAAAAI/AAAAAAAAAuM/-r6o6A8RKCM/s512-c/photo.jpg',
      ...
 
+.. _topics-xpath-variables:
 
 Variables in XPath expressions
 ------------------------------

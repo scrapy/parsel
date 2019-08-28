@@ -8,7 +8,7 @@ import six
 from lxml import etree, html
 from pkg_resources import parse_version
 
-from .utils import flatten, iflatten, extract_regex
+from .utils import flatten, iflatten, extract_regex, shorten
 from .csstranslator import HTMLTranslator, GenericTranslator
 
 lxml_version = parse_version(etree.__version__)
@@ -20,7 +20,6 @@ class SafeXMLParser(etree.XMLParser):
     def __init__(self, *args, **kwargs):
         kwargs.setdefault('resolve_entities', False)
         super(SafeXMLParser, self).__init__(*args, **kwargs)
-
 
 _ctgroup = {
     'html': {'_parser': html.HTMLParser,
@@ -44,8 +43,7 @@ def _st(st):
 def create_root_node(text, parser_cls, base_url=None, huge_tree=LXML_SUPPORTS_HUGE_TREE):
     """Create root node for text using given parser class.
     """
-
-    body = text.strip().encode('utf8') or b'<html/>'
+    body = text.strip().replace('\x00', '').encode('utf8') or b'<html/>'
     if huge_tree and LXML_SUPPORTS_HUGE_TREE:
         parser = parser_cls(recover=True, encoding='utf8', huge_tree=True)
         root = etree.fromstring(body, parser=parser, base_url=base_url)
@@ -274,6 +272,8 @@ class Selector(object):
 
         In the background, CSS queries are translated into XPath queries using
         `cssselect`_ library and run ``.xpath()`` method.
+
+        .. _cssselect: https://pypi.python.org/pypi/cssselect/
         """
         return self.xpath(self._css2xpath(query))
 
@@ -289,7 +289,7 @@ class Selector(object):
         will be compiled to a regular expression using ``re.compile(regex)``.
 
         By default, character entity references are replaced by their
-        corresponding character (except for ``&amp;`` and ``&lt;``.
+        corresponding character (except for ``&amp;`` and ``&lt;``).
         Passing ``replace_entities`` as ``False`` switches off these
         replacements.
         """
@@ -302,7 +302,7 @@ class Selector(object):
         the argument is not provided).
 
         By default, character entity references are replaced by their
-        corresponding character (except for ``&amp;`` and ``&lt;``.
+        corresponding character (except for ``&amp;`` and ``&lt;``).
         Passing ``replace_entities`` as ``False`` switches off these
         replacements.
         """
@@ -353,8 +353,8 @@ class Selector(object):
             for an in el.attrib.keys():
                 if an.startswith('{'):
                     el.attrib[an.split('}', 1)[1]] = el.attrib.pop(an)
-            # remove namespace declarations
-            etree.cleanup_namespaces(self.root)
+        # remove namespace declarations
+        etree.cleanup_namespaces(self.root)
 
     @property
     def attrib(self):
@@ -372,6 +372,6 @@ class Selector(object):
     __nonzero__ = __bool__
 
     def __str__(self):
-        data = repr(self.get()[:40])
+        data = repr(shorten(self.get(), width=40))
         return "<%s xpath=%r data=%s>" % (type(self).__name__, self._expr, data)
     __repr__ = __str__

@@ -72,6 +72,25 @@ class XPathFuncsTestCase(unittest.TestCase):
             [x.extract() for x in sel.xpath('//p[has-class("foo")]/text()')],
             [u'First'])
 
+    def test_has_class_newline(self):
+        body = u"""
+        <p CLASS="foo
+        bar">First</p>
+        """
+        sel = Selector(text=body)
+        self.assertEqual(
+            [x.extract() for x in sel.xpath(u'//p[has-class("foo")]/text()')],
+            [u'First'])
+
+    def test_has_class_tab(self):
+        body = u"""
+        <p CLASS="foo\tbar">First</p>
+        """
+        sel = Selector(text=body)
+        self.assertEqual(
+            [x.extract() for x in sel.xpath(u'//p[has-class("foo")]/text()')],
+            [u'First'])
+
     def test_set_xpathfunc(self):
 
         def myfunc(ctx):

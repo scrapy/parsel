@@ -3,6 +3,58 @@
 History
 -------
 
+1.5.2 (2019-08-09)
+~~~~~~~~~~~~~~~~~~
+
+* ``Selector.remove_namespaces`` received a significant performance improvement
+* The value of ``data`` within the printable representation of a selector
+  (``repr(selector)``) now ends in ``...`` when truncated, to make the
+  truncation obvious.
+* Minor documentation improvements.
+
+
+1.5.1 (2018-10-25)
+~~~~~~~~~~~~~~~~~~
+
+* ``has-class`` XPath function handles newlines and other separators
+  in class names properly;
+* fixed parsing of HTML documents with null bytes;
+* documentation improvements;
+* Python 3.7 tests are run on CI; other test improvements.
+
+
+1.5.0 (2018-07-04)
+~~~~~~~~~~~~~~~~~~
+
+* New ``Selector.attrib`` and ``SelectorList.attrib`` properties which make
+  it easier to get attributes of HTML elements.
+* CSS selectors became faster: compilation results are cached
+  (LRU cache is used for ``css2xpath``), so there is
+  less overhead when the same CSS expression is used several times.
+* ``.get()`` and ``.getall()`` selector methods are documented and recommended
+  over ``.extract_first()`` and ``.extract()``.
+* Various documentation tweaks and improvements.
+
+One more change is that ``.extract()`` and  ``.extract_first()`` methods
+are now implemented using ``.get()`` and ``.getall()``, not the other
+way around, and instead of calling ``Selector.extract`` all other methods
+now call ``Selector.get`` internally. It can be **backwards incompatible**
+in case of custom Selector subclasses which override ``Selector.extract``
+without doing the same for ``Selector.get``. If you have such Selector
+subclass, make sure ``get`` method is also overridden. For example, this::
+
+    class MySelector(parsel.Selector):
+        def extract(self):
+            return super().extract() + " foo"
+
+should be changed to this::
+
+    class MySelector(parsel.Selector):
+        def get(self):
+            return super().get() + " foo"
+        extract = get
+
+
 1.4.0 (2018-02-08)
 ~~~~~~~~~~~~~~~~~~
 
@@ -12,10 +64,12 @@ History
   silently produce wrong output. This is technically backwards-incompatible
   if you're using Python < 3.6.
 
+
 1.3.1 (2017-12-28)
 ~~~~~~~~~~~~~~~~~~
 
 * Fix artifact uploads to pypi.
+
 
 1.3.0 (2017-12-28)
 ~~~~~~~~~~~~~~~~~~
