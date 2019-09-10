@@ -7,7 +7,7 @@ import pickle
 
 from parsel import Selector
 from parsel.selector import (
-    CannotRemovePseudoElement,
+    CannotRemoveElementWithoutRoot,
     CannotRemoveRootElement,
 )
 
@@ -767,7 +767,7 @@ class SelectorTestCase(unittest.TestCase):
         sel = self.sscls(text=u'<html><body><ul><li>1</li><li>2</li><li>3</li></ul></body></html>')
         sel_list = sel.css('li::text')
         self.assertEqual(sel_list.getall(), ['1', '2', '3'])
-        with self.assertRaises(CannotRemovePseudoElement):
+        with self.assertRaises(CannotRemoveElementWithoutRoot):
             sel_list.remove()
 
         self.assertIsInstance(sel.css('li'), self.sscls.selectorlist_cls)
@@ -777,7 +777,7 @@ class SelectorTestCase(unittest.TestCase):
         sel = self.sscls(text=u'<html><body><ul><li>1</li><li>2</li><li>3</li></ul></body></html>')
         sel_list = sel.css('li::text')
         self.assertEqual(sel_list.getall(), ['1', '2', '3'])
-        with self.assertRaises(CannotRemovePseudoElement):
+        with self.assertRaises(CannotRemoveElementWithoutRoot):
             sel_list[0].remove()
 
         self.assertIsInstance(sel.css('li'), self.sscls.selectorlist_cls)

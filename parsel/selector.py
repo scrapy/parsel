@@ -11,7 +11,7 @@ from .utils import flatten, iflatten, extract_regex, shorten
 from .csstranslator import HTMLTranslator, GenericTranslator
 
 
-class CannotRemovePseudoElement(Exception):
+class CannotRemoveElementWithoutRoot(Exception):
     pass
 
 
@@ -365,9 +365,10 @@ class Selector(object):
             parent = self.root.getparent()
         except AttributeError:
             # 'str' object has no attribute 'getparent'
-            raise CannotRemovePseudoElement(
-                "The node you're trying to remove might be a pseudo-element, "
-                "try to use 'li' as a selector instead of 'li::text' or "
+            raise CannotRemoveElementWithoutRoot(
+                "The node you're trying to remove has no root, "
+                "are you trying to remove a pseudo-element? "
+                "Try to use 'li' as a selector instead of 'li::text' or "
                 "'//li' instead of '//li/text()', for example."
             )
 
