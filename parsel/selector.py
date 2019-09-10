@@ -15,7 +15,7 @@ class CannotRemoveElementWithoutRoot(Exception):
     pass
 
 
-class CannotRemoveRootElement(Exception):
+class CannotRemoveElementWithoutParent(Exception):
     pass
 
 
@@ -376,7 +376,7 @@ class Selector(object):
             parent.remove(self.root)
         except AttributeError:
             # 'NoneType' object has no attribute 'remove'
-            raise CannotRemoveRootElement(
+            raise CannotRemoveElementWithoutParent(
                 "The node you're trying to remove has no parent, "
                 "are you trying to remove a root element?"
             )

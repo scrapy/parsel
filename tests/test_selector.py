@@ -8,7 +8,7 @@ import pickle
 from parsel import Selector
 from parsel.selector import (
     CannotRemoveElementWithoutRoot,
-    CannotRemoveRootElement,
+    CannotRemoveElementWithoutParent,
 )
 
 
@@ -787,10 +787,10 @@ class SelectorTestCase(unittest.TestCase):
         sel = self.sscls(text=u'<html><body><ul><li>1</li><li>2</li><li>3</li></ul></body></html>')
         sel_list = sel.css('li::text')
         self.assertEqual(sel_list.getall(), ['1', '2', '3'])
-        with self.assertRaises(CannotRemoveRootElement):
+        with self.assertRaises(CannotRemoveElementWithoutParent):
             sel.remove()
 
-        with self.assertRaises(CannotRemoveRootElement):
+        with self.assertRaises(CannotRemoveElementWithoutParent):
             sel.css('html').remove()
 
         self.assertIsInstance(sel.css('li'), self.sscls.selectorlist_cls)
