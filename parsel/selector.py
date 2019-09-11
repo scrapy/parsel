@@ -11,6 +11,14 @@ from .utils import flatten, iflatten, extract_regex, shorten
 from .csstranslator import HTMLTranslator, GenericTranslator
 
 
+class CannotRemoveElementWithoutRoot(Exception):
+    pass
+
+
+class CannotRemoveElementWithoutParent(Exception):
+    pass
+
+
 class SafeXMLParser(etree.XMLParser):
     def __init__(self, *args, **kwargs):
         kwargs.setdefault('resolve_entities', False)
@@ -149,6 +157,13 @@ class SelectorList(list):
             return x.attrib
         else:
             return {}
+
+    def remove(self):
+        """
+        Remove matched nodes from the parent for each element in this list.
+        """
+        for x in self:
+            x.remove()
 
 
 class Selector(object):
@@ -341,6 +356,30 @@ class Selector(object):
                     el.attrib[an.split('}', 1)[1]] = el.attrib.pop(an)
         # remove namespace declarations
         etree.cleanup_namespaces(self.root)
+
+    def remove(self):
+        """
+        Remove matched nodes from the parent element.
+        """
+        try:
+            parent = self.root.getparent()
+        except AttributeError:
+            # 'str' object has no attribute 'getparent'
+            raise CannotRemoveElementWithoutRoot(
+                "The node you're trying to remove has no root, "
+                "are you trying to remove a pseudo-element? "
+                "Try to use 'li' as a selector instead of 'li::text' or "
+                "'//li' instead of '//li/text()', for example."
+            )
+
+        try:
+            parent.remove(self.root)
+        except AttributeError:
+            # 'NoneType' object has no attribute 'remove'
+            raise CannotRemoveElementWithoutParent(
+                "The node you're trying to remove has no parent, "
+                "are you trying to remove a root element?"
+            )
 
     @property
     def attrib(self):
