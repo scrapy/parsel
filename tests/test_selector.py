@@ -2,10 +2,10 @@
 import re
 import warnings
 import weakref
-import six
 import unittest
 import pickle
 
+import six
 from lxml import etree
 from pkg_resources import parse_version
 

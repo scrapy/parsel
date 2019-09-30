@@ -4,6 +4,7 @@ XPath selectors based on lxml
 
 import sys
 import warnings
+
 import six
 from lxml import etree, html
 from pkg_resources import parse_version
@@ -60,7 +61,7 @@ def create_root_node(text, parser_cls, base_url=None, huge_tree=LXML_SUPPORTS_HU
         root = etree.fromstring(body, parser=parser, base_url=base_url)
         for error in parser.error_log:
             if 'use XML_PARSE_HUGE option' in error.message:
-                warnings.warn("input data too big. Upgrade to lxml %s for huge_tree support." % (
+                warnings.warn("Input data is too big. Upgrade to lxml %s or later for huge_tree support." % (
                     str(lxml_huge_tree_version)))
 
     if root is None:
