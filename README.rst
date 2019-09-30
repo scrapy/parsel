@@ -24,6 +24,7 @@ Features
 --------
 
 * Extract text using CSS or XPath selectors
+* Remove elements using CSS or XPath selectors
 * Regular expression helper methods
 
 Example::

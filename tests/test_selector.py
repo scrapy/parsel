@@ -10,6 +10,10 @@ from lxml import etree
 from pkg_resources import parse_version
 
 from parsel import Selector
+from parsel.selector import (
+    CannotRemoveElementWithoutRoot,
+    CannotRemoveElementWithoutParent,
+)
 
 
 class SelectorTestCase(unittest.TestCase):
@@ -748,6 +752,57 @@ class SelectorTestCase(unittest.TestCase):
         text = u'<html>\x00<body><p>Grainy</p></body></html>'
         self.assertEqual(u'<html><body><p>Grainy</p></body></html>',
                           self.sscls(text).extract())
+
+    def test_remove_selector_list(self):
+        sel = self.sscls(text=u'<html><body><ul><li>1</li><li>2</li><li>3</li></ul></body></html>')
+        sel_list = sel.css('li')
+        sel_list.remove()
+        self.assertIsInstance(sel.css('li'), self.sscls.selectorlist_cls)
+        self.assertEqual(sel.css('li'), [])
+
+    def test_remove_selector(self):
+        sel = self.sscls(text=u'<html><body><ul><li>1</li><li>2</li><li>3</li></ul></body></html>')
+        sel_list = sel.css('li')
+        sel_list[0].remove()
+        self.assertIsInstance(sel.css('li'), self.sscls.selectorlist_cls)
+        self.assertEqual(sel.css('li::text').getall(), ['2', '3'])
+
+    def test_remove_pseudo_element_selector_list(self):
+        sel = self.sscls(text=u'<html><body><ul><li>1</li><li>2</li><li>3</li></ul></body></html>')
+        sel_list = sel.css('li::text')
+        self.assertEqual(sel_list.getall(), ['1', '2', '3'])
+        with self.assertRaises(CannotRemoveElementWithoutRoot):
+            sel_list.remove()
+
+        self.assertIsInstance(sel.css('li'), self.sscls.selectorlist_cls)
+        self.assertEqual(sel.css('li::text').getall(), ['1', '2', '3'])
+
+    def test_remove_pseudo_element_selector(self):
+        sel = self.sscls(text=u'<html><body><ul><li>1</li><li>2</li><li>3</li></ul></body></html>')
+        sel_list = sel.css('li::text')
+        self.assertEqual(sel_list.getall(), ['1', '2', '3'])
+        with self.assertRaises(CannotRemoveElementWithoutRoot):
+            sel_list[0].remove()
+
+        self.assertIsInstance(sel.css('li'), self.sscls.selectorlist_cls)
+        self.assertEqual(sel.css('li::text').getall(), ['1', '2', '3'])
+
+    def test_remove_root_element_selector(self):
+        sel = self.sscls(text=u'<html><body><ul><li>1</li><li>2</li><li>3</li></ul></body></html>')
+        sel_list = sel.css('li::text')
+        self.assertEqual(sel_list.getall(), ['1', '2', '3'])
+        with self.assertRaises(CannotRemoveElementWithoutParent):
+            sel.remove()
+
+        with self.assertRaises(CannotRemoveElementWithoutParent):
+            sel.css('html').remove()
+
+        self.assertIsInstance(sel.css('li'), self.sscls.selectorlist_cls)
+        self.assertEqual(sel.css('li::text').getall(), ['1', '2', '3'])
+
+        sel.css('body').remove()
+        self.assertEqual(sel.get(), '<html></html>')
+
 
     def test_deep_nesting(self):
         lxml_version = parse_version(etree.__version__)

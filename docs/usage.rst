@@ -385,6 +385,41 @@ XPath specification.
 .. _Location Paths: https://www.w3.org/TR/xpath#location-paths
 
 
+Removing elements
+-----------------
+
+If for any reason you need to remove elements based on a Selector or
+a SelectorList, you can do it with the ``remove()`` method, available for both
+classes.
+
+.. warning:: this is a destructive action and cannot be undone. The original
+    content of the selector is removed from the elements tree. This could be useful
+    when trying to reduce the memory footprint of Responses.
+
+Example removing an ad from a blog post:
+
+    >>> from parsel import Selector
+    >>> doc = u"""
+    ... <article>
+    ...     <div class="row">Content paragraph...</div>
+    ...     <div class="row">
+    ...         <div class="ad">
+    ...             Ad content...
+    ...             <a href="http://...">Link</a>
+    ...         </div>
+    ...     </div>
+    ...     <div class="row">More content...</div>
+    ... </article>
+    ... """
+    >>> sel = Selector(text=doc)
+    >>> sel.xpath('//div/text()').getall()
+    ['Content paragraph...', 'Ad content...', 'Link', 'More content...']
+    >>> sel.xpath('//div[@class="ad"]').remove()
+    >>> sel.xpath('//div//text()').getall()
+    ['Content paragraph...', 'More content...']
+    >>>
+
+
 Using EXSLT extensions
 ----------------------
 
@@ -743,6 +778,23 @@ needed to be called, depending whether you had a ``Selector`` or ``SelectorList`
 So, the main difference is that the outputs of ``.get()`` and ``.getall()``
 are more predictable: ``.get()`` always returns a single result,
 ``.getall()`` always returns a list of all extracted results.
+
+
+Command-Line Interface Tools
+============================
+
+There are third-party tools that allow using Parsel from the command line:
+
+-   `Parsel CLI <https://github.com/rmax/parsel-cli>`_ allows applying
+    Parsel selectors to the standard input. For example, you can apply a Parsel
+    selector to the output of cURL_.
+
+-   `parselcli
+    <https://github.com/Granitosaurus/parsel-cli>`_ provides an interactive
+    shell that allows applying Parsel selectors to a remote URL or a local
+    file.
+
+.. _cURL: https://curl.haxx.se/
 
 
 .. _topics-selectors-ref:
