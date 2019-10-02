@@ -730,6 +730,66 @@ you can just select by class using CSS and then switch to XPath when needed::
 This is cleaner than using the verbose XPath trick shown above. Just remember
 to use the ``.`` in the XPath expressions that will follow.
 
+
+Beware of how script and style tags differ from other tags
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+`Following the standard`__, the contents of ``script`` and ``style`` elements
+are parsed as plain text.
+
+__ https://www.w3.org/TR/html401/types.html#type-cdata
+
+This means that XML-like structures found within them, including comments, are
+all treated as part of the element text, and not as separate nodes.
+
+For example::
+
+    >>> from parsel import Selector
+    >>> selector = Selector(text="""
+    ....        <script>
+    ....            <!-- comment -->
+    ....            text
+    ....            <br/>
+    ....        </script>
+    ....        <style>
+    ....            <!-- comment -->
+    ....            text
+    ....            <br/>
+    ....        </style>
+    ....        <div>
+    ....            <!-- comment -->
+    ....            text
+    ....            <br/>
+    ....        </div>""")
+    >>> for tag in selector.xpath('//*[contains(text(), "text")]'):
+    ...     print(tag.xpath('name()').get())
+    ...     print('    Text: ' + (tag.xpath('text()').get() or ''))
+    ...     print('    Comment: ' + (tag.xpath('comment()').get() or ''))
+    ...     print('    Children: ' + ''.join(tag.xpath('*').getall()))
+    ...
+    script
+        Text:
+            text
+            <!-- comment -->
+            <br/>
+
+        Comment:
+        Children:
+    style
+        Text:
+            text
+            <!-- comment -->
+            <br/>
+
+        Comment:
+        Children:
+    div
+        Text:
+            text
+
+        Comment: <!-- comment -->
+        Children: <br>
+
 .. _old-extraction-api:
 
 extract() and extract_first()
