@@ -15,6 +15,7 @@ Contents:
 
    installation
    usage
+   parsel
    history
 
 Indices and tables

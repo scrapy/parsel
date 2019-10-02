@@ -22,6 +22,10 @@ matrix:
       env: TOXENV=py37
       dist: xenial
       sudo: true
+    - python: 3.7
+      env: TOXENV=docs
+      dist: xenial
+      sudo: true
 install:
   - |
       if [ "$TOXENV" = "pypy" ]; then

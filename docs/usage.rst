@@ -857,26 +857,10 @@ There are third-party tools that allow using Parsel from the command line:
 .. _cURL: https://curl.haxx.se/
 
 
-.. _topics-selectors-ref:
-
-API reference
-=============
-
-Selector objects
-----------------
-
-.. autoclass:: parsel.selector.Selector
-    :members:
-
-
-SelectorList objects
---------------------
-
-.. autoclass:: parsel.selector.SelectorList
-    :members:
-
-
 .. _selector-examples-html:
+
+Examples
+========
 
 Working on HTML
 ---------------
@@ -936,7 +920,8 @@ Removing namespaces
 When dealing with scraping projects, it is often quite convenient to get rid of
 namespaces altogether and just work with element names, to write more
 simple/convenient XPaths. You can use the
-:meth:`Selector.remove_namespaces` method for that.
+:meth:`Selector.remove_namespaces <parsel.selector.Selector.remove_namespaces>`
+method for that.
 
 Let's show an example that illustrates this with the Python Insider blog atom feed.
 
@@ -947,10 +932,12 @@ Let's download the atom feed using `requests`_ and create a selector::
     >>> text = requests.get('https://feeds.feedburner.com/PythonInsider').text
     >>> sel = Selector(text=text, type='xml')
 
-This is how the file starts::
+This is how the file starts:
+
+.. code-block:: xml
 
     <?xml version="1.0" encoding="UTF-8"?>
-    <?xml-stylesheet ...
+    <?xml-stylesheet ... ?>
     <feed xmlns="http://www.w3.org/2005/Atom"
           xmlns:openSearch="http://a9.com/-/spec/opensearchrss/1.0/"
           xmlns:blogger="http://schemas.google.com/blogger/2008"
@@ -959,6 +946,7 @@ This is how the file starts::
           xmlns:thr="http://purl.org/syndication/thread/1.0"
           xmlns:feedburner="http://rssnamespace.org/feedburner/ext/1.0">
       ...
+    </feed>
 
 You can see several namespace declarations including a default
 "http://www.w3.org/2005/Atom" and another one using the "gd:" prefix for
@@ -970,8 +958,9 @@ We can try selecting all ``<link>`` objects and then see that it doesn't work
     >>> sel.xpath("//link")
     []
 
-But once we call the :meth:`Selector.remove_namespaces` method, all
-nodes can be accessed directly by their names::
+But once we call the :meth:`Selector.remove_namespaces
+<parsel.selector.Selector.remove_namespaces>` method, all nodes can be accessed
+directly by their names::
 
     >>> sel.remove_namespaces()
     >>> sel.xpath("//link")
