@@ -126,8 +126,7 @@ class SelectorList(list):
         """
         for el in iflatten(x.re(regex, replace_entities=replace_entities) for x in self):
             return el
-        else:
-            return default
+        return default
 
     def getall(self):
         """
@@ -144,8 +143,7 @@ class SelectorList(list):
         """
         for x in self:
             return x.get()
-        else:
-            return default
+        return default
     extract_first = get
 
     @property
@@ -155,8 +153,7 @@ class SelectorList(list):
         """
         for x in self:
             return x.attrib
-        else:
-            return {}
+        return {}
 
     def remove(self):
         """
@@ -273,7 +270,7 @@ class Selector(object):
 
         In the background, CSS queries are translated into XPath queries using
         `cssselect`_ library and run ``.xpath()`` method.
-        
+
         .. _cssselect: https://pypi.python.org/pypi/cssselect/
         """
         return self.xpath(self._css2xpath(query))
