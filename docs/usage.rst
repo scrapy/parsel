@@ -840,6 +840,29 @@ are more predictable: ``.get()`` always returns a single result,
 ``.getall()`` always returns a list of all extracted results.
 
 
+Using CSS selectors in multi-root documents
+-------------------------------------------
+
+Some webpages may have multiple root elements. It can happen, for example, when
+a webpage has broken code, such as missing closing tags.
+
+You can use XPath to determine if a page has multiple root elements::
+
+    >>> len(selector.xpath('/*')) > 1
+    True
+
+CSS selectors only work on the first root element, because the first root
+element is always used as the starting current element, and CSS selectors do
+not allow selecting parent elements (XPath’s ``..``) or elements relative to
+the document root (XPath’s ``/``).
+
+If you want to use a CSS selector that takes into account all root elements,
+you need to precede your CSS query by an XPath query that reaches all root
+elements::
+
+    selector.xpath('/*').css('<your CSS selector>')
+
+
 Command-Line Interface Tools
 ============================
 
