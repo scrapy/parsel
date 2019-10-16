@@ -844,7 +844,7 @@ Using CSS selectors in multi-root documents
 -------------------------------------------
 
 Some webpages may have multiple root elements. It can happen, for example, when
-a webpage has broken code, such as missing closign tags.
+a webpage has broken code, such as missing closing tags.
 
 You can use XPath to determine if a page has multiple root elements::
 
