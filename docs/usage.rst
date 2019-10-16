@@ -44,11 +44,13 @@ And extract data from those elements::
 used with HTML. `CSS`_ is a language for applying styles to HTML documents. It
 defines selectors to associate those styles with specific HTML elements.
 
-You can use either language you're more comfortable with, though you may find
-that in some specific cases `XPath`_ is more powerful than `CSS`_.
+You can use either language. CSS_ is usually more readable, but some things can
+only be done with XPath_. See `XPath/CSS Equivalents in Wikibooks`_ to compare
+their syntax.
 
-.. _XPath: http://www.w3.org/TR/xpath
 .. _CSS: http://www.w3.org/TR/selectors
+.. _XPath: http://www.w3.org/TR/xpath
+.. _XPath/CSS Equivalents in Wikibooks: https://en.wikibooks.org/wiki/XPath/CSS_Equivalents
 
 
 Using selectors
