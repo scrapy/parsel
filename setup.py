@@ -27,7 +27,8 @@ def has_environment_marker_platform_impl_support():
 
 install_requires = [
     'w3lib>=1.19.0',
-    'lxml>=2.3',
+    'lxml;python_version!="3.4"',
+    'lxml<=4.3.5;python_version=="3.4"',
     'six>=1.5.2',
     'cssselect>=0.9'
 ]
@@ -41,7 +42,7 @@ else:
 
 setup(
     name='parsel',
-    version='1.5.1',
+    version='1.5.2',
     description="Parsel is a library to extract data from HTML and XML using XPath and CSS selectors",
     long_description=readme + '\n\n' + history,
     author="Scrapy project",

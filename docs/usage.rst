@@ -385,6 +385,41 @@ XPath specification.
 .. _Location Paths: https://www.w3.org/TR/xpath#location-paths
 
 
+Removing elements
+-----------------
+
+If for any reason you need to remove elements based on a Selector or
+a SelectorList, you can do it with the ``remove()`` method, available for both
+classes.
+
+.. warning:: this is a destructive action and cannot be undone. The original
+    content of the selector is removed from the elements tree. This could be useful
+    when trying to reduce the memory footprint of Responses.
+
+Example removing an ad from a blog post:
+
+    >>> from parsel import Selector
+    >>> doc = u"""
+    ... <article>
+    ...     <div class="row">Content paragraph...</div>
+    ...     <div class="row">
+    ...         <div class="ad">
+    ...             Ad content...
+    ...             <a href="http://...">Link</a>
+    ...         </div>
+    ...     </div>
+    ...     <div class="row">More content...</div>
+    ... </article>
+    ... """
+    >>> sel = Selector(text=doc)
+    >>> sel.xpath('//div/text()').getall()
+    ['Content paragraph...', 'Ad content...', 'Link', 'More content...']
+    >>> sel.xpath('//div[@class="ad"]').remove()
+    >>> sel.xpath('//div//text()').getall()
+    ['Content paragraph...', 'More content...']
+    >>>
+
+
 Using EXSLT extensions
 ----------------------
 
@@ -695,6 +730,66 @@ you can just select by class using CSS and then switch to XPath when needed::
 This is cleaner than using the verbose XPath trick shown above. Just remember
 to use the ``.`` in the XPath expressions that will follow.
 
+
+Beware of how script and style tags differ from other tags
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+`Following the standard`__, the contents of ``script`` and ``style`` elements
+are parsed as plain text.
+
+__ https://www.w3.org/TR/html401/types.html#type-cdata
+
+This means that XML-like structures found within them, including comments, are
+all treated as part of the element text, and not as separate nodes.
+
+For example::
+
+    >>> from parsel import Selector
+    >>> selector = Selector(text="""
+    ....        <script>
+    ....            <!-- comment -->
+    ....            text
+    ....            <br/>
+    ....        </script>
+    ....        <style>
+    ....            <!-- comment -->
+    ....            text
+    ....            <br/>
+    ....        </style>
+    ....        <div>
+    ....            <!-- comment -->
+    ....            text
+    ....            <br/>
+    ....        </div>""")
+    >>> for tag in selector.xpath('//*[contains(text(), "text")]'):
+    ...     print(tag.xpath('name()').get())
+    ...     print('    Text: ' + (tag.xpath('text()').get() or ''))
+    ...     print('    Comment: ' + (tag.xpath('comment()').get() or ''))
+    ...     print('    Children: ' + ''.join(tag.xpath('*').getall()))
+    ...
+    script
+        Text:
+            text
+            <!-- comment -->
+            <br/>
+
+        Comment:
+        Children:
+    style
+        Text:
+            text
+            <!-- comment -->
+            <br/>
+
+        Comment:
+        Children:
+    div
+        Text:
+            text
+
+        Comment: <!-- comment -->
+        Children: <br>
+
 .. _old-extraction-api:
 
 extract() and extract_first()
@@ -743,6 +838,23 @@ needed to be called, depending whether you had a ``Selector`` or ``SelectorList`
 So, the main difference is that the outputs of ``.get()`` and ``.getall()``
 are more predictable: ``.get()`` always returns a single result,
 ``.getall()`` always returns a list of all extracted results.
+
+
+Command-Line Interface Tools
+============================
+
+There are third-party tools that allow using Parsel from the command line:
+
+-   `Parsel CLI <https://github.com/rmax/parsel-cli>`_ allows applying
+    Parsel selectors to the standard input. For example, you can apply a Parsel
+    selector to the output of cURL_.
+
+-   `parselcli
+    <https://github.com/Granitosaurus/parsel-cli>`_ provides an interactive
+    shell that allows applying Parsel selectors to a remote URL or a local
+    file.
+
+.. _cURL: https://curl.haxx.se/
 
 
 .. _topics-selectors-ref:

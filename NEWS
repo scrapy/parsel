@@ -3,6 +3,16 @@
 History
 -------
 
+1.5.2 (2019-08-09)
+~~~~~~~~~~~~~~~~~~
+
+* ``Selector.remove_namespaces`` received a significant performance improvement
+* The value of ``data`` within the printable representation of a selector
+  (``repr(selector)``) now ends in ``...`` when truncated, to make the
+  truncation obvious.
+* Minor documentation improvements.
+
+
 1.5.1 (2018-10-25)
 ~~~~~~~~~~~~~~~~~~
 
@@ -11,6 +21,7 @@ History
 * fixed parsing of HTML documents with null bytes;
 * documentation improvements;
 * Python 3.7 tests are run on CI; other test improvements.
+
 
 1.5.0 (2018-07-04)
 ~~~~~~~~~~~~~~~~~~

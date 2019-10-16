@@ -15,8 +15,8 @@ Parsel
    :alt: Coverage report
 
 
-Parsel is a BSD-licensed Python_ library to extract data from HTML_ and XML_
-using XPath_ and CSS_ selectors, optionally combined with
+Parsel is a BSD-licensed Python_ library to extract and remove data from HTML_
+and XML_ using XPath_ and CSS_ selectors, optionally combined with
 `regular expressions`_.
 
 Find the Parsel online documentation at https://parsel.readthedocs.org.
@@ -30,7 +30,7 @@ Find the Parsel online documentation at https://parsel.readthedocs.org.
                 <ul>
                     <li><a href="http://example.com">Link 1</a></li>
                     <li><a href="http://scrapy.org">Link 2</a></li>
-                </ul
+                </ul>
             </body>
             </html>""")
     >>> selector.css('h1::text').get()

@@ -7,8 +7,16 @@ import sys
 import six
 from lxml import etree, html
 
-from .utils import flatten, iflatten, extract_regex
+from .utils import flatten, iflatten, extract_regex, shorten
 from .csstranslator import HTMLTranslator, GenericTranslator
+
+
+class CannotRemoveElementWithoutRoot(Exception):
+    pass
+
+
+class CannotRemoveElementWithoutParent(Exception):
+    pass
 
 
 class SafeXMLParser(etree.XMLParser):
@@ -149,6 +157,13 @@ class SelectorList(list):
             return x.attrib
         else:
             return {}
+
+    def remove(self):
+        """
+        Remove matched nodes from the parent for each element in this list.
+        """
+        for x in self:
+            x.remove()
 
 
 class Selector(object):
@@ -339,8 +354,32 @@ class Selector(object):
             for an in el.attrib.keys():
                 if an.startswith('{'):
                     el.attrib[an.split('}', 1)[1]] = el.attrib.pop(an)
-            # remove namespace declarations
-            etree.cleanup_namespaces(self.root)
+        # remove namespace declarations
+        etree.cleanup_namespaces(self.root)
+
+    def remove(self):
+        """
+        Remove matched nodes from the parent element.
+        """
+        try:
+            parent = self.root.getparent()
+        except AttributeError:
+            # 'str' object has no attribute 'getparent'
+            raise CannotRemoveElementWithoutRoot(
+                "The node you're trying to remove has no root, "
+                "are you trying to remove a pseudo-element? "
+                "Try to use 'li' as a selector instead of 'li::text' or "
+                "'//li' instead of '//li/text()', for example."
+            )
+
+        try:
+            parent.remove(self.root)
+        except AttributeError:
+            # 'NoneType' object has no attribute 'remove'
+            raise CannotRemoveElementWithoutParent(
+                "The node you're trying to remove has no parent, "
+                "are you trying to remove a root element?"
+            )
 
     @property
     def attrib(self):
@@ -358,6 +397,6 @@ class Selector(object):
     __nonzero__ = __bool__
 
     def __str__(self):
-        data = repr(self.get()[:40])
+        data = repr(shorten(self.get(), width=40))
         return "<%s xpath=%r data=%s>" % (type(self).__name__, self._expr, data)
     __repr__ = __str__

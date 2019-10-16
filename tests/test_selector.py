@@ -6,6 +6,10 @@ import unittest
 import pickle
 
 from parsel import Selector
+from parsel.selector import (
+    CannotRemoveElementWithoutRoot,
+    CannotRemoveElementWithoutParent,
+)
 
 
 class SelectorTestCase(unittest.TestCase):
@@ -133,9 +137,9 @@ class SelectorTestCase(unittest.TestCase):
         body = u"<p><input name='{}' value='\xa9'/></p>".format(50 * 'b')
         sel = self.sscls(text=body)
 
-        representation = "<Selector xpath='//input/@name' data='{}'>".format(40 * 'b')
+        representation = "<Selector xpath='//input/@name' data='{}...'>".format(37 * 'b')
         if six.PY2:
-            representation = "<Selector xpath='//input/@name' data=u'{}'>".format(40 * 'b')
+            representation = "<Selector xpath='//input/@name' data=u'{}...'>".format(37 * 'b')
 
         self.assertEqual(
             [repr(it) for it in sel.xpath('//input/@name')],
@@ -625,28 +629,61 @@ class SelectorTestCase(unittest.TestCase):
     def test_remove_namespaces(self):
         xml = u"""<?xml version="1.0" encoding="UTF-8"?>
 <feed xmlns="http://www.w3.org/2005/Atom" xml:lang="en-US" xmlns:media="http://search.yahoo.com/mrss/">
-  <link type="text/html">
-  <link type="application/atom+xml">
+  <link type="text/html"/>
+  <entry>
+    <link type="text/html"/>
+  </entry>
+  <link type="application/atom+xml"/>
 </feed>
 """
         sel = self.sscls(text=xml, type='xml')
         self.assertEqual(len(sel.xpath("//link")), 0)
         self.assertEqual(len(sel.xpath("./namespace::*")), 3)
         sel.remove_namespaces()
+        self.assertEqual(len(sel.xpath("//link")), 3)
+        self.assertEqual(len(sel.xpath("./namespace::*")), 1)
+
+    def test_remove_namespaces_embedded(self):
+        xml = u"""
+        <feed xmlns="http://www.w3.org/2005/Atom">
+          <link type="text/html"/>
+          <entry>
+            <link type="text/html"/>
+          </entry>
+          <svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="0 0 100 100">
+            <linearGradient id="gradient">
+              <stop class="begin" offset="0%" style="stop-color:yellow;"/>
+              <stop class="end" offset="80%" style="stop-color:green;"/>
+            </linearGradient>
+            <circle cx="50" cy="50" r="30" style="fill:url(#gradient)" />
+          </svg>
+        </feed>
+        """
+        sel = self.sscls(text=xml, type='xml')
+        self.assertEqual(len(sel.xpath("//link")), 0)
+        self.assertEqual(len(sel.xpath("//stop")), 0)
+        self.assertEqual(len(sel.xpath("./namespace::*")), 2)
+        self.assertEqual(len(sel.xpath("//f:link", namespaces={'f': 'http://www.w3.org/2005/Atom'})), 2)
+        self.assertEqual(len(sel.xpath("//s:stop", namespaces={'s': 'http://www.w3.org/2000/svg'})), 2)
+        sel.remove_namespaces()
         self.assertEqual(len(sel.xpath("//link")), 2)
+        self.assertEqual(len(sel.xpath("//stop")), 2)
         self.assertEqual(len(sel.xpath("./namespace::*")), 1)
 
     def test_remove_attributes_namespaces(self):
         xml = u"""<?xml version="1.0" encoding="UTF-8"?>
 <feed xmlns:atom="http://www.w3.org/2005/Atom" xml:lang="en-US" xmlns:media="http://search.yahoo.com/mrss/">
-  <link atom:type="text/html">
-  <link atom:type="application/atom+xml">
+  <link atom:type="text/html"/>
+  <entry>
+    <link atom:type="text/html"/>
+  </entry>
+  <link atom:type="application/atom+xml"/>
 </feed>
 """
         sel = self.sscls(text=xml, type='xml')
         self.assertEqual(len(sel.xpath("//link/@type")), 0)
         sel.remove_namespaces()
-        self.assertEqual(len(sel.xpath("//link/@type")), 2)
+        self.assertEqual(len(sel.xpath("//link/@type")), 3)
 
     def test_smart_strings(self):
         """Lxml smart strings return values"""
@@ -711,6 +748,57 @@ class SelectorTestCase(unittest.TestCase):
         text = u'<html>\x00<body><p>Grainy</p></body></html>'
         self.assertEqual(u'<html><body><p>Grainy</p></body></html>',
                           self.sscls(text).extract())
+
+    def test_remove_selector_list(self):
+        sel = self.sscls(text=u'<html><body><ul><li>1</li><li>2</li><li>3</li></ul></body></html>')
+        sel_list = sel.css('li')
+        sel_list.remove()
+        self.assertIsInstance(sel.css('li'), self.sscls.selectorlist_cls)
+        self.assertEqual(sel.css('li'), [])
+
+    def test_remove_selector(self):
+        sel = self.sscls(text=u'<html><body><ul><li>1</li><li>2</li><li>3</li></ul></body></html>')
+        sel_list = sel.css('li')
+        sel_list[0].remove()
+        self.assertIsInstance(sel.css('li'), self.sscls.selectorlist_cls)
+        self.assertEqual(sel.css('li::text').getall(), ['2', '3'])
+
+    def test_remove_pseudo_element_selector_list(self):
+        sel = self.sscls(text=u'<html><body><ul><li>1</li><li>2</li><li>3</li></ul></body></html>')
+        sel_list = sel.css('li::text')
+        self.assertEqual(sel_list.getall(), ['1', '2', '3'])
+        with self.assertRaises(CannotRemoveElementWithoutRoot):
+            sel_list.remove()
+
+        self.assertIsInstance(sel.css('li'), self.sscls.selectorlist_cls)
+        self.assertEqual(sel.css('li::text').getall(), ['1', '2', '3'])
+
+    def test_remove_pseudo_element_selector(self):
+        sel = self.sscls(text=u'<html><body><ul><li>1</li><li>2</li><li>3</li></ul></body></html>')
+        sel_list = sel.css('li::text')
+        self.assertEqual(sel_list.getall(), ['1', '2', '3'])
+        with self.assertRaises(CannotRemoveElementWithoutRoot):
+            sel_list[0].remove()
+
+        self.assertIsInstance(sel.css('li'), self.sscls.selectorlist_cls)
+        self.assertEqual(sel.css('li::text').getall(), ['1', '2', '3'])
+
+    def test_remove_root_element_selector(self):
+        sel = self.sscls(text=u'<html><body><ul><li>1</li><li>2</li><li>3</li></ul></body></html>')
+        sel_list = sel.css('li::text')
+        self.assertEqual(sel_list.getall(), ['1', '2', '3'])
+        with self.assertRaises(CannotRemoveElementWithoutParent):
+            sel.remove()
+
+        with self.assertRaises(CannotRemoveElementWithoutParent):
+            sel.css('html').remove()
+
+        self.assertIsInstance(sel.css('li'), self.sscls.selectorlist_cls)
+        self.assertEqual(sel.css('li::text').getall(), ['1', '2', '3'])
+
+        sel.css('body').remove()
+        self.assertEqual(sel.get(), '<html></html>')
+
 
 class ExsltTestCase(unittest.TestCase):
 
