@@ -27,7 +27,7 @@ Features
 * Remove elements using CSS or XPath selectors
 * Regular expression helper methods
 
-Example::
+Example (`open online demo`_)::
 
     >>> from parsel import Selector
     >>> sel = Selector(text=u"""<html>
@@ -50,3 +50,5 @@ Example::
     ...     print(e.xpath('.//a/@href').get())
     http://example.com
     http://scrapy.org
+
+.. _open online demo: https://colab.research.google.com/drive/149VFa6Px3wg7S3SEnUqk--TyBrKplxCN#forceEdit=true&sandboxMode=true
