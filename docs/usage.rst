@@ -4,52 +4,56 @@
 Usage
 =====
 
-Getting started
-===============
-
-If you already know how to write `CSS`_ or `XPath`_ expressions, using Parsel
-is straightforward: you just need to create a
-:class:`~parsel.selector.Selector` object for the HTML or XML text you want to
-parse, and use the available methods for selecting parts from the text and
-extracting data out of the result.
-
-Creating a :class:`~parsel.selector.Selector` object is simple::
+Create a :class:`~parsel.selector.Selector` object for the HTML or XML text
+that you want to parse::
 
     >>> from parsel import Selector
     >>> text = u"<html><body><h1>Hello, Parsel!</h1></body></html>"
-    >>> sel = Selector(text=text)
+    >>> selector = Selector(text=text)
 
-.. note::
-    One important thing to note is that if you're using Python 2,
-    make sure to use an `unicode` object for the text argument.
-    :class:`~parsel.selector.Selector` expects text to be an `unicode`
-    object in Python 2 or an `str` object in Python 3.
+.. note:: In Python 2, the ``text`` argument must be a ``unicode`` string.
 
-Once you have created the Selector object, you can use `CSS`_ or
-`XPath`_ expressions to select elements::
+Then use `CSS`_ or `XPath`_ expressions to select elements::
 
-    >>> sel.css('h1')
+    >>> selector.css('h1')
     [<Selector xpath='descendant-or-self::h1' data='<h1>Hello, Parsel!</h1>'>]
-    >>> sel.xpath('//h1')  # the same, but now with XPath
+    >>> selector.xpath('//h1')  # the same, but now with XPath
     [<Selector xpath='//h1' data='<h1>Hello, Parsel!</h1>'>]
 
 And extract data from those elements::
 
-    >>> sel.css('h1::text').get()
+    >>> selector.css('h1::text').get()
     'Hello, Parsel!'
-    >>> sel.xpath('//h1/text()').getall()
+    >>> selector.xpath('//h1/text()').getall()
     ['Hello, Parsel!']
-
-`XPath`_ is a language for selecting nodes in XML documents, which can also be
-used with HTML. `CSS`_ is a language for applying styles to HTML documents. It
-defines selectors to associate those styles with specific HTML elements.
-
-You can use either language. CSS_ is usually more readable, but some things can
-only be done with XPath_. See `XPath/CSS Equivalents in Wikibooks`_ to compare
-their syntax.
 
 .. _CSS: http://www.w3.org/TR/selectors
 .. _XPath: http://www.w3.org/TR/xpath
+
+Learning CSS and XPath
+======================
+
+`CSS`_ is a language for applying styles to HTML documents. It defines
+selectors to associate those styles with specific HTML elements. Resources to
+learn CSS_ selectors include:
+
+-   `CSS selectors in the MDN`_
+
+-   `XPath/CSS Equivalents in Wikibooks`_
+
+`XPath`_ is a language for selecting nodes in XML documents, which can also be
+used with HTML. Resources to learn XPath_ include:
+
+-   `XPath Tutorial in W3Schools`_
+
+-   `XPath cheatsheet`_
+
+You can use either CSS_ or XPath_. CSS_ is usually more readable, but some
+things can only be done with XPath_.
+
+.. _CSS selectors in the MDN: https://developer.mozilla.org/en-US/docs/Learn/CSS/Building_blocks/Selectors
+.. _XPath cheatsheet: https://devhints.io/xpath
+.. _XPath Tutorial in W3Schools: https://www.w3schools.com/xml/xpath_intro.asp
 .. _XPath/CSS Equivalents in Wikibooks: https://en.wikibooks.org/wiki/XPath/CSS_Equivalents
 
 
