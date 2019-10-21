@@ -40,7 +40,11 @@ import parsel
 
 # Add any Sphinx extension module names here, as strings. They can be
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom ones.
-extensions = ['sphinx.ext.autodoc', 'sphinx.ext.viewcode']
+extensions = [
+    'sphinx.ext.autodoc',
+    'sphinx.ext.intersphinx',
+    'sphinx.ext.viewcode',
+]
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
@@ -273,3 +277,22 @@ texinfo_documents = [
 
 # If true, do not generate a @detailmenu in the "Top" node's menu.
 #texinfo_no_detailmenu = False
+
+
+# -- Options for the InterSphinx extension ------------------------------------
+
+intersphinx_mapping = {
+    'cssselect': ('https://cssselect.readthedocs.io/en/latest', None),
+    'python': ('https://docs.python.org/3', None),
+}
+
+
+# --- Nitpicking options ------------------------------------------------------
+
+nitpicky = True
+nitpick_ignore = [
+    ('py:class', 'cssselect.xpath.GenericTranslator'),
+    ('py:class', 'cssselect.xpath.HTMLTranslator'),
+    ('py:class', 'cssselect.xpath.XPathExpr'),
+    ('py:class', 'lxml.etree.XMLParser'),
+]
