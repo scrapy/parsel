@@ -2,7 +2,7 @@
 Selector tests for cssselect backend
 """
 import unittest
-from parsel.csstranslator import HTMLTranslator
+from parsel.csstranslator import GenericTranslator, HTMLTranslator
 from parsel import Selector
 from cssselect.parser import SelectorSyntaxError
 from cssselect.xpath import ExpressionError
@@ -44,9 +44,7 @@ HTMLBODY = u'''
 '''
 
 
-class TranslatorMixinTest(unittest.TestCase):
-
-    tr_cls = HTMLTranslator
+class TranslatorTestMixin():
 
     def setUp(self):
         self.tr = self.tr_cls()
@@ -111,6 +109,14 @@ class TranslatorMixinTest(unittest.TestCase):
         ]
         for css, exc in cases:
             self.assertRaises(exc, self.c2x, css)
+
+
+class HTMLTranslatorTest(TranslatorTestMixin, unittest.TestCase):
+    tr_cls = HTMLTranslator
+
+
+class GenericTranslatorTest(TranslatorTestMixin, unittest.TestCase):
+    tr_cls = GenericTranslator
 
 
 class UtilCss2XPathTest(unittest.TestCase):
