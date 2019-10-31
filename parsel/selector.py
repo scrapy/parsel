@@ -173,7 +173,8 @@ class Selector(object):
     ``type`` defines the selector type, it can be ``"html"``, ``"xml"`` or ``None`` (default).
     If ``type`` is ``None``, the selector defaults to ``"html"``.
 
-    The ``base_url`` keyword allows setting a URL for the document. This is needed when looking up external entities with relative paths. See [`lxml` documentation](https://lxml.de/api/index.html) for more information.
+    The ``base_url`` keyword allows setting a URL for the document. This is needed when looking up external entities with relative paths.
+    See [`lxml` documentation](https://lxml.de/api/index.html) for more information.
     """
 
     __slots__ = ['text', 'namespaces', 'type', '_expr', 'root',
