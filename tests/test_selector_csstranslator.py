@@ -44,7 +44,7 @@ HTMLBODY = u'''
 '''
 
 
-class TranslatorTestMixin():
+class TranslatorTestMixin:
 
     def setUp(self):
         self.tr = self.tr_cls()
