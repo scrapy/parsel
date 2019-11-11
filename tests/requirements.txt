@@ -1,2 +1,4 @@
 pytest
 pytest-cov
+requests
+sybil
