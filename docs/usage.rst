@@ -4,51 +4,57 @@
 Usage
 =====
 
-Getting started
-===============
-
-If you already know how to write `CSS`_ or `XPath`_ expressions, using Parsel
-is straightforward: you just need to create a
-:class:`~parsel.selector.Selector` object for the HTML or XML text you want to
-parse, and use the available methods for selecting parts from the text and
-extracting data out of the result.
-
-Creating a :class:`~parsel.selector.Selector` object is simple::
+Create a :class:`~parsel.selector.Selector` object for the HTML or XML text
+that you want to parse::
 
     >>> from parsel import Selector
     >>> text = u"<html><body><h1>Hello, Parsel!</h1></body></html>"
-    >>> sel = Selector(text=text)
+    >>> selector = Selector(text=text)
 
-.. note::
-    One important thing to note is that if you're using Python 2,
-    make sure to use an `unicode` object for the text argument.
-    :class:`~parsel.selector.Selector` expects text to be an `unicode`
-    object in Python 2 or an `str` object in Python 3.
+.. note:: In Python 2, the ``text`` argument must be a ``unicode`` string.
 
-Once you have created the Selector object, you can use `CSS`_ or
-`XPath`_ expressions to select elements::
+Then use `CSS`_ or `XPath`_ expressions to select elements::
 
-    >>> sel.css('h1')
+    >>> selector.css('h1')
     [<Selector xpath='descendant-or-self::h1' data='<h1>Hello, Parsel!</h1>'>]
-    >>> sel.xpath('//h1')  # the same, but now with XPath
+    >>> selector.xpath('//h1')  # the same, but now with XPath
     [<Selector xpath='//h1' data='<h1>Hello, Parsel!</h1>'>]
 
 And extract data from those elements::
 
-    >>> sel.css('h1::text').get()
+    >>> selector.css('h1::text').get()
     'Hello, Parsel!'
-    >>> sel.xpath('//h1/text()').getall()
+    >>> selector.xpath('//h1/text()').getall()
     ['Hello, Parsel!']
 
-`XPath`_ is a language for selecting nodes in XML documents, which can also be
-used with HTML. `CSS`_ is a language for applying styles to HTML documents. It
-defines selectors to associate those styles with specific HTML elements.
-
-You can use either language you're more comfortable with, though you may find
-that in some specific cases `XPath`_ is more powerful than `CSS`_.
-
-.. _XPath: http://www.w3.org/TR/xpath
 .. _CSS: http://www.w3.org/TR/selectors
+.. _XPath: http://www.w3.org/TR/xpath
+
+Learning CSS and XPath
+======================
+
+`CSS`_ is a language for applying styles to HTML documents. It defines
+selectors to associate those styles with specific HTML elements. Resources to
+learn CSS_ selectors include:
+
+-   `CSS selectors in the MDN`_
+
+-   `XPath/CSS Equivalents in Wikibooks`_
+
+`XPath`_ is a language for selecting nodes in XML documents, which can also be
+used with HTML. Resources to learn XPath_ include:
+
+-   `XPath Tutorial in W3Schools`_
+
+-   `XPath cheatsheet`_
+
+You can use either CSS_ or XPath_. CSS_ is usually more readable, but some
+things can only be done with XPath_.
+
+.. _CSS selectors in the MDN: https://developer.mozilla.org/en-US/docs/Learn/CSS/Building_blocks/Selectors
+.. _XPath cheatsheet: https://devhints.io/xpath
+.. _XPath Tutorial in W3Schools: https://www.w3schools.com/xml/xpath_intro.asp
+.. _XPath/CSS Equivalents in Wikibooks: https://en.wikibooks.org/wiki/XPath/CSS_Equivalents
 
 
 Using selectors
@@ -840,6 +846,29 @@ are more predictable: ``.get()`` always returns a single result,
 ``.getall()`` always returns a list of all extracted results.
 
 
+Using CSS selectors in multi-root documents
+-------------------------------------------
+
+Some webpages may have multiple root elements. It can happen, for example, when
+a webpage has broken code, such as missing closing tags.
+
+You can use XPath to determine if a page has multiple root elements::
+
+    >>> len(selector.xpath('/*')) > 1
+    True
+
+CSS selectors only work on the first root element, because the first root
+element is always used as the starting current element, and CSS selectors do
+not allow selecting parent elements (XPath’s ``..``) or elements relative to
+the document root (XPath’s ``/``).
+
+If you want to use a CSS selector that takes into account all root elements,
+you need to precede your CSS query by an XPath query that reaches all root
+elements::
+
+    selector.xpath('/*').css('<your CSS selector>')
+
+
 Command-Line Interface Tools
 ============================
 
@@ -857,26 +886,10 @@ There are third-party tools that allow using Parsel from the command line:
 .. _cURL: https://curl.haxx.se/
 
 
-.. _topics-selectors-ref:
-
-API reference
-=============
-
-Selector objects
-----------------
-
-.. autoclass:: parsel.selector.Selector
-    :members:
-
-
-SelectorList objects
---------------------
-
-.. autoclass:: parsel.selector.SelectorList
-    :members:
-
-
 .. _selector-examples-html:
+
+Examples
+========
 
 Working on HTML
 ---------------
@@ -936,7 +949,8 @@ Removing namespaces
 When dealing with scraping projects, it is often quite convenient to get rid of
 namespaces altogether and just work with element names, to write more
 simple/convenient XPaths. You can use the
-:meth:`Selector.remove_namespaces` method for that.
+:meth:`Selector.remove_namespaces <parsel.selector.Selector.remove_namespaces>`
+method for that.
 
 Let's show an example that illustrates this with the Python Insider blog atom feed.
 
@@ -947,10 +961,12 @@ Let's download the atom feed using `requests`_ and create a selector::
     >>> text = requests.get('https://feeds.feedburner.com/PythonInsider').text
     >>> sel = Selector(text=text, type='xml')
 
-This is how the file starts::
+This is how the file starts:
+
+.. code-block:: xml
 
     <?xml version="1.0" encoding="UTF-8"?>
-    <?xml-stylesheet ...
+    <?xml-stylesheet ... ?>
     <feed xmlns="http://www.w3.org/2005/Atom"
           xmlns:openSearch="http://a9.com/-/spec/opensearchrss/1.0/"
           xmlns:blogger="http://schemas.google.com/blogger/2008"
@@ -959,6 +975,7 @@ This is how the file starts::
           xmlns:thr="http://purl.org/syndication/thread/1.0"
           xmlns:feedburner="http://rssnamespace.org/feedburner/ext/1.0">
       ...
+    </feed>
 
 You can see several namespace declarations including a default
 "http://www.w3.org/2005/Atom" and another one using the "gd:" prefix for
@@ -970,8 +987,9 @@ We can try selecting all ``<link>`` objects and then see that it doesn't work
     >>> sel.xpath("//link")
     []
 
-But once we call the :meth:`Selector.remove_namespaces` method, all
-nodes can be accessed directly by their names::
+But once we call the :meth:`Selector.remove_namespaces
+<parsel.selector.Selector.remove_namespaces>` method, all nodes can be accessed
+directly by their names::
 
     >>> sel.remove_namespaces()
     >>> sel.xpath("//link")

@@ -1,38 +1,30 @@
-parsel package
-==============
+API reference
+=============
 
-Submodules
-----------
-
-parsel.csstranslator module
----------------------------
+parsel.csstranslator
+--------------------
 
 .. automodule:: parsel.csstranslator
     :members:
     :undoc-members:
     :show-inheritance:
 
-parsel.selector module
-----------------------
+
+.. _topics-selectors-ref:
+
+parsel.selector
+---------------
 
 .. automodule:: parsel.selector
     :members:
     :undoc-members:
     :show-inheritance:
 
-parsel.utils module
--------------------
+
+parsel.utils
+------------
 
 .. automodule:: parsel.utils
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
-
-Module contents
----------------
-
-.. automodule:: parsel
     :members:
     :undoc-members:
     :show-inheritance:

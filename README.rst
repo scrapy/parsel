@@ -21,6 +21,8 @@ and XML_ using XPath_ and CSS_ selectors, optionally combined with
 
 Find the Parsel online documentation at https://parsel.readthedocs.org.
 
+Example (`open online demo`_):
+
 .. code-block:: python
 
     >>> from parsel import Selector
@@ -42,8 +44,10 @@ Find the Parsel online documentation at https://parsel.readthedocs.org.
     http://example.com
     http://scrapy.org
 
+
 .. _CSS: https://en.wikipedia.org/wiki/Cascading_Style_Sheets
 .. _HTML: https://en.wikipedia.org/wiki/HTML
+.. _open online demo: https://colab.research.google.com/drive/149VFa6Px3wg7S3SEnUqk--TyBrKplxCN#forceEdit=true&sandboxMode=true
 .. _Python: https://www.python.org/
 .. _regular expressions: https://docs.python.org/library/re.html
 .. _XML: https://en.wikipedia.org/wiki/XML
