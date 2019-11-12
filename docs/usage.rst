@@ -74,13 +74,21 @@ For the sake of completeness, here's its full HTML code:
 
 .. highlight:: python
 
-So, let's download that page and create a selector for it::
+So, let's download that page and create a selector for it:
 
-    >>> import requests
-    >>> from parsel import Selector
-    >>> url = 'http://parsel.readthedocs.org/en/latest/_static/selectors-sample1.html'
-    >>> text = requests.get(url).text
-    >>> selector = Selector(text=text)
+.. skip: start
+
+>>> import requests
+>>> from parsel import Selector
+>>> url = 'http://parsel.readthedocs.org/en/latest/_static/selectors-sample1.html'
+>>> text = requests.get(url).text
+>>> selector = Selector(text=text)
+
+.. skip: end
+
+.. invisible-code-block: python
+
+   selector = load_selector('selectors-sample1.html')
 
 Since we're dealing with HTML, the default type for Selector, we don't need
 to specify the `type` argument.
@@ -807,6 +815,10 @@ and readable code.
 
 The following examples show how these methods map to each other.
 
+.. invisible-code-block: python
+
+   selector = load_selector('selectors-sample1.html')
+
 1. ``SelectorList.get()`` is the same as ``SelectorList.extract_first()``::
 
      >>> selector.css('a::attr(href)').get()
@@ -848,10 +860,14 @@ Using CSS selectors in multi-root documents
 Some webpages may have multiple root elements. It can happen, for example, when
 a webpage has broken code, such as missing closing tags.
 
-You can use XPath to determine if a page has multiple root elements::
+.. invisible-code-block: python
 
-    >>> len(selector.xpath('/*')) > 1
-    True
+   selector = load_selector('multiroot.html')
+
+You can use XPath to determine if a page has multiple root elements:
+
+>>> len(selector.xpath('/*')) > 1
+True
 
 CSS selectors only work on the first root element, because the first root
 element is always used as the starting current element, and CSS selectors do
@@ -950,12 +966,20 @@ method for that.
 
 Let's show an example that illustrates this with the Python Insider blog atom feed.
 
-Let's download the atom feed using `requests`_ and create a selector::
+Let's download the atom feed using `requests`_ and create a selector:
 
-    >>> import requests
-    >>> from parsel import Selector
-    >>> text = requests.get('https://feeds.feedburner.com/PythonInsider').text
-    >>> sel = Selector(text=text, type='xml')
+.. skip: start
+
+>>> import requests
+>>> from parsel import Selector
+>>> text = requests.get('https://feeds.feedburner.com/PythonInsider').text
+>>> sel = Selector(text=text, type='xml')
+
+.. skip: end
+
+.. invisible-code-block: python
+
+   sel = load_selector('python-insider.xml', type='xml')
 
 This is how the file starts:
 
@@ -1016,12 +1040,20 @@ Ad-hoc namespaces references
 references along with the query, through a ``namespaces`` argument,
 with the prefixes you declare being used in your XPath or CSS query.
 
-Let's use the same Python Insider Atom feed::
+Let's use the same Python Insider Atom feed:
 
-    >>> import requests
-    >>> from parsel import Selector
-    >>> text = requests.get('https://feeds.feedburner.com/PythonInsider').text
-    >>> sel = Selector(text=text, type='xml')
+.. skip: start
+
+>>> import requests
+>>> from parsel import Selector
+>>> text = requests.get('https://feeds.feedburner.com/PythonInsider').text
+>>> sel = Selector(text=text, type='xml')
+
+.. skip: end
+
+.. invisible-code-block: python
+
+   sel = load_selector('python-insider.xml', type='xml')
 
 And try to select the links again, now using an "atom:" prefix
 for the "link" node test::
@@ -1050,6 +1082,10 @@ the ``$somevariable`` syntax. This is somewhat similar to parameterized
 queries or prepared statements in the SQL world where you replace
 some arguments in your queries with placeholders like ``?``,
 which are then substituted with values passed with the query.
+
+.. invisible-code-block: python
+
+   selector = load_selector('selectors-sample1.html')
 
 Here's an example to match an element based on its normalized string-value::
 
