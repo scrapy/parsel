@@ -60,7 +60,7 @@ things can only be done with XPath_.
 Using selectors
 ===============
 
-To explain how to use the selectors we'll use the `requests`_ library
+To explain how to use the selectors we'll use the :mod:`requests` library
 to download an example page located in the Parsel's documentation:
 
     http://parsel.readthedocs.org/en/latest/_static/selectors-sample1.html
@@ -954,7 +954,7 @@ method for that.
 
 Let's show an example that illustrates this with the Python Insider blog atom feed.
 
-Let's download the atom feed using `requests`_ and create a selector::
+Let's download the atom feed using :mod:`requests` and create a selector::
 
     >>> import requests
     >>> from parsel import Selector
@@ -1010,7 +1010,6 @@ of relevance, are:
    though.
 
 .. _Google Base XML feed: https://support.google.com/merchants/answer/160589?hl=en&ref_topic=2473799
-.. _requests: http://www.python-requests.org/
 
 
 Ad-hoc namespaces references

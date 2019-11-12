@@ -284,6 +284,7 @@ texinfo_documents = [
 intersphinx_mapping = {
     'cssselect': ('https://cssselect.readthedocs.io/en/latest', None),
     'python': ('https://docs.python.org/3', None),
+    'requests': ('https://requests.kennethreitz.org/en/latest', None),
 }
 
 
