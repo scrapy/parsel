@@ -1,15 +1,13 @@
 import os
 from doctest import ELLIPSIS, NORMALIZE_WHITESPACE
+from sys import version_info
 
 from sybil import Sybil
 from sybil.parsers.codeblock import CodeBlockParser
-from sybil.parsers.doctest import DocTestParser, FIX_BYTE_UNICODE_REPR
+from sybil.parsers.doctest import DocTestParser
 from sybil.parsers.skip import skip
 
 from parsel import Selector
-
-
-DOCTEST_OPTIONS = ELLIPSIS | FIX_BYTE_UNICODE_REPR | NORMALIZE_WHITESPACE
 
 
 def load_selector(filename, **kwargs):
@@ -22,12 +20,13 @@ def setup(namespace):
     namespace['load_selector'] = load_selector
 
 
-pytest_collect_file = Sybil(
-    parsers=[
-        DocTestParser(optionflags=DOCTEST_OPTIONS),
-        CodeBlockParser(future_imports=['print_function']),
-        skip,
-    ],
-    pattern='*.rst',
-    setup=setup,
-).pytest()
+if version_info >= (3,):
+    pytest_collect_file = Sybil(
+        parsers=[
+            DocTestParser(optionflags=ELLIPSIS | NORMALIZE_WHITESPACE),
+            CodeBlockParser(future_imports=['print_function']),
+            skip,
+        ],
+        pattern='*.rst',
+        setup=setup,
+    ).pytest()
