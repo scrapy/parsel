@@ -32,7 +32,7 @@ class XPathFuncsTestCase(unittest.TestCase):
         <p CLASS="foo">First</p>
         """
         sel = Selector(text=body)
-        self.assertRaisesRegexp(
+        self.assertRaisesRegex(
             ValueError, 'has-class must have at least 1 argument',
             sel.xpath, 'has-class()')
 
@@ -41,7 +41,7 @@ class XPathFuncsTestCase(unittest.TestCase):
         <p CLASS="foo">First</p>
         """
         sel = Selector(text=body)
-        self.assertRaisesRegexp(
+        self.assertRaisesRegex(
             ValueError, 'has-class arguments must be strings',
             sel.xpath, 'has-class(.)')
 
@@ -50,7 +50,7 @@ class XPathFuncsTestCase(unittest.TestCase):
         <p CLASS="foo">First</p>
         """
         sel = Selector(text=body)
-        self.assertRaisesRegexp(
+        self.assertRaisesRegex(
             ValueError, 'All strings must be XML compatible',
             sel.xpath, u'has-class("héllö")'.encode('utf-8'))
 
@@ -102,7 +102,7 @@ class XPathFuncsTestCase(unittest.TestCase):
         <p CLASS="foo">First</p>
         """
         sel = Selector(text=body)
-        self.assertRaisesRegexp(
+        self.assertRaisesRegex(
             ValueError, 'Unregistered function in myfunc',
             sel.xpath, 'myfunc()')
 
@@ -111,6 +111,6 @@ class XPathFuncsTestCase(unittest.TestCase):
         self.assertEqual(myfunc.call_count, 1)
 
         set_xpathfunc('myfunc', None)
-        self.assertRaisesRegexp(
+        self.assertRaisesRegex(
             ValueError, 'Unregistered function in myfunc',
             sel.xpath, 'myfunc()')
