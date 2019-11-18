@@ -102,7 +102,7 @@ class SelectorTestCase(unittest.TestCase):
         self.assertRaises(ValueError, sel.xpath, "//p[normalize-space()='{}']//@name".format(lt))
 
         self.assertEqual([x.extract() for x in sel.xpath("//p[normalize-space()=$lng]//@name",
-            lng=lt)],
+                                                         lng=lt)],
                          [u'a'])
 
     def test_accessing_attributes(self):
@@ -231,7 +231,7 @@ class SelectorTestCase(unittest.TestCase):
         self.assertEqual(sel.re_first(r'foo'), None)
         self.assertEqual(sel.re_first(r'foo', default='bar'), 'bar')
 
-    def test_extract_first_default(self):
+    def test_extract_first_re_default(self):
         """Test if re_first() returns default value when no results found"""
         body = u'<ul><li id="1">1</li><li id="2">2</li></ul>'
         sel = self.sscls(text=body)
@@ -440,38 +440,53 @@ class SelectorTestCase(unittest.TestCase):
         self.assertRaises(ValueError, x.xpath, "//xmlns:TestTag/@b:att")
 
         # "b" namespace being passed ad-hoc
-        self.assertEqual(x.xpath("//b:Operation/text()",
-            namespaces={"b": "http://somens.com"}).extract()[0], 'hello')
+        self.assertEqual(
+            x.xpath("//b:Operation/text()",
+                    namespaces={"b": "http://somens.com"}).extract()[0],
+            'hello')
 
         # "b" namespace declaration is not cached
         self.assertRaises(ValueError, x.xpath, "//xmlns:TestTag/@b:att")
 
         # "xmlns" is still defined
-        self.assertEqual(x.xpath("//xmlns:TestTag/@b:att",
-            namespaces={"b": "http://somens.com"}).extract()[0], 'value')
+        self.assertEqual(
+            x.xpath("//xmlns:TestTag/@b:att",
+                    namespaces={"b": "http://somens.com"}).extract()[0],
+            'value')
 
         # chained selectors still have knowledge of register_namespace() operations
-        self.assertEqual(x.xpath("//p:SecondTestTag",
-            namespaces={"p": "http://www.scrapy.org/product"}).xpath("./xmlns:price/text()")[0].extract(), '90')
+        self.assertEqual(
+            x.xpath("//p:SecondTestTag",
+                    namespaces={"p": "http://www.scrapy.org/product"})
+             .xpath("./xmlns:price/text()")[0].extract(),
+            '90')
 
         # but chained selector don't know about parent ad-hoc declarations
-        self.assertRaises(ValueError,x.xpath("//p:SecondTestTag",
-            namespaces={"p": "http://www.scrapy.org/product"}).xpath, "p:name/text()")
+        self.assertRaises(
+            ValueError,
+            x.xpath("//p:SecondTestTag",
+                    namespaces={"p": "http://www.scrapy.org/product"})
+             .xpath,
+            "p:name/text()")
 
         # ad-hoc declarations need repeats when chaining
-        self.assertEqual(x.xpath("//p:SecondTestTag",
-                            namespaces={"p": "http://www.scrapy.org/product"}
-                        ).xpath("p:name/text()",
-                            namespaces={"p": "http://www.scrapy.org/product"}
-                        ).extract_first(), 'Dried Rose')
+        self.assertEqual(
+            x.xpath("//p:SecondTestTag",
+                    namespaces={"p": "http://www.scrapy.org/product"})
+             .xpath("p:name/text()",
+                    namespaces={"p": "http://www.scrapy.org/product"})
+             .extract_first(),
+            'Dried Rose')
 
         # declaring several ad-hoc namespaces
-        self.assertEqual(x.xpath("""string(
-                //b:Operation
-                 /following-sibling::xmlns:TestTag
-                 /following-sibling::*//p:name)""",
-            namespaces={"b": "http://somens.com",
-                        "p": "http://www.scrapy.org/product"}).extract_first(), 'Dried Rose')
+        self.assertEqual(
+            x.xpath(
+                "string(//b:Operation/following-sibling::xmlns:TestTag"
+                "/following-sibling::*//p:name)",
+                namespaces={"b": "http://somens.com",
+                            "p": "http://www.scrapy.org/product"})
+             .extract_first(),
+            'Dried Rose')
 
         # "p" prefix is not cached from previous calls
         self.assertRaises(ValueError, x.xpath, "//p:SecondTestTag/xmlns:price/text()")
@@ -502,7 +517,7 @@ class SelectorTestCase(unittest.TestCase):
                          ["John", "Paul"])
         self.assertEqual(x.xpath("//ul/li").re(r"Age: (\d+)"),
                          ["10", "20"])
-        
+
         # Test named group, hit and miss
         x = self.sscls(text=u'foobar')
         self.assertEqual(x.re('(?P<extract>foo)'), ['foo'])
@@ -515,7 +530,7 @@ class SelectorTestCase(unittest.TestCase):
     def test_re_replace_entities(self):
         body = u"""<script>{"foo":"bar &amp; &quot;baz&quot;"}</script>"""
         x = self.sscls(text=body)
-        
+
         name_re = re.compile('{"foo":(.*)}')
 
         # by default, only &amp; and &lt; are preserved ;
@@ -573,7 +588,7 @@ class SelectorTestCase(unittest.TestCase):
         <body><span id="blank">\xa3</span></body></html>'''
         x = self.sscls(text=text)
         self.assertEqual(x.xpath("//span[@id='blank']/text()").extract(),
-                          [u'\xa3'])
+                         [u'\xa3'])
 
     def test_empty_bodies_shouldnt_raise_errors(self):
         self.sscls(text=u'').xpath('//text()').extract()
@@ -747,7 +762,7 @@ class SelectorTestCase(unittest.TestCase):
     def test_replacement_null_char_from_body(self):
         text = u'<html>\x00<body><p>Grainy</p></body></html>'
         self.assertEqual(u'<html><body><p>Grainy</p></body></html>',
-                          self.sscls(text).extract())
+                         self.sscls(text).extract())
 
     def test_remove_selector_list(self):
         sel = self.sscls(text=u'<html><body><ul><li>1</li><li>2</li><li>3</li></ul></body></html>')
@@ -837,13 +852,12 @@ class ExsltTestCase(unittest.TestCase):
                  '//a[re:test(@href, "second")]/text()')],
             [u'second link'])
 
-
         # re:match() is rather special: it returns a node-set of <match> nodes
-        #[u'<match>http://www.bayes.co.uk/xml/index.xml?/xml/utils/rechecker.xml</match>',
-        #u'<match>http</match>',
-        #u'<match>www.bayes.co.uk</match>',
-        #u'<match></match>',
-        #u'<match>/xml/index.xml?/xml/utils/rechecker.xml</match>']
+        # [u'<match>http://www.bayes.co.uk/xml/index.xml?/xml/utils/rechecker.xml</match>',
+        # u'<match>http</match>',
+        # u'<match>www.bayes.co.uk</match>',
+        # u'<match></match>',
+        # u'<match>/xml/index.xml?/xml/utils/rechecker.xml</match>']
         self.assertEqual(
             sel.xpath(r're:match(//a[re:test(@href, "\.xml$")]/@href,'
                       r'"(\w+):\/\/([^/:]+)(:\d*)?([^# ]*)")/text()').extract(),
