@@ -41,6 +41,7 @@ import parsel
 # Add any Sphinx extension module names here, as strings. They can be
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom ones.
 extensions = [
+    'hoverxref.extension',
     'notfound.extension',
     'sphinx.ext.autodoc',
     'sphinx.ext.intersphinx',
@@ -288,7 +289,7 @@ intersphinx_mapping = {
 }
 
 
-# --- Nitpicking options ------------------------------------------------------
+# -- Nitpicking options -------------------------------------------------------
 
 nitpicky = True
 nitpick_ignore = [
@@ -297,3 +298,8 @@ nitpick_ignore = [
     ('py:class', 'cssselect.xpath.XPathExpr'),
     ('py:class', 'lxml.etree.XMLParser'),
 ]
+
+
+# -- sphinx-hoverxref options -------------------------------------------------
+
+hoverxref_auto_ref = True
