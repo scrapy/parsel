@@ -1,2 +1,3 @@
+psutil
 pytest
 pytest-cov
