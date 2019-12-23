@@ -1138,6 +1138,9 @@ that Parsel is simpler to use and extend, unlike the `lxml`_ API which is much
 bigger because the `lxml`_ library can be used for many other tasks, besides
 selecting markup documents.
 
+For more information do read: https://blog.datahut.co/how-xpath-plays-vital-role-in-web-scraping/
+https://blog.datahut.co/how-xpath-plays-vital-role-in-web-scraping-part-2/
+
 
 .. _BeautifulSoup: http://www.crummy.com/software/BeautifulSoup/
 .. _lxml: http://lxml.de/
