@@ -251,17 +251,23 @@ class Selector(object):
 
         Requires : jmespath(https://github.com/jmespath/jmespath)
         """
-        if self.json is not None:
-            datas = self.json
-        elif self.text is not None:
-            datas = json.loads(self.text)
-        else:
-            if isinstance(self.root, six.text_type):
-                datas = json.loads(self.root)
+        try:
+            if self.json is not None:
+                datas = self.json
+            elif self.text is not None:
+                datas = json.loads(self.text)
             else:
-                datas = json.loads(self.root.text)
+                if isinstance(self.root, six.string_types):
+                    datas = json.loads(self.root)
+                else:
+                    datas = json.loads(self.root.text)
+        except json.decoder.JSONDecodeError as exc:
+            msg = u"JPath error: %s in %s" % (exc, query)
+            msg = msg if six.PY3 else msg.encode('unicode_escape')
+            six.reraise(ValueError, ValueError(msg), sys.exc_info()[2])
+        else:
+            result = jmespath.search(query, datas, **kwargs)
 
-        result = jmespath.search(query, datas, **kwargs)
         if type(result) is not list:
             result = [result]
 
