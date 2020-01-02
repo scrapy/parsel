@@ -6,7 +6,6 @@
 # @File    : test_selector_jpath.py
 # @Explain :
 import unittest
-import json
 
 from parsel import Selector
 
@@ -44,10 +43,14 @@ class JpathTestCase(unittest.TestCase):
                 """
         sel = Selector(text=datas)
         self.assertEqual(sel.jpath(u'html').get(),
-                         u'<div><a>AAA<br>Test</a>aaa</div><div><a>BBB</a>bbb<b>BbB</b><div/>')
-        self.assertEqual(sel.jpath(u'html').xpath(u'//div/a/text()').getall(), [u'AAA', u'Test', u'BBB'])
-        self.assertEqual(sel.jpath(u'html').xpath(u'//div/b').getall(), [u'<b>BbB</b>'])
-        self.assertEqual(sel.jpath(u'content').jpath(u'name.age').get(), 18)
+                         u'<div><a>AAA<br>Test</a>aaa</div>'
+                         u'<div><a>BBB</a>bbb<b>BbB</b><div/>')
+        self.assertEqual(sel.jpath(u'html').xpath(u'//div/a/text()').getall(),
+                         [u'AAA', u'Test', u'BBB'])
+        self.assertEqual(sel.jpath(u'html').xpath(u'//div/b').getall(),
+                         [u'<b>BbB</b>'])
+        self.assertEqual(sel.jpath(u'content').jpath(u'name.age').get(),
+                         18)
 
     def test_jpath_with_html_contains_json(self):
         html_text = u"""
@@ -80,6 +83,11 @@ class JpathTestCase(unittest.TestCase):
         </div>
         """
         sel = Selector(text=html_text)
-        self.assertEqual(sel.xpath(u'//div/jsondata/text()').jpath(u'user[*].name').getall(), [u'A', u'B', u'C', u'D'])
-        self.assertEqual(sel.xpath(u'//div/jsondata').jpath(u'user[*].name').getall(), [u'A', u'B', u'C', u'D'])
-        self.assertEqual(sel.xpath(u'//div/jsondata').jpath(u'total').get(), 4)
+        self.assertEqual(
+            sel.xpath(u'/div/jsondata/text()').jpath(u'user[*].name').getall(),
+            [u'A', u'B', u'C', u'D'])
+        self.assertEqual(
+            sel.xpath(u'/div/jsondata').jpath(u'user[*].name').getall(),
+            [u'A', u'B', u'C', u'D'])
+        self.assertEqual(
+            sel.xpath(u'/div/jsondata').jpath(u'total').get(), 4)
