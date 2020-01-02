@@ -6,7 +6,6 @@ import sys
 from pkg_resources import parse_version
 from setuptools import setup, __version__ as setuptools_version
 
-
 with open('README.rst') as readme_file:
     readme = readme_file.read()
 
@@ -15,6 +14,7 @@ with open('NEWS') as history_file:
 
 test_requirements = [
 ]
+
 
 def has_environment_marker_platform_impl_support():
     """Code extracted from 'pytest/setup.py'
@@ -25,12 +25,14 @@ def has_environment_marker_platform_impl_support():
     """
     return parse_version(setuptools_version) >= parse_version('18.5')
 
+
 install_requires = [
     'w3lib>=1.19.0',
     'lxml;python_version!="3.4"',
     'lxml<=4.3.5;python_version=="3.4"',
     'six>=1.5.2',
-    'cssselect>=0.9'
+    'cssselect>=0.9',
+    'jmespath>=0.9',
 ]
 extras_require = {}
 
@@ -52,7 +54,7 @@ setup(
         'parsel',
     ],
     package_dir={'parsel':
-                 'parsel'},
+                     'parsel'},
     include_package_data=True,
     install_requires=install_requires,
     extras_require=extras_require,
@@ -77,7 +79,7 @@ setup(
         'Programming Language :: Python :: Implementation :: CPython',
         'Programming Language :: Python :: Implementation :: PyPy',
     ],
-    setup_requires=['pytest-runner',],
-    tests_require=['pytest',],
+    setup_requires=['pytest-runner', ],
+    tests_require=['pytest', ],
     test_suite='tests',
 )
