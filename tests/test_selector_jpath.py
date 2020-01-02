@@ -23,16 +23,16 @@ class JpathTestCase(unittest.TestCase):
                 {'name': 'C', 'value': 'c'},
                 {'name': '<a>D</a>', 'value': '<div>d</div>'},
             ],
-            'html': ['<div><a>AAA<br>鬼打墙</a>aaa</div><div><a>BBB</a>bbb<b>BbB</b><div/>'],
+            'html': [u'<div><a>AAA<br>鬼打墙</a>aaa</div><div><a>BBB</a>bbb<b>BbB</b><div/>'],
         }
         sel = Selector(text=json.dumps(datas))
-        self.assertEqual(sel.jpath('html').get(), '<div><a>AAA<br>鬼打墙</a>aaa</div><div><a>BBB</a>bbb<b>BbB</b><div/>')
-        self.assertEqual(sel.jpath('html').xpath('//div/a/text()').getall(), ['AAA', '鬼打墙', 'BBB'])
-        self.assertEqual(sel.jpath('html').xpath('//div/b').getall(), ['<b>BbB</b>'])
-        self.assertEqual(sel.jpath('content').jpath('name.age').get(), 18)
+        self.assertEqual(sel.jpath('html').get(), u'<div><a>AAA<br>鬼打墙</a>aaa</div><div><a>BBB</a>bbb<b>BbB</b><div/>')
+        self.assertEqual(sel.jpath('html').xpath(u'//div/a/text()').getall(), ['AAA', u'鬼打墙', 'BBB'])
+        self.assertEqual(sel.jpath('html').xpath(u'//div/b').getall(), ['<b>BbB</b>'])
+        self.assertEqual(sel.jpath('content').jpath(u'name.age').get(), 18)
 
     def test_jpath_with_html_contains_json(self):
-        html_text = """
+        html_text = u"""
         <div>
             <h1>Information</h1>
             <jsondata>
