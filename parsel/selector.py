@@ -261,7 +261,7 @@ class Selector(object):
                     datas = json.loads(self.root)
                 else:
                     datas = json.loads(self.root.text)
-        except json.decoder.JSONDecodeError as exc:
+        except jmespath.exceptions.JMESPathError as exc:
             msg = u"JPath error: %s in %s" % (exc, query)
             msg = msg if six.PY3 else msg.encode('unicode_escape')
             six.reraise(ValueError, ValueError(msg), sys.exc_info()[2])
