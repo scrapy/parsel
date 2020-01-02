@@ -56,7 +56,7 @@ class JpathTestCase(unittest.TestCase):
         html_text = u"""
         <div>
             <h1>Information</h1>
-            <jsondata>
+            <content>
             {
               "user": [
                         {
@@ -79,15 +79,15 @@ class JpathTestCase(unittest.TestCase):
               "total": 4,
               "status": "ok"
             }
-            </jsondata>
+            </content>
         </div>
         """
         sel = Selector(text=html_text)
         self.assertEqual(
-            sel.xpath(u'/div/jsondata/text()').jpath(u'user[*].name').getall(),
+            sel.xpath(u'//div/content/text()').jpath(u'user[*].name').getall(),
             [u'A', u'B', u'C', u'D'])
         self.assertEqual(
-            sel.xpath(u'/div/jsondata').jpath(u'user[*].name').getall(),
+            sel.xpath(u'//div/content').jpath(u'user[*].name').getall(),
             [u'A', u'B', u'C', u'D'])
         self.assertEqual(
-            sel.xpath(u'/div/jsondata').jpath(u'total').get(), 4)
+            sel.xpath(u'//div/content').jpath(u'total').get(), 4)
