@@ -1,5 +1,5 @@
 """
-Jsonpath/XPath selectors based on lxml and jmespath
+Jmespath/XPath selectors based on lxml and jmespath
 """
 import json
 import sys
@@ -73,14 +73,14 @@ class SelectorList(list):
     def __getstate__(self):
         raise TypeError("can't pickle SelectorList objects")
 
-    def jsonpath(self, jsonpath, **kwargs):
+    def jmespath(self, jmespath, **kwargs):
         """
-        Call the ``.jsonpath()`` method for each element in this list and return
+        Call the ``.jmespath()`` method for each element in this list and return
         their results flattened as another :class:`SelectorList`.
 
-        ``jsonpath`` is the same argument as the one in :meth:`Selector.jsonpath`
+        ``jmespath`` is the same argument as the one in :meth:`Selector.jmespath`
         """
-        return self.__class__(flatten([x.jsonpath(jsonpath, **kwargs) for x in self]))
+        return self.__class__(flatten([x.jmespath(jmespath, **kwargs) for x in self]))
 
     def xpath(self, xpath, namespaces=None, **kwargs):
         """
@@ -213,7 +213,7 @@ class Selector(object):
         self._parser = _ctgroup[st]['_parser']
         self._csstranslator = _ctgroup[st]['_csstranslator']
         self._tostring_method = _ctgroup[st]['_tostring_method']
-        self._text = text  # save source text is friendly to jsonpath
+        self._text = text  # save source text is friendly to jmespath
 
         if text is not None:
             if not isinstance(text, six.text_type):
@@ -237,12 +237,12 @@ class Selector(object):
     def _get_root(self, text, base_url=None):
         return create_root_node(text, self._parser, base_url=base_url)
 
-    def jsonpath(self, query, **kwargs):
+    def jmespath(self, query, **kwargs):
         """
-        Call the ``.jsonpath()`` method for each element in this list and return
+        Call the ``.jmespath()`` method for each element in this list and return
         their results flattened as another :class:`SelectorList`.
 
-        ``query`` is the same argument as the one in :meth:`Selector.jsonpath`
+        ``query`` is the same argument as the one in :meth:`Selector.jmespath`
 
         Requires : jmespath(https://github.com/jmespath/jmespath)
         """
@@ -257,7 +257,7 @@ class Selector(object):
                 else:
                     datas = json.loads(self.root.text)
         except jmespath.exceptions.JMESPathError as exc:
-            msg = u"Jsonpath error: %s in %s" % (exc, query)
+            msg = u"jmespath error: %s in %s" % (exc, query)
             msg = msg if six.PY3 else msg.encode('unicode_escape')
             six.reraise(ValueError, ValueError(msg), sys.exc_info()[2])
         else:
@@ -457,7 +457,7 @@ class Selector(object):
 
     def __str__(self):
         if self.json is not None:
-            return "<%s jsonpath=%r data=%s>" % (type(self).__name__, self._expr, repr(self.json))
+            return "<%s jmespath=%r data=%s>" % (type(self).__name__, self._expr, repr(self.json))
         else:
             data = repr(shorten(self.get(), width=40))
             return "<%s xpath=%r data=%s>" % (type(self).__name__, self._expr, data)
