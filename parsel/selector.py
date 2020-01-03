@@ -1,17 +1,14 @@
 """
-JPath/XPath selectors based on lxml and jmespath
+Jsonpath/XPath selectors based on lxml and jmespath
 """
-
+import json
 import sys
-
+import jmespath
 import six
 from lxml import etree, html
 
 from .utils import flatten, iflatten, extract_regex, shorten
 from .csstranslator import HTMLTranslator, GenericTranslator
-
-import jmespath
-import json
 
 
 class CannotRemoveElementWithoutRoot(Exception):
@@ -76,23 +73,21 @@ class SelectorList(list):
     def __getstate__(self):
         raise TypeError("can't pickle SelectorList objects")
 
-    def jpath(self, jpath, **kwargs):
+    def jsonpath(self, jsonpath, **kwargs):
         """
-        Call the ``.jpath()`` method for each element in this list and return
+        Call the ``.jsonpath()`` method for each element in this list and return
         their results flattened as another :class:`SelectorList`.
 
-        ``query`` is the same argument as the one in :meth:`Selector.jpath`
-
-        Requires : jmespath(https://github.com/jmespath/jmespath)
+        ``jsonpath`` is the same argument as the one in :meth:`Selector.jsonpath`
         """
-        return self.__class__(flatten([x.jpath(jpath, **kwargs) for x in self]))
+        return self.__class__(flatten([x.jsonpath(jsonpath, **kwargs) for x in self]))
 
     def xpath(self, xpath, namespaces=None, **kwargs):
         """
         Call the ``.xpath()`` method for each element in this list and return
         their results flattened as another :class:`SelectorList`.
 
-        ``query`` is the same argument as the one in :meth:`Selector.xpath`
+        ``xpath`` is the same argument as the one in :meth:`Selector.xpath`
 
         ``namespaces`` is an optional ``prefix: namespace-uri`` mapping (dict)
         for additional prefixes to those registered with ``register_namespace(prefix, uri)``.
@@ -194,7 +189,7 @@ class Selector(object):
     See [`lxml` documentation](https://lxml.de/api/index.html) ``lxml.etree.fromstring`` for more information.
     """
 
-    __slots__ = ['text', 'namespaces', 'type', '_expr', 'root', 'json',
+    __slots__ = ['_text', 'namespaces', 'type', '_expr', 'root', 'json',
                  '__weakref__', '_parser', '_csstranslator', '_tostring_method']
 
     _default_type = None
@@ -218,7 +213,7 @@ class Selector(object):
         self._parser = _ctgroup[st]['_parser']
         self._csstranslator = _ctgroup[st]['_csstranslator']
         self._tostring_method = _ctgroup[st]['_tostring_method']
-        self.text = text  # save source text is friendly to jpath
+        self._text = text  # save source text is friendly to jsonpath
 
         if text is not None:
             if not isinstance(text, six.text_type):
@@ -242,27 +237,27 @@ class Selector(object):
     def _get_root(self, text, base_url=None):
         return create_root_node(text, self._parser, base_url=base_url)
 
-    def jpath(self, query, **kwargs):
+    def jsonpath(self, query, **kwargs):
         """
-        Call the ``.jpath()`` method for each element in this list and return
+        Call the ``.jsonpath()`` method for each element in this list and return
         their results flattened as another :class:`SelectorList`.
 
-        ``query`` is the same argument as the one in :meth:`Selector.jpath`
+        ``query`` is the same argument as the one in :meth:`Selector.jsonpath`
 
         Requires : jmespath(https://github.com/jmespath/jmespath)
         """
         try:
             if self.json is not None:
                 datas = self.json
-            elif self.text is not None:
-                datas = json.loads(self.text)
+            elif self._text is not None:
+                datas = json.loads(self._text)
             else:
                 if isinstance(self.root, six.string_types):
                     datas = json.loads(self.root)
                 else:
                     datas = json.loads(self.root.text)
         except jmespath.exceptions.JMESPathError as exc:
-            msg = u"JPath error: %s in %s" % (exc, query)
+            msg = u"Jsonpath error: %s in %s" % (exc, query)
             msg = msg if six.PY3 else msg.encode('unicode_escape')
             six.reraise(ValueError, ValueError(msg), sys.exc_info()[2])
         else:
@@ -462,7 +457,7 @@ class Selector(object):
 
     def __str__(self):
         if self.json is not None:
-            return "<%s jpath=%r data=%s>" % (type(self).__name__, self._expr, repr(self.json))
+            return "<%s jsonpath=%r data=%s>" % (type(self).__name__, self._expr, repr(self.json))
         else:
             data = repr(shorten(self.get(), width=40))
             return "<%s xpath=%r data=%s>" % (type(self).__name__, self._expr, data)
