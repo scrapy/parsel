@@ -1129,7 +1129,7 @@ Similar libraries
    library.). Parsel uses it under-the-hood.
 
  * `PyQuery`_ is a library that, like Parsel, uses `lxml`_ and
-   `cssselect`_ under the hood, but it offers a jQuery-like API to
+   :doc:`cssselect <cssselect:index>` under the hood, but it offers a jQuery-like API to
    traverse and manipulate XML/HTML documents.
 
 Parsel is built on top of the `lxml`_ library, which means they're very similar
@@ -1143,4 +1143,3 @@ selecting markup documents.
 .. _lxml: http://lxml.de/
 .. _PyQuery: https://pypi.python.org/pypi/pyquery
 .. _ElementTree: https://docs.python.org/2/library/xml.etree.elementtree.html
-.. _cssselect: https://pypi.python.org/pypi/cssselect/
