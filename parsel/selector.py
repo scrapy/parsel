@@ -24,6 +24,7 @@ class SafeXMLParser(etree.XMLParser):
         kwargs.setdefault('resolve_entities', False)
         super(SafeXMLParser, self).__init__(*args, **kwargs)
 
+
 _ctgroup = {
     'html': {'_parser': html.HTMLParser,
              '_csstranslator': HTMLTranslator(),
@@ -205,7 +206,7 @@ class Selector(object):
         if text is not None:
             if not isinstance(text, six.text_type):
                 msg = "text argument should be of type %s, got %s" % (
-                           six.text_type, text.__class__)
+                    six.text_type, text.__class__)
                 raise TypeError(msg)
             root = self._get_root(text, base_url)
         elif root is None:

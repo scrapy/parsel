@@ -1,9 +1,7 @@
-import six
-
-if six.PY2:
-    from functools32 import lru_cache
-else:
+try:
     from functools import lru_cache
+except ImportError:
+    from functools32 import lru_cache
 
 from cssselect import GenericTranslator as OriginalGenericTranslator
 from cssselect import HTMLTranslator as OriginalHTMLTranslator
