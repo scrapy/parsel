@@ -49,4 +49,4 @@ deploy:
     tags: true
     all_branches: true
     repo: scrapy/parsel
-    condition: $TOXENV == py27
+    condition: $TOXENV == py37
