@@ -74,13 +74,21 @@ For the sake of completeness, here's its full HTML code:
 
 .. highlight:: python
 
-So, let's download that page and create a selector for it::
+So, let's download that page and create a selector for it:
 
-    >>> import requests
-    >>> from parsel import Selector
-    >>> url = 'http://parsel.readthedocs.org/en/latest/_static/selectors-sample1.html'
-    >>> text = requests.get(url).text
-    >>> selector = Selector(text=text)
+.. skip: start
+
+>>> import requests
+>>> from parsel import Selector
+>>> url = 'http://parsel.readthedocs.org/en/latest/_static/selectors-sample1.html'
+>>> text = requests.get(url).text
+>>> selector = Selector(text=text)
+
+.. skip: end
+
+.. invisible-code-block: python
+
+   selector = load_selector('selectors-sample1.html')
 
 Since we're dealing with HTML, the default type for Selector, we don't need
 to specify the `type` argument.
@@ -279,7 +287,6 @@ too. Here's an example::
     >>> for index, link in enumerate(links):
     ...     args = (index, link.xpath('@href').get(), link.xpath('img/@src').get())
     ...     print('Link number %d points to url %r and image %r' % args)
-
     Link number 0 points to url 'image1.html' and image 'image1_thumb.jpg'
     Link number 1 points to url 'image2.html' and image 'image2_thumb.jpg'
     Link number 2 points to url 'image3.html' and image 'image3_thumb.jpg'
@@ -341,18 +348,18 @@ Here's an example used to extract image names from the :ref:`HTML code
 <topics-selectors-htmlcode>` above::
 
     >>> selector.xpath('//a[contains(@href, "image")]/text()').re(r'Name:\s*(.*)')
-    ['My image 1',
-     'My image 2',
-     'My image 3',
-     'My image 4',
-     'My image 5']
+    ['My image 1 ',
+     'My image 2 ',
+     'My image 3 ',
+     'My image 4 ',
+     'My image 5 ']
 
 There's an additional helper reciprocating ``.get()`` (and its
 alias ``.extract_first()``) for ``.re()``, named ``.re_first()``.
 Use it to extract just the first matching string::
 
     >>> selector.xpath('//a[contains(@href, "image")]/text()').re_first(r'Name:\s*(.*)')
-    'My image 1'
+    'My image 1 '
 
 .. _topics-selectors-relative-xpaths:
 
@@ -419,11 +426,10 @@ Example removing an ad from a blog post:
     ... """
     >>> sel = Selector(text=doc)
     >>> sel.xpath('//div/text()').getall()
-    ['Content paragraph...', 'Ad content...', 'Link', 'More content...']
+    ['Content paragraph...', '\n        ', '\n            Ad content...\n            ', '\n        ', '\n    ', 'More content...']
     >>> sel.xpath('//div[@class="ad"]').remove()
     >>> sel.xpath('//div//text()').getall()
     ['Content paragraph...', 'More content...']
-    >>>
 
 
 Using EXSLT extensions
@@ -463,7 +469,7 @@ Example selecting links in list item with a "class" attribute ending with a digi
     >>> sel = Selector(text=doc)
     >>> sel.xpath('//li//@href').getall()
     ['link1.html', 'link2.html', 'link3.html', 'link4.html', 'link5.html']
-    >>> sel.xpath('//li[re:test(@class, "item-\d$")]//@href').getall()
+    >>> sel.xpath(r'//li[re:test(@class, "item-\d$")]//@href').getall()
     ['link1.html', 'link2.html', 'link4.html', 'link5.html']
     >>>
 
@@ -539,29 +545,27 @@ with groups of itemscopes and corresponding itemprops::
     ...                                .//*[@itemscope]/*/@itemprop)''')
     ...     print("    properties: %s" % (props.getall()))
     ...     print("")
-
     current scope: ['http://schema.org/Product']
         properties: ['name', 'aggregateRating', 'offers', 'description', 'review', 'review']
-
+    <BLANKLINE>
     current scope: ['http://schema.org/AggregateRating']
         properties: ['ratingValue', 'reviewCount']
-
+    <BLANKLINE>
     current scope: ['http://schema.org/Offer']
         properties: ['price', 'availability']
-
+    <BLANKLINE>
     current scope: ['http://schema.org/Review']
         properties: ['name', 'author', 'datePublished', 'reviewRating', 'description']
-
+    <BLANKLINE>
+    current scope: ['http://schema.org/Rating']
+        properties: ['worstRating', 'ratingValue', 'bestRating']
+    <BLANKLINE>
+    current scope: ['http://schema.org/Review']
+        properties: ['name', 'author', 'datePublished', 'reviewRating', 'description']
+    <BLANKLINE>
     current scope: ['http://schema.org/Rating']
         properties: ['worstRating', 'ratingValue', 'bestRating']
 
-    current scope: ['http://schema.org/Review']
-        properties: ['name', 'author', 'datePublished', 'reviewRating', 'description']
-
-    current scope: ['http://schema.org/Rating']
-        properties: ['worstRating', 'ratingValue', 'bestRating']
-
-    >>>
 
 Here we first iterate over ``itemscope`` elements, and for each one,
 we look for all ``itemprops`` elements and exclude those that are themselves
@@ -680,16 +684,16 @@ Example::
 
     >>> from parsel import Selector
     >>> sel = Selector(text="""
-    ....:     <ul class="list">
-    ....:         <li>1</li>
-    ....:         <li>2</li>
-    ....:         <li>3</li>
-    ....:     </ul>
-    ....:     <ul class="list">
-    ....:         <li>4</li>
-    ....:         <li>5</li>
-    ....:         <li>6</li>
-    ....:     </ul>""")
+    ...     <ul class="list">
+    ...         <li>1</li>
+    ...         <li>2</li>
+    ...         <li>3</li>
+    ...     </ul>
+    ...     <ul class="list">
+    ...         <li>4</li>
+    ...         <li>5</li>
+    ...         <li>6</li>
+    ...     </ul>""")
     >>> xp = lambda x: sel.xpath(x).getall()
 
 This gets all first ``<li>``  elements under whatever it is its parent::
@@ -752,21 +756,21 @@ For example::
 
     >>> from parsel import Selector
     >>> selector = Selector(text="""
-    ....        <script>
-    ....            <!-- comment -->
-    ....            text
-    ....            <br/>
-    ....        </script>
-    ....        <style>
-    ....            <!-- comment -->
-    ....            text
-    ....            <br/>
-    ....        </style>
-    ....        <div>
-    ....            <!-- comment -->
-    ....            text
-    ....            <br/>
-    ....        </div>""")
+    ...     <script>
+    ...         text
+    ...         <!-- comment -->
+    ...         <br/>
+    ...     </script>
+    ...     <style>
+    ...         text
+    ...         <!-- comment -->
+    ...         <br/>
+    ...     </style>
+    ...     <div>
+    ...         text
+    ...         <!-- comment -->
+    ...         <br/>
+    ...     </div>""")
     >>> for tag in selector.xpath('//*[contains(text(), "text")]'):
     ...     print(tag.xpath('name()').get())
     ...     print('    Text: ' + (tag.xpath('text()').get() or ''))
@@ -778,7 +782,7 @@ For example::
             text
             <!-- comment -->
             <br/>
-
+    <BLANKLINE>
         Comment:
         Children:
     style
@@ -786,13 +790,13 @@ For example::
             text
             <!-- comment -->
             <br/>
-
+    <BLANKLINE>
         Comment:
         Children:
     div
         Text:
             text
-
+    <BLANKLINE>
         Comment: <!-- comment -->
         Children: <br>
 
@@ -810,6 +814,10 @@ However, ``parsel`` usage docs are now written using ``.get()`` and
 and readable code.
 
 The following examples show how these methods map to each other.
+
+.. invisible-code-block: python
+
+   selector = load_selector('selectors-sample1.html')
 
 1. ``SelectorList.get()`` is the same as ``SelectorList.extract_first()``::
 
@@ -852,10 +860,14 @@ Using CSS selectors in multi-root documents
 Some webpages may have multiple root elements. It can happen, for example, when
 a webpage has broken code, such as missing closing tags.
 
-You can use XPath to determine if a page has multiple root elements::
+.. invisible-code-block: python
 
-    >>> len(selector.xpath('/*')) > 1
-    True
+   selector = load_selector('multiroot.html')
+
+You can use XPath to determine if a page has multiple root elements:
+
+>>> len(selector.xpath('/*')) > 1
+True
 
 CSS selectors only work on the first root element, because the first root
 element is always used as the starting current element, and CSS selectors do
@@ -954,12 +966,20 @@ method for that.
 
 Let's show an example that illustrates this with the Python Insider blog atom feed.
 
-Let's download the atom feed using :mod:`requests` and create a selector::
+Let's download the atom feed using :mod:`requests` and create a selector:
 
-    >>> import requests
-    >>> from parsel import Selector
-    >>> text = requests.get('https://feeds.feedburner.com/PythonInsider').text
-    >>> sel = Selector(text=text, type='xml')
+.. skip: start
+
+>>> import requests
+>>> from parsel import Selector
+>>> text = requests.get('https://feeds.feedburner.com/PythonInsider').text
+>>> sel = Selector(text=text, type='xml')
+
+.. skip: end
+
+.. invisible-code-block: python
+
+   sel = load_selector('python-insider.xml', type='xml')
 
 This is how the file starts:
 
@@ -993,9 +1013,9 @@ directly by their names::
 
     >>> sel.remove_namespaces()
     >>> sel.xpath("//link")
-    [<Selector xpath='//link' data='<link rel="alternate" type="text/html" h'>,
-     <Selector xpath='//link' data='<link rel="next" type="application/atom+'>,
-     ...
+    [<Selector xpath='//link' data='<link rel="alternate" type="text/html...'>,
+     <Selector xpath='//link' data='<link rel="next" type="application/at...'>,
+     ...]
 
 If you wonder why the namespace removal procedure isn't called always by default
 instead of having to call it manually, this is because of two reasons, which, in order
@@ -1019,29 +1039,37 @@ Ad-hoc namespaces references
 references along with the query, through a ``namespaces`` argument,
 with the prefixes you declare being used in your XPath or CSS query.
 
-Let's use the same Python Insider Atom feed::
+Let's use the same Python Insider Atom feed:
 
-    >>> import requests
-    >>> from parsel import Selector
-    >>> text = requests.get('https://feeds.feedburner.com/PythonInsider').text
-    >>> sel = Selector(text=text, type='xml')
+.. skip: start
+
+>>> import requests
+>>> from parsel import Selector
+>>> text = requests.get('https://feeds.feedburner.com/PythonInsider').text
+>>> sel = Selector(text=text, type='xml')
+
+.. skip: end
+
+.. invisible-code-block: python
+
+   sel = load_selector('python-insider.xml', type='xml')
 
 And try to select the links again, now using an "atom:" prefix
 for the "link" node test::
 
     >>> sel.xpath("//atom:link", namespaces={"atom": "http://www.w3.org/2005/Atom"})
-    [<Selector xpath='//atom:link' data='<link xmlns="http://www.w3.org/2005/Atom'>,
-     <Selector xpath='//atom:link' data='<link xmlns="http://www.w3.org/2005/Atom'>,
-     ...
+    [<Selector xpath='//atom:link' data='<link xmlns="http://www.w3.org/2005/A...'>,
+     <Selector xpath='//atom:link' data='<link xmlns="http://www.w3.org/2005/A...'>,
+     ...]
 
 You can pass several namespaces (here we're using shorter 1-letter prefixes)::
 
     >>> sel.xpath("//a:entry/a:author/g:image/@src",
     ...           namespaces={"a": "http://www.w3.org/2005/Atom",
     ...                       "g": "http://schemas.google.com/g/2005"}).getall()
-    ['http://photos1.blogger.com/blogger/4554/1119/400/beethoven_10.jpg',
-     '//lh3.googleusercontent.com/-7xisiK0EArc/AAAAAAAAAAI/AAAAAAAAAuM/-r6o6A8RKCM/s512-c/photo.jpg',
-     ...
+    ['https://img1.blogblog.com/img/b16-rounded.gif',
+     'https://img1.blogblog.com/img/b16-rounded.gif',
+     ...]
 
 .. _topics-xpath-variables:
 
@@ -1053,6 +1081,10 @@ the ``$somevariable`` syntax. This is somewhat similar to parameterized
 queries or prepared statements in the SQL world where you replace
 some arguments in your queries with placeholders like ``?``,
 which are then substituted with values passed with the query.
+
+.. invisible-code-block: python
+
+   selector = load_selector('selectors-sample1.html')
 
 Here's an example to match an element based on its normalized string-value::
 
@@ -1128,7 +1160,7 @@ Similar libraries
    library.). Parsel uses it under-the-hood.
 
  * `PyQuery`_ is a library that, like Parsel, uses `lxml`_ and
-   `cssselect`_ under the hood, but it offers a jQuery-like API to
+   :doc:`cssselect <cssselect:index>` under the hood, but it offers a jQuery-like API to
    traverse and manipulate XML/HTML documents.
 
 Parsel is built on top of the `lxml`_ library, which means they're very similar
@@ -1142,4 +1174,3 @@ selecting markup documents.
 .. _lxml: http://lxml.de/
 .. _PyQuery: https://pypi.python.org/pypi/pyquery
 .. _ElementTree: https://docs.python.org/2/library/xml.etree.elementtree.html
-.. _cssselect: https://pypi.python.org/pypi/cssselect/
