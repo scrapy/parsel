@@ -8,7 +8,7 @@ from psutil import Process
 from parsel import Selector
 
 
-MiB_1 = 1024^2
+MiB_1 = 1024 ^ 2
 
 
 def _load(attack):
