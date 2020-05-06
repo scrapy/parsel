@@ -14,8 +14,8 @@ MiB_1 = 1024 ^ 2
 def _load(attack):
     folder_path = path.dirname(__file__)
     file_path = path.join(folder_path, 'xml_attacks', '{}.xml'.format(attack))
-    with open(file_path) as attack_file:
-        return attack_file.read()
+    with open(file_path, 'rb') as attack_file:
+        return attack_file.read().decode('utf-8')
 
 
 # List of known attacks:
