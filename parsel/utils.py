@@ -22,7 +22,7 @@ def flatten(x):
 
 
 def iflatten(x):
-    """iflatten(sequence) -> iterator
+    """iflatten(sequence) -> Iterator
     Similar to ``.flatten()``, but returns iterator instead"""
     for el in x:
         if _is_listlike(el):

@@ -27,8 +27,7 @@ def has_environment_marker_platform_impl_support():
 
 install_requires = [
     'w3lib>=1.19.0',
-    'lxml;python_version!="3.4"',
-    'lxml<=4.3.5;python_version=="3.4"',
+    'lxml',
     'six>=1.5.2',
     'cssselect>=0.9'
 ]
@@ -70,10 +69,10 @@ setup(
         'Programming Language :: Python :: 2',
         'Programming Language :: Python :: 2.7',
         'Programming Language :: Python :: 3',
-        'Programming Language :: Python :: 3.4',
         'Programming Language :: Python :: 3.5',
         'Programming Language :: Python :: 3.6',
         'Programming Language :: Python :: 3.7',
+        'Programming Language :: Python :: 3.8',
         'Programming Language :: Python :: Implementation :: CPython',
         'Programming Language :: Python :: Implementation :: PyPy',
     ],
