@@ -1,0 +1,22 @@
+[MASTER]
+persistent=no
+
+[MESSAGES CONTROL]
+disable=bad-continuation,
+        c-extension-no-member,
+        import-error,
+        invalid-name,
+        line-too-long,
+        missing-class-docstring,
+        missing-function-docstring,
+        missing-module-docstring,
+        no-else-return,
+        no-member,
+        no-self-use,
+        parse-error,
+        redefined-builtin,
+        too-few-public-methods,
+        too-many-arguments,
+        unidiomatic-typecheck,
+        useless-object-inheritance,  # Required for Python 2 support
+        wrong-import-position

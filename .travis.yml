@@ -10,6 +10,8 @@ matrix:
       env: TOXENV=security
     - python: 3.8
       env: TOXENV=flake8
+    - python: 3.8
+      env: TOXENV=pylint
     - python: 2.7
       env: TOXENV=py27
     - python: pypy
