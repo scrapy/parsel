@@ -3,6 +3,16 @@
 History
 -------
 
+1.6.0 (2020-05-NN)
+~~~~~~~~~~~~~~~~~~
+
+* Python 3.4 is no longer supported
+* New ``Selector.remove()`` and ``SelectorList.remove()`` methods to remove
+  selected elements from the parsed document tree.
+* Improvements to error reporting, test coverage and documentation, and code
+  cleanup.
+
+
 1.5.2 (2019-08-09)
 ~~~~~~~~~~~~~~~~~~
 
