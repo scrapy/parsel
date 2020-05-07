@@ -8,9 +8,9 @@ History
 
 * Python 3.4 is no longer supported
 * New ``Selector.remove()`` and ``SelectorList.remove()`` methods to remove
-  selected elements from the parsed document tree.
+  selected elements from the parsed document tree
 * Improvements to error reporting, test coverage and documentation, and code
-  cleanup.
+  cleanup
 
 
 1.5.2 (2019-08-09)
