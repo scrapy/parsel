@@ -240,12 +240,17 @@ class Selector(object):
 
     def jmespath(self, query, **kwargs):
         """
-        Call the ``.jmespath()`` method for each element in this list and return
-        their results flattened as another :class:`SelectorList`.
+        Find objects matching the JMESPath ``query`` and return the result as a
+        :class:`SelectorList` instance with all elements flattened. List
+        elements implement :class:`Selector` interface too.
 
-        ``query`` is the same argument as the one in :meth:`Selector.jmespath`
+        ``query`` is a string containing the `JMESPath
+        <https://jmespath.org/>`_ query to apply.
 
-        Requires : jmespath(https://github.com/jmespath/jmespath)
+        Any additional named arguments are passed to the underlying
+        ``jmespath.search`` call, e.g.::
+
+            selector.jmespath('author.name', options=jmespath.Options(dict_cls=collections.OrderedDict))
         """
         try:
             if self.json is not None:
