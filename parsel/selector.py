@@ -262,8 +262,9 @@ class Selector(object):
             else:
                 datas = json.loads(self.root.text)
         result = jmespath.search(query, datas, **kwargs)
-
-        if type(result) is not list:
+        if result is None:
+            result = []
+        elif not isinstance(result, list):
             result = [result]
 
         def make_selector(x):  # closure function
@@ -272,7 +273,7 @@ class Selector(object):
             else:
                 return self.__class__(json=x, _expr=query, type=self.type)
 
-        result = [make_selector(x) for x in result if x is not None]
+        result = [make_selector(x) for x in result]
         return self.selectorlist_cls(result)
 
     def xpath(self, query, namespaces=None, **kwargs):
