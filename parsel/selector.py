@@ -252,22 +252,16 @@ class Selector(object):
 
             selector.jmespath('author.name', options=jmespath.Options(dict_cls=collections.OrderedDict))
         """
-        try:
-            if self.json is not None:
-                datas = self.json
-            elif self._text is not None:
-                datas = json.loads(self._text)
-            else:
-                if isinstance(self.root, six.string_types):
-                    datas = json.loads(self.root)
-                else:
-                    datas = json.loads(self.root.text)
-        except jmespath.exceptions.JMESPathError as exc:
-            msg = u"jmespath error: %s in %s" % (exc, query)
-            msg = msg if six.PY3 else msg.encode('unicode_escape')
-            six.reraise(ValueError, ValueError(msg), sys.exc_info()[2])
+        if self.json is not None:
+            datas = self.json
+        elif self._text is not None:
+            datas = json.loads(self._text)
         else:
-            result = jmespath.search(query, datas, **kwargs)
+            if isinstance(self.root, six.string_types):
+                datas = json.loads(self.root)
+            else:
+                datas = json.loads(self.root.text)
+        result = jmespath.search(query, datas, **kwargs)
 
         if type(result) is not list:
             result = [result]
