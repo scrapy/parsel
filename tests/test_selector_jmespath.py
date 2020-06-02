@@ -5,37 +5,37 @@ import unittest
 from parsel import Selector
 
 
-class jmespathTestCase(unittest.TestCase):
-    sscls = Selector
+class JMESPathTestCase(unittest.TestCase):
 
-    def test_jmespath_with_json_contains_html(self):
-        """ Sometimes the information is returned in a json wrapper """
-        datas = u"""{
-                    "content": [
-                        {
-                            "name": "A",
-                            "value": "a"
-                        },
-                        {
-                            "name": {
-                                "age": 18
-                            },
-                            "value": "b"
-                        },
-                        {
-                            "name": "C",
-                            "value": "c"
-                        },
-                        {
-                            "name": "<a>D</a>",
-                            "value": "<div>d</div>"
-                        }
-                    ],
-                    "html": [
-                        "<div><a>AAA<br>Test</a>aaa</div><div><a>BBB</a>bbb<b>BbB</b><div/>"
-                    ]
+    def test_json_has_html(self):
+        """Sometimes the information is returned in a json wrapper"""
+        datas = u"""
+        {
+            "content": [
+                {
+                    "name": "A",
+                    "value": "a"
+                },
+                {
+                    "name": {
+                        "age": 18
+                    },
+                    "value": "b"
+                },
+                {
+                    "name": "C",
+                    "value": "c"
+                },
+                {
+                    "name": "<a>D</a>",
+                    "value": "<div>d</div>"
                 }
-                """
+            ],
+            "html": [
+                "<div><a>AAA<br>Test</a>aaa</div><div><a>BBB</a>bbb<b>BbB</b><div/>"
+            ]
+        }
+        """
         sel = Selector(text=datas)
         self.assertEqual(sel.jmespath(u'html').get(),
                          u'<div><a>AAA<br>Test</a>aaa</div>'
@@ -47,7 +47,7 @@ class jmespathTestCase(unittest.TestCase):
         self.assertEqual(sel.jmespath(u'content').jmespath(u'name.age').get(),
                          18)
 
-    def test_jmespath_with_html_contains_json(self):
+    def test_html_has_json(self):
         html_text = u"""
         <div>
             <h1>Information</h1>
