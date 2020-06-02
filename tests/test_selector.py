@@ -273,7 +273,7 @@ class SelectorTestCase(unittest.TestCase):
 
     def test_text_or_root_is_required(self):
         self.assertRaisesRegexp(ValueError,
-                                'Selector needs either text or root argument',
+                                'Selector needs text, root or data arguments',
                                 self.sscls)
 
     def test_bool(self):
