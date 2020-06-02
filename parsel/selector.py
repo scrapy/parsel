@@ -3,6 +3,7 @@ Jmespath/XPath selectors based on lxml and jmespath
 """
 import json
 import sys
+
 import jmespath
 import six
 from lxml import etree, html
