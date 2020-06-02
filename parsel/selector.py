@@ -260,13 +260,15 @@ class Selector(object):
         """
         if self.json is not None:
             data = self.json
-        elif self._text is not None:
-            data = json.loads(self._text)
         else:
-            if isinstance(self.root, six.string_types):
-                data = json.loads(self.root)
+            if self._text is not None:
+                data_json = self._text
+            elif isinstance(self.root, six.string_types):
+                data_json = self.root
             else:
-                data = json.loads(self.root.text)
+                data_json = self.root.text
+            # TODO: Follow the same behavior as that caused by invalid XML/HTML
+            data = json.loads(data_json)
         result = jmespath.search(query, data, **kwargs)
         if result is None:
             result = []
