@@ -9,7 +9,7 @@ class JMESPathTestCase(unittest.TestCase):
 
     def test_json_has_html(self):
         """Sometimes the information is returned in a json wrapper"""
-        datas = u"""
+        data = u"""
         {
             "content": [
                 {
@@ -36,7 +36,7 @@ class JMESPathTestCase(unittest.TestCase):
             ]
         }
         """
-        sel = Selector(text=datas)
+        sel = Selector(text=data)
         self.assertEqual(sel.jmespath(u'html').get(),
                          u'<div><a>AAA<br>Test</a>aaa</div>'
                          u'<div><a>BBB</a>bbb<b>BbB</b><div/>')

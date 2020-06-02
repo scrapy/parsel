@@ -259,15 +259,15 @@ class Selector(object):
             selector.jmespath('author.name', options=jmespath.Options(dict_cls=collections.OrderedDict))
         """
         if self.json is not None:
-            datas = self.json
+            data = self.json
         elif self._text is not None:
-            datas = json.loads(self._text)
+            data = json.loads(self._text)
         else:
             if isinstance(self.root, six.string_types):
-                datas = json.loads(self.root)
+                data = json.loads(self.root)
             else:
-                datas = json.loads(self.root.text)
-        result = jmespath.search(query, datas, **kwargs)
+                data = json.loads(self.root.text)
+        result = jmespath.search(query, data, **kwargs)
         if result is None:
             result = []
         elif not isinstance(result, list):
