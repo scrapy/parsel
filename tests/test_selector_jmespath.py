@@ -1,10 +1,5 @@
 # -*- coding: utf-8 -*-
-# @Time    : 2019/12/16 5:28 PM
-# @Author  : EchoShoot
-# @Email   : BiarFordlander@gmail.com
-# @URL     : https://github.com/EchoShoot
-# @File    : test_selector_jmespath.py
-# @Explain :
+
 import unittest
 
 from parsel import Selector
