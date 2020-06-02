@@ -87,7 +87,7 @@ class SelectorList(list):
 
             selector.jmespath('author.name', options=jmespath.Options(dict_cls=collections.OrderedDict))
         """
-        return self.__class__(flatten([x.jmespath(jmespath, **kwargs) for x in self]))
+        return self.__class__(flatten([x.jmespath(query, **kwargs) for x in self]))
 
     def xpath(self, xpath, namespaces=None, **kwargs):
         """
@@ -196,7 +196,7 @@ class Selector(object):
     See [`lxml` documentation](https://lxml.de/api/index.html) ``lxml.etree.fromstring`` for more information.
     """
 
-    __slots__ = ['_text', 'namespaces', 'type', '_expr', 'root', 'json',
+    __slots__ = ['_text', 'namespaces', 'type', '_expr', 'root', 'data',
                  '__weakref__', '_parser', '_csstranslator', '_tostring_method']
 
     _default_type = None
@@ -215,7 +215,7 @@ class Selector(object):
     selectorlist_cls = SelectorList
 
     def __init__(self, text=None, type=None, namespaces=None, root=None,
-                 base_url=None, _expr=None, json=None):
+                 base_url=None, _expr=None, data=None):
         self.type = st = _st(type or self._default_type)
         self._parser = _ctgroup[st]['_parser']
         self._csstranslator = _ctgroup[st]['_csstranslator']
@@ -228,14 +228,14 @@ class Selector(object):
                     six.text_type, text.__class__)
                 raise TypeError(msg)
             root = self._get_root(text, base_url)
-        elif root is None and json is None:
-            raise ValueError("Selector needs text, root or json arguments")
+        elif root is None and data is None:
+            raise ValueError("Selector needs text, root or data arguments")
 
         self.namespaces = dict(self._default_namespaces)
         if namespaces is not None:
             self.namespaces.update(namespaces)
         self.root = root
-        self.json = json
+        self.data = data
         self._expr = _expr
 
     def __getstate__(self):
@@ -258,8 +258,8 @@ class Selector(object):
 
             selector.jmespath('author.name', options=jmespath.Options(dict_cls=collections.OrderedDict))
         """
-        if self.json is not None:
-            data = self.json
+        if self.data is not None:
+            data = self.data
         else:
             if self._text is not None:
                 data_json = self._text
@@ -267,7 +267,6 @@ class Selector(object):
                 data_json = self.root
             else:
                 data_json = self.root.text
-            # TODO: Follow the same behavior as that caused by invalid XML/HTML
             data = json.loads(data_json)
         result = jmespath.search(query, data, **kwargs)
         if result is None:
@@ -277,9 +276,9 @@ class Selector(object):
 
         def make_selector(x):  # closure function
             if isinstance(x, six.text_type):
-                return self.__class__(text=x, json=x, _expr=query, type=self.type)
+                return self.__class__(text=x, data=x, _expr=query, type=self.type)
             else:
-                return self.__class__(json=x, _expr=query, type=self.type)
+                return self.__class__(data=x, _expr=query, type=self.type)
 
         result = [make_selector(x) for x in result]
         return self.selectorlist_cls(result)
@@ -378,8 +377,8 @@ class Selector(object):
         Percent encoded content is unquoted.
         """
         try:
-            if self.json is not None:
-                return self.json
+            if self.data is not None:
+                return self.data
             else:
                 return etree.tostring(self.root,
                                       method=self._tostring_method,
@@ -465,8 +464,8 @@ class Selector(object):
     __nonzero__ = __bool__
 
     def __str__(self):
-        if self.json is not None:
-            return "<%s jmespath=%r data=%s>" % (type(self).__name__, self._expr, repr(self.json))
+        if self.data is not None:
+            return "<%s jmespath=%r data=%s>" % (type(self).__name__, self._expr, repr(self.data))
         else:
             data = repr(shorten(self.get(), width=40))
             return "<%s xpath=%r data=%s>" % (type(self).__name__, self._expr, data)
