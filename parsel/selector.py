@@ -222,7 +222,7 @@ class Selector(object):
                 raise TypeError(msg)
             root = self._get_root(text, base_url)
         elif root is None and json is None:
-            raise ValueError("Selector needs either text or root argument/json argument")
+            raise ValueError("Selector needs text, root or json arguments")
 
         self.namespaces = dict(self._default_namespaces)
         if namespaces is not None:
