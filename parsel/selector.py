@@ -1,6 +1,7 @@
 """
-Jmespath/XPath selectors based on lxml and jmespath
+XPath and JMESPath selectors based on lxml and jmespath
 """
+
 import json
 import sys
 
@@ -74,12 +75,17 @@ class SelectorList(list):
     def __getstate__(self):
         raise TypeError("can't pickle SelectorList objects")
 
-    def jmespath(self, jmespath, **kwargs):
+    def jmespath(self, query, **kwargs):
         """
         Call the ``.jmespath()`` method for each element in this list and return
         their results flattened as another :class:`SelectorList`.
 
-        ``jmespath`` is the same argument as the one in :meth:`Selector.jmespath`
+        ``query`` is the same argument as the one in :meth:`Selector.jmespath`
+
+        Any additional named arguments are passed to the underlying
+        ``jmespath.search`` call, e.g.::
+
+            selector.jmespath('author.name', options=jmespath.Options(dict_cls=collections.OrderedDict))
         """
         return self.__class__(flatten([x.jmespath(jmespath, **kwargs) for x in self]))
 
