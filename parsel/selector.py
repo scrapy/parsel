@@ -173,6 +173,9 @@ class SelectorList(list):
             x.remove()
 
 
+_NOTSET = object()
+
+
 class Selector(object):
     """
     :class:`Selector` allows you to select parts of an XML or HTML text using CSS
@@ -203,36 +206,33 @@ class Selector(object):
     _lxml_smart_strings = False
     selectorlist_cls = SelectorList
 
-    def __init__(self, text=None, type=None, namespaces=None, root=None,
+    def __init__(self, text=None, type=None, namespaces=None, root=_NOTSET,
                  base_url=None, _expr=None):
-        if text is None:
-            if root is not None:
-                self.root = root
-                if type in ('html', 'json', 'xml'):
-                    self.type = type
-                elif type is not None:
-                    raise ValueError('Invalid type: %s' % type)
-                elif isinstance(self.root, etree._Element):
-                    self.type = 'html'
-                else:
-                    self.type = 'json'
-            else:
-                raise ValueError("Selector needs text or root arguments")
-        elif isinstance(text, six.text_type):
+        if type not in ('html', 'json', 'text', 'xml', None):
+            raise ValueError('Invalid type: %s' % type)
+
+        if text is None and root is _NOTSET:
+            raise ValueError("Selector needs text or root arguments")
+
+        if text is not None and not isinstance(text, six.text_type):
+            msg = "text argument should be of type %s, got %s" % (
+                six.text_type, text.__class__)
+            raise TypeError(msg)
+
+        if text is not None:
             if type in ('html', 'xml'):
                 self._load_lxml_root(text, type=type, base_url=base_url)
             elif type == 'json':
                 self.root = json.loads(text)
                 self.type = type
-            elif type is not None:
-                raise ValueError('Invalid type: %s' % type)
             else:
                 self.root = text
                 self.type = 'text'
         else:
-            msg = "text argument should be of type %s, got %s" % (
-                six.text_type, text.__class__)
-            raise TypeError(msg)
+            self.root = root
+            if type is None and isinstance(self.root, etree._Element):
+                type = 'html'
+            self.type = type or 'json'
 
         self._expr = _expr
         self.namespaces = dict(self._default_namespaces)
