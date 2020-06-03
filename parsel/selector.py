@@ -37,15 +37,6 @@ _ctgroup = {
 }
 
 
-def _st(st):
-    if st is None:
-        return 'html'
-    elif st in _ctgroup:
-        return st
-    else:
-        raise ValueError('Invalid type: %s' % st)
-
-
 def create_root_node(text, parser_cls, base_url=None):
     """Create root node for text using given parser class.
     """
@@ -189,17 +180,15 @@ class Selector(object):
 
     ``text`` is a ``unicode`` object in Python 2 or a ``str`` object in Python 3
 
-    ``type`` defines the selector type, it can be ``"html"``, ``"xml"`` or ``None`` (default).
-    If ``type`` is ``None``, the selector defaults to ``"html"``.
+    ``type`` defines the selector type. It can be ``"html"`` (default),
+    ``"json"``, or ``"xml"``.
 
     ``base_url`` allows setting a URL for the document. This is needed when looking up external entities with relative paths.
     See [`lxml` documentation](https://lxml.de/api/index.html) ``lxml.etree.fromstring`` for more information.
     """
 
-    __slots__ = ['_text', 'namespaces', 'type', '_expr', 'root', 'data',
-                 '__weakref__', '_parser', '_csstranslator', '_tostring_method']
+    __slots__ = ['namespaces', 'type', '_expr', 'root', '__weakref__']
 
-    _default_type = None
     _default_namespaces = {
         "re": "http://exslt.org/regular-expressions",
 
@@ -215,36 +204,56 @@ class Selector(object):
     selectorlist_cls = SelectorList
 
     def __init__(self, text=None, type=None, namespaces=None, root=None,
-                 base_url=None, _expr=None, data=None):
-        self.type = st = _st(type or self._default_type)
-        self._parser = _ctgroup[st]['_parser']
-        self._csstranslator = _ctgroup[st]['_csstranslator']
-        self._tostring_method = _ctgroup[st]['_tostring_method']
-        self._text = text  # save source text is friendly to jmespath
+                 base_url=None, _expr=None):
+        if text is None:
+            if root is not None:
+                self.root = root
+                if type in ('html', 'json', 'xml'):
+                    self.type = type
+                elif type is not None:
+                    raise ValueError('Invalid type: %s' % type)
+                elif isinstance(self.root, etree._Element):
+                    self.type = 'html'
+                else:
+                    self.type = 'json'
+            else:
+                raise ValueError("Selector needs text or root arguments")
+        elif isinstance(text, six.text_type):
+            if type in ('html', 'xml'):
+                self._load_lxml_root(text, type=type, base_url=base_url)
+            elif type == 'json':
+                self.root = json.loads(text)
+                self.type = type
+            elif type is not None:
+                raise ValueError('Invalid type: %s' % type)
+            else:
+                self.root = text
+                self.type = 'text'
+        else:
+            msg = "text argument should be of type %s, got %s" % (
+                six.text_type, text.__class__)
+            raise TypeError(msg)
 
-        if text is not None:
-            if not isinstance(text, six.text_type):
-                msg = "text argument should be of type %s, got %s" % (
-                    six.text_type, text.__class__)
-                raise TypeError(msg)
-            root = self._get_root(text, base_url)
-        elif root is None and data is None:
-            raise ValueError("Selector needs text, root or data arguments")
-
+        self._expr = _expr
         self.namespaces = dict(self._default_namespaces)
         if namespaces is not None:
             self.namespaces.update(namespaces)
-        self.root = root
-        self.data = data
-        self._expr = _expr
+
+    def _load_lxml_root(self, text, type, base_url=None):
+        self.type = type
+        self.root = self._get_root(text, base_url)
 
     def __getstate__(self):
         raise TypeError("can't pickle Selector objects")
 
     def _get_root(self, text, base_url=None):
-        return create_root_node(text, self._parser, base_url=base_url)
+        return create_root_node(
+            text,
+            _ctgroup[self.type]['_parser'],
+            base_url=base_url,
+        )
 
-    def jmespath(self, query, **kwargs):
+    def jmespath(self, query, type=None, **kwargs):
         """
         Find objects matching the JMESPath ``query`` and return the result as a
         :class:`SelectorList` instance with all elements flattened. List
@@ -253,21 +262,21 @@ class Selector(object):
         ``query`` is a string containing the `JMESPath
         <https://jmespath.org/>`_ query to apply.
 
+        ``type`` is a string that allows the same values as the matching
+        argument of the ``__init__`` method. If not specified, it defaults to
+        ``"json"``.
+
         Any additional named arguments are passed to the underlying
         ``jmespath.search`` call, e.g.::
 
             selector.jmespath('author.name', options=jmespath.Options(dict_cls=collections.OrderedDict))
         """
-        if self.data is not None:
-            data = self.data
+        if self.type == 'json':
+            data = self.root
+        elif isinstance(self.root, six.string_types):
+            data = json.loads(self.root)
         else:
-            if self._text is not None:
-                data_json = self._text
-            elif isinstance(self.root, six.string_types):
-                data_json = self.root
-            else:
-                data_json = self.root.text
-            data = json.loads(data_json)
+            data = json.loads(self.root.text)
         result = jmespath.search(query, data, **kwargs)
         if result is None:
             result = []
@@ -276,9 +285,9 @@ class Selector(object):
 
         def make_selector(x):  # closure function
             if isinstance(x, six.text_type):
-                return self.__class__(text=x, data=x, _expr=query, type=self.type)
+                return self.__class__(text=x, _expr=query, type=type)
             else:
-                return self.__class__(data=x, _expr=query, type=self.type)
+                return self.__class__(root=x, _expr=query, type=type)
 
         result = [make_selector(x) for x in result]
         return self.selectorlist_cls(result)
@@ -301,6 +310,11 @@ class Selector(object):
 
             selector.xpath('//a[href=$url]', url="http://www.example.com")
         """
+        if self.type == 'text':
+            self._load_lxml_root(self.root, type='html')
+        elif self.type not in ('html', 'xml'):
+            raise ValueError('Cannot use xpath on a Selector of type {}'
+                             .format(repr(self.type)))
         try:
             xpathev = self.root.xpath
         except AttributeError:
@@ -338,10 +352,15 @@ class Selector(object):
 
         .. _cssselect: https://pypi.python.org/pypi/cssselect/
         """
+        if self.type == 'text':
+            self._load_lxml_root(self.root, type='html')
+        elif self.type not in ('html', 'xml'):
+            raise ValueError('Cannot use css on a Selector of type {}'
+                             .format(repr(self.type)))
         return self.xpath(self._css2xpath(query))
 
     def _css2xpath(self, query):
-        return self._csstranslator.css_to_xpath(query)
+        return _ctgroup[self.type]['_csstranslator'].css_to_xpath(query)
 
     def re(self, regex, replace_entities=True):
         """
@@ -376,14 +395,15 @@ class Selector(object):
         Serialize and return the matched nodes in a single unicode string.
         Percent encoded content is unquoted.
         """
+        if self.type in ('text', 'json'):
+            return self.root
         try:
-            if self.data is not None:
-                return self.data
-            else:
-                return etree.tostring(self.root,
-                                      method=self._tostring_method,
-                                      encoding='unicode',
-                                      with_tail=False)
+            return etree.tostring(
+                self.root,
+                method=_ctgroup[self.type]['_tostring_method'],
+                encoding='unicode',
+                with_tail=False,
+            )
         except (AttributeError, TypeError):
             if self.root is True:
                 return u'1'
@@ -464,10 +484,8 @@ class Selector(object):
     __nonzero__ = __bool__
 
     def __str__(self):
-        if self.data is not None:
-            return "<%s jmespath=%r data=%s>" % (type(self).__name__, self._expr, repr(self.data))
-        else:
-            data = repr(shorten(self.get(), width=40))
-            return "<%s xpath=%r data=%s>" % (type(self).__name__, self._expr, data)
+        data = repr(shorten(self.get(), width=40))
+        expr_field = 'jmespath' if self.type == 'json' else 'xpath'
+        return "<%s %s=%r data=%s>" % (type(self).__name__, expr_field, self._expr, data)
 
     __repr__ = __str__

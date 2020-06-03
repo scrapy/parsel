@@ -31,15 +31,13 @@ class JMESPathTestCase(unittest.TestCase):
                     "value": "<div>d</div>"
                 }
             ],
-            "html": [
-                "<div><a>AAA<br>Test</a>aaa</div><div><a>BBB</a>bbb<b>BbB</b><div/>"
-            ]
+            "html": "<div><a>AAA<br>Test</a>aaa</div><div><a>BBB</a>bbb<b>BbB</b></div>"
         }
         """
         sel = Selector(text=data)
         self.assertEqual(sel.jmespath(u'html').get(),
                          u'<div><a>AAA<br>Test</a>aaa</div>'
-                         u'<div><a>BBB</a>bbb<b>BbB</b><div/>')
+                         u'<div><a>BBB</a>bbb<b>BbB</b></div>')
         self.assertEqual(sel.jmespath(u'html').xpath(u'//div/a/text()').getall(),
                          [u'AAA', u'Test', u'BBB'])
         self.assertEqual(sel.jmespath(u'html').xpath(u'//div/b').getall(),

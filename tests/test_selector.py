@@ -117,7 +117,7 @@ class SelectorTestCase(unittest.TestCase):
     </body>
 </html>
         """
-        sel = self.sscls(text=body)
+        sel = self.sscls(text=body, type='html')
         self.assertEqual({'lang': 'en', 'version': '1.0'}, sel.attrib)
         self.assertEqual({'id': 'some-list', 'class': 'list-cls'}, sel.css('ul')[0].attrib)
 
@@ -273,7 +273,7 @@ class SelectorTestCase(unittest.TestCase):
 
     def test_text_or_root_is_required(self):
         self.assertRaisesRegexp(ValueError,
-                                'Selector needs text, root or data arguments',
+                                'Selector needs text or root arguments',
                                 self.sscls)
 
     def test_bool(self):
@@ -496,7 +496,7 @@ class SelectorTestCase(unittest.TestCase):
 
     def test_make_links_absolute(self):
         text = u'<a href="file.html">link to file</a>'
-        sel = Selector(text=text, base_url='http://example.com')
+        sel = Selector(text=text, base_url='http://example.com', type='html')
         sel.root.make_links_absolute()
         self.assertEqual(u'http://example.com/file.html', sel.xpath('//a/@href').extract_first())
 
@@ -559,7 +559,9 @@ class SelectorTestCase(unittest.TestCase):
         self.assertEqual(x.xpath("//div").re(r"Evento: (\w+)"), [u'cumplea\xf1os'])
 
     def test_selector_over_text(self):
-        hs = self.sscls(text=u'<root>lala</root>')
+        ts = self.sscls(text=u'<root>lala</root>')
+        self.assertEqual(ts.extract(), u'<root>lala</root>')
+        hs = self.sscls(text=u'<root>lala</root>', type='html')
         self.assertEqual(hs.extract(), u'<html><body><root>lala</root></body></html>')
         xs = self.sscls(text=u'<root>lala</root>', type='xml')
         self.assertEqual(xs.extract(), u'<root>lala</root>')
@@ -594,7 +596,7 @@ class SelectorTestCase(unittest.TestCase):
         self.sscls(text=u'').xpath('//text()').extract()
 
     def test_bodies_with_comments_only(self):
-        sel = self.sscls(text=u'<!-- hello world -->', base_url='http://example.com')
+        sel = self.sscls(text=u'<!-- hello world -->', base_url='http://example.com', type='html')
         self.assertEqual(u'http://example.com', sel.root.base)
 
     def test_null_bytes_shouldnt_raise_errors(self):
@@ -743,7 +745,7 @@ class SelectorTestCase(unittest.TestCase):
         self.assertEqual(sel.extract(), '<foo>&xxe;</foo>')
 
     def test_configure_base_url(self):
-        sel = self.sscls(text=u'nothing', base_url='http://example.com')
+        sel = self.sscls(text=u'nothing', base_url='http://example.com', type='html')
         self.assertEqual(u'http://example.com', sel.root.base)
 
     def test_extending_selector(self):
@@ -762,7 +764,7 @@ class SelectorTestCase(unittest.TestCase):
     def test_replacement_null_char_from_body(self):
         text = u'<html>\x00<body><p>Grainy</p></body></html>'
         self.assertEqual(u'<html><body><p>Grainy</p></body></html>',
-                         self.sscls(text).extract())
+                         self.sscls(text, type='html').extract())
 
     def test_remove_selector_list(self):
         sel = self.sscls(text=u'<html><body><ul><li>1</li><li>2</li><li>3</li></ul></body></html>')
