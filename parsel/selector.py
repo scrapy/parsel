@@ -176,6 +176,13 @@ class SelectorList(list):
 _NOTSET = object()
 
 
+def _load_json_or_none(text):
+    try:
+        return json.loads(text)
+    except ValueError:
+        return None
+
+
 class Selector(object):
     """
     :class:`Selector` allows you to select parts of an XML or HTML text using CSS
@@ -223,7 +230,7 @@ class Selector(object):
             if type in ('html', 'xml'):
                 self._load_lxml_root(text, type=type, base_url=base_url)
             elif type == 'json':
-                self.root = json.loads(text)
+                self.root = _load_json_or_none(text)
                 self.type = type
             else:
                 self.root = text
@@ -274,9 +281,9 @@ class Selector(object):
         if self.type == 'json':
             data = self.root
         elif isinstance(self.root, six.string_types):
-            data = json.loads(self.root)
+            data = _load_json_or_none(self.root)
         else:
-            data = json.loads(self.root.text)
+            data = _load_json_or_none(self.root.text)
         result = jmespath.search(query, data, **kwargs)
         if result is None:
             result = []
