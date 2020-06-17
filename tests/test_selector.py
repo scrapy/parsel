@@ -827,7 +827,7 @@ class SelectorTestCase(unittest.TestCase):
 
     def test_json_type(self):
         obj = 1
-        selector = self.sscls(str(obj), type='json')
+        selector = self.sscls(six.text_type(obj), type='json')
         self.assertEqual(selector.root, obj)
         self.assertEqual(selector.type, 'json')
 
