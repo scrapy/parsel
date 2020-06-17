@@ -126,6 +126,8 @@ intersphinx_mapping = {
 
 nitpicky = True
 nitpick_ignore = [
+    ('py:class', 'ExpressionError'),
+    ('py:class', 'SelectorSyntaxError'),
     ('py:class', 'cssselect.xpath.GenericTranslator'),
     ('py:class', 'cssselect.xpath.HTMLTranslator'),
     ('py:class', 'cssselect.xpath.XPathExpr'),
