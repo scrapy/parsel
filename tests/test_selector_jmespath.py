@@ -40,7 +40,7 @@ class JMESPathTestCase(unittest.TestCase):
                          u'<div><a>BBB</a>bbb<b>BbB</b></div>')
         self.assertEqual(sel.jmespath(u'html').xpath(u'//div/a/text()').getall(),
                          [u'AAA', u'Test', u'BBB'])
-        self.assertEqual(sel.jmespath(u'html').xpath(u'//div/b').getall(),
+        self.assertEqual(sel.jmespath(u'html').css(u'div > b').getall(),
                          [u'<b>BbB</b>'])
         self.assertEqual(sel.jmespath(u'content').jmespath(u'name.age').get(),
                          18)
