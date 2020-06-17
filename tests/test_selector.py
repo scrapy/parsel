@@ -5,6 +5,8 @@ import six
 import unittest
 import pickle
 
+import lxml.etree
+
 from parsel import Selector
 from parsel.selector import (
     CannotRemoveElementWithoutRoot,
@@ -815,6 +817,46 @@ class SelectorTestCase(unittest.TestCase):
 
         sel.css('body').remove()
         self.assertEqual(sel.get(), '<html></html>')
+
+    def test_invalid_type(self):
+        with self.assertRaises(ValueError):
+            self.sscls(u'', type='xhtml')
+
+    def test_default_type(self):
+        text = u'foo'
+        selector = self.sscls(text)
+        self.assertEqual(selector.root, text)
+        self.assertEqual(selector.type, 'text')
+
+    def test_json_type(self):
+        obj = 1
+        selector = self.sscls(str(obj), type='json')
+        self.assertEqual(selector.root, obj)
+        self.assertEqual(selector.type, 'json')
+
+    def test_html_root(self):
+        root = lxml.etree.fromstring('<html/>')
+        selector = self.sscls(root=root)
+        self.assertEqual(selector.root, root)
+        self.assertEqual(selector.type, 'html')
+
+    def test_json_root(self):
+        obj = 1
+        selector = self.sscls(root=obj)
+        self.assertEqual(selector.root, obj)
+        self.assertEqual(selector.type, 'json')
+
+    def test_json_xpath(self):
+        obj = 1
+        selector = self.sscls(root=obj)
+        with self.assertRaises(ValueError):
+            selector.xpath('//*')
+
+    def test_json_css(self):
+        obj = 1
+        selector = self.sscls(root=obj)
+        with self.assertRaises(ValueError):
+            selector.css('*')
 
 
 class ExsltTestCase(unittest.TestCase):
