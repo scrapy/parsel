@@ -197,7 +197,7 @@ class Selector(object):
     See [`lxml` documentation](https://lxml.de/api/index.html) ``lxml.etree.fromstring`` for more information.
     """
 
-    __slots__ = ['namespaces', 'type', '_expr', 'root', '__weakref__']
+    __slots__ = ['namespaces', 'type', '_expr', 'root', '_text', '__weakref__']
 
     _default_namespaces = {
         "re": "http://exslt.org/regular-expressions",
@@ -218,8 +218,10 @@ class Selector(object):
         if type not in ('html', 'json', 'text', 'xml', None):
             raise ValueError('Invalid type: %s' % type)
 
+        self._text = text
+
         if text is None and root is _NOTSET:
-            raise ValueError("Selector needs text or root arguments")
+            raise ValueError("Selector needs either text or root argument")
 
         if text is not None and not isinstance(text, six.text_type):
             msg = "text argument should be of type %s, got %s" % (
@@ -227,14 +229,14 @@ class Selector(object):
             raise TypeError(msg)
 
         if text is not None:
-            if type in ('html', 'xml'):
-                self._load_lxml_root(text, type=type, base_url=base_url)
+            if type in ('html', 'xml', None):
+                self._load_lxml_root(text, type=type or 'html', base_url=base_url)
             elif type == 'json':
                 self.root = _load_json_or_none(text)
                 self.type = type
             else:
                 self.root = text
-                self.type = 'text'
+                self.type = type
         else:
             self.root = root
             if type is None and isinstance(self.root, etree._Element):
@@ -282,6 +284,8 @@ class Selector(object):
             data = self.root
         elif isinstance(self.root, six.string_types):
             data = _load_json_or_none(self.root)
+        elif self.root.text is None:
+            data = _load_json_or_none(self._text)
         else:
             data = _load_json_or_none(self.root.text)
         result = jmespath.search(query, data, **kwargs)
@@ -292,7 +296,7 @@ class Selector(object):
 
         def make_selector(x):  # closure function
             if isinstance(x, six.text_type):
-                return self.__class__(text=x, _expr=query, type=type)
+                return self.__class__(text=x, _expr=query, type=type or 'text')
             else:
                 return self.__class__(root=x, _expr=query, type=type)
 
