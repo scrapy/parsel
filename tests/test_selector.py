@@ -856,7 +856,7 @@ class SelectorTestCase(unittest.TestCase):
             selector.css('*')
 
     def test_invalid_json(self):
-        text = '<html/>'
+        text = u'<html/>'
         selector = self.sscls(text, type='json')
         self.assertEqual(selector.root, None)
         self.assertEqual(selector.type, 'json')
