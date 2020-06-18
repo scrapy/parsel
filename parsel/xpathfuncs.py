@@ -20,7 +20,7 @@ def set_xpathfunc(fname, func):
 
     See more `in lxml documentation`_.
 
-    .. _`in lxml documentation`: http://lxml.de/extensions.html#xpath-extension-functions
+    .. _`in lxml documentation`: https://lxml.de/extensions.html#xpath-extension-functions
 
     """
     ns_fns = etree.FunctionNamespace(None)
