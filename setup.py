@@ -30,7 +30,7 @@ install_requires = [
     'lxml',
     'six>=1.6.0',
     'cssselect>=0.9',
-    'jmespath>=0.9',
+    'jmespath',
 ]
 extras_require = {}
 
