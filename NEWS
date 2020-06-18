@@ -114,7 +114,7 @@ should be changed to this::
 1.1.0 (2016-11-22)
 ~~~~~~~~~~~~~~~~~~
 
-* Change default HTML parser to `lxml.html.HTMLParser <http://lxml.de/api/lxml.html.HTMLParser-class.html>`_,
+* Change default HTML parser to `lxml.html.HTMLParser <https://lxml.de/api/lxml.html.HTMLParser-class.html>`_,
   which makes easier to use some HTML specific features
 * Add css2xpath function to translate CSS to XPath
 * Add support for ad-hoc namespaces declarations
