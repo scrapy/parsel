@@ -29,5 +29,6 @@ class XMLAttackTestCase(TestCase):
         lolz = selector.css('lolz::text').get()
         memory_usage_after = process.memory_info().rss
         memory_change = (memory_usage_after - memory_usage_before)
-        assert memory_change <= MiB_1, "Memory change: {}B".format(memory_change)
+        assert_message = "Memory change: {}B".format(memory_change)
+        assert memory_change <= MiB_1, assert_message
         assert lolz == '&lol9;'
