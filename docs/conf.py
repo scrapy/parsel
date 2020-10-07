@@ -125,7 +125,7 @@ intersphinx_mapping = {
 
 # --- Nitpicking options ------------------------------------------------------
 
-nitpicky = True
+# nitpicky = True  # https://github.com/scrapy/cssselect/pull/110
 nitpick_ignore = [
     ('py:class', 'cssselect.xpath.GenericTranslator'),
     ('py:class', 'cssselect.xpath.HTMLTranslator'),
