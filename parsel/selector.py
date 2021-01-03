@@ -376,6 +376,12 @@ class Selector(object):
             )
 
         try:
+            if self.root.tail:
+                previous = self.root.getprevious()
+                if previous is not None:
+                    previous.tail = (previous.tail or '') + self.root.tail
+                else:
+                    parent.text = (parent.text or '') + self.root.tail
             parent.remove(self.root)
         except AttributeError:
             # 'NoneType' object has no attribute 'remove'
