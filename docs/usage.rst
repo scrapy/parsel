@@ -623,13 +623,13 @@ Some XPath tips
 ---------------
 
 Here are some tips that you may find useful when using XPath
-with Parsel, based on `this post from ScrapingHub's blog`_.
+with Parsel, based on `this post from Zyte's blog`_.
 If you are not much familiar with XPath yet,
 you may want to take a look first at this `XPath tutorial`_.
 
 
 .. _`XPath tutorial`: http://www.zvon.org/comp/r/tut-XPath_1.html
-.. _`this post from ScrapingHub's blog`: https://blog.scrapinghub.com/2014/07/17/xpath-tips-from-the-web-scraping-trenches/
+.. _`this post from Zyte's blog`: https://blog.zyte.com/2014/07/17/xpath-tips-from-the-web-scraping-trenches/
 
 
 Using text nodes in a condition
