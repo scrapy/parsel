@@ -629,7 +629,7 @@ you may want to take a look first at this `XPath tutorial`_.
 
 
 .. _`XPath tutorial`: http://www.zvon.org/comp/r/tut-XPath_1.html
-.. _`this post from Zyte's blog`: https://blog.zyte.com/2014/07/17/xpath-tips-from-the-web-scraping-trenches/
+.. _`this post from Zyte's blog`: https://www.zyte.com/blog/xpath-tips-from-the-web-scraping-trenches/
 
 
 Using text nodes in a condition
