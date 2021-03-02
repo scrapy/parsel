@@ -27,7 +27,7 @@ jobs:
             TOXENV: py
         - python-version: pypy3
           env:
-            TOXENV: py
+            TOXENV: pypy
 
     steps:
     - uses: actions/checkout@v2
