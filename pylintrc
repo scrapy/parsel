@@ -4,7 +4,10 @@ persistent=no
 [MESSAGES CONTROL]
 disable=bad-continuation,
         c-extension-no-member,
+        deprecated-method,
+        fixme,
         import-error,
+        import-outside-toplevel,
         invalid-name,
         line-too-long,
         missing-class-docstring,
@@ -19,6 +22,9 @@ disable=bad-continuation,
         super-with-arguments,  # Required for Python 2 support
         too-few-public-methods,
         too-many-arguments,
+        too-many-public-methods,
         unidiomatic-typecheck,
+        unused-argument,
         useless-object-inheritance,  # Required for Python 2 support
+        wrong-import-order,
         wrong-import-position
