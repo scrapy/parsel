@@ -403,3 +403,33 @@ class Selector(object):
         data = repr(shorten(self.get(), width=40))
         return "<%s xpath=%r data=%s>" % (type(self).__name__, self._expr, data)
     __repr__ = __str__
+
+def create_root_node_bytes(body, parser_cls, base_url=None):
+    """Create root node for text using given parser class.
+    """
+    parser = parser_cls(recover=True, encoding='utf8')
+    b = body or b'<html/>'
+    root = etree.fromstring(b, parser=parser, base_url=base_url)
+    if root is None:
+        root = etree.fromstring(b'<html/>', parser=parser, base_url=base_url)
+    return root
+
+class SelectorUtf8Bytes(Selector):
+
+    def __init__(self, body=None, type=None, namespaces=None, root=None,
+                 base_url=None, _expr=None):
+        self.type = st = _st(type or self._default_type)
+        self._parser = _ctgroup[st]['_parser']
+        self._csstranslator = _ctgroup[st]['_csstranslator']
+        self._tostring_method = _ctgroup[st]['_tostring_method']
+
+        if body is not None:
+            root = create_root_node_bytes(body, self._parser, base_url=base_url)
+        elif root is None:
+            raise ValueError("Selector needs either text or root argument")
+
+        self.namespaces = dict(self._default_namespaces)
+        if namespaces is not None:
+            self.namespaces.update(namespaces)
+        self.root = root
+        self._expr = _expr
