@@ -404,6 +404,7 @@ class Selector(object):
         return "<%s xpath=%r data=%s>" % (type(self).__name__, self._expr, data)
     __repr__ = __str__
 
+
 def create_root_node_bytes(body, parser_cls, base_url=None):
     """Create root node for text using given parser class.
     """
@@ -413,6 +414,7 @@ def create_root_node_bytes(body, parser_cls, base_url=None):
     if root is None:
         root = etree.fromstring(b'<html/>', parser=parser, base_url=base_url)
     return root
+
 
 class SelectorUtf8Bytes(Selector):
 
