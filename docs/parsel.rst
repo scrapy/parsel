@@ -19,6 +19,7 @@ parsel.selector
     :members:
     :undoc-members:
     :show-inheritance:
+    :exclude-members: create_root_node
 
 
 parsel.utils

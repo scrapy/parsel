@@ -7,6 +7,7 @@ import pickle
 
 from parsel import Selector
 from parsel.selector import (
+    _load_object,
     CannotRemoveElementWithoutRoot,
     CannotRemoveElementWithoutParent,
 )
@@ -927,3 +928,24 @@ class ExsltTestCase(unittest.TestCase):
                                //div[@itemtype="http://schema.org/Event"]
                                     //*[@itemscope]/*/@itemprop)''').extract(),
                          [u'url', u'name', u'startDate', u'location', u'offers'])
+
+
+try:
+    ModuleNotFoundError
+except NameError:
+    ModuleNotFoundError = ImportError
+
+
+class LoadObjectTestCase(unittest.TestCase):
+
+    def test_incomplete_path(self):
+        with self.assertRaises(ValueError):
+            object = _load_object('parsel')
+
+    def test_inexistent_module(self):
+        with self.assertRaises(ModuleNotFoundError):
+            object = _load_object('parsel.inexistent.inexistent')
+
+    def test_inexistent_object(self):
+        with self.assertRaises(NameError):
+            object = _load_object('parsel.parser.inexistent')

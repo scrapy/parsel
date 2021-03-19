@@ -3,12 +3,37 @@ XPath selectors based on lxml
 """
 
 import sys
+from importlib import import_module
+from warnings import warn
 
 import six
-from lxml import etree, html
+from lxml import etree
 
 from .utils import flatten, iflatten, extract_regex, shorten
 from .csstranslator import HTMLTranslator, GenericTranslator
+
+
+def _load_object(path):
+    """Load an object given its absolute object path, and return it.
+
+    `path` can point to a class, function, variable or a class instance. For
+    example: ``'parsel.parser.html.HTML_PARSER'``.
+    """
+
+    try:
+        dot = path.rindex('.')
+    except ValueError:
+        raise ValueError("Error loading object '%s': not a full path" % path)
+
+    module, name = path[:dot], path[dot+1:]
+    mod = import_module(module)
+
+    try:
+        obj = getattr(mod, name)
+    except AttributeError:
+        raise NameError("Module '%s' doesn't define any object named '%s'" % (module, name))
+
+    return obj
 
 
 class CannotRemoveElementWithoutRoot(Exception):
@@ -21,15 +46,17 @@ class CannotRemoveElementWithoutParent(Exception):
 
 class SafeXMLParser(etree.XMLParser):
     def __init__(self, *args, **kwargs):
+        warn('parsel.selector.SafeXMLParser is deprecated',
+             DeprecationWarning, stacklevel=2)
         kwargs.setdefault('resolve_entities', False)
         super(SafeXMLParser, self).__init__(*args, **kwargs)
 
 
 _ctgroup = {
-    'html': {'_parser': html.HTMLParser,
+    'html': {'_parser': 'parsel.parser.html.HTML_PARSER',
              '_csstranslator': HTMLTranslator(),
              '_tostring_method': 'html'},
-    'xml': {'_parser': SafeXMLParser,
+    'xml': {'_parser': 'parsel.parser.xml.XML_PARSER',
             '_csstranslator': GenericTranslator(),
             '_tostring_method': 'xml'},
 }
@@ -47,6 +74,8 @@ def _st(st):
 def create_root_node(text, parser_cls, base_url=None):
     """Create root node for text using given parser class.
     """
+    warn('parsel.selector.create_root_node is deprecated',
+         DeprecationWarning, stacklevel=2)
     body = text.strip().replace('\x00', '').encode('utf8') or b'<html/>'
     parser = parser_cls(recover=True, encoding='utf8')
     root = etree.fromstring(body, parser=parser, base_url=base_url)
@@ -199,7 +228,7 @@ class Selector(object):
     def __init__(self, text=None, type=None, namespaces=None, root=None,
                  base_url=None, _expr=None):
         self.type = st = _st(type or self._default_type)
-        self._parser = _ctgroup[st]['_parser']
+        self._parser = _load_object(_ctgroup[st]['_parser'])
         self._csstranslator = _ctgroup[st]['_csstranslator']
         self._tostring_method = _ctgroup[st]['_tostring_method']
 
@@ -222,7 +251,7 @@ class Selector(object):
         raise TypeError("can't pickle Selector objects")
 
     def _get_root(self, text, base_url=None):
-        return create_root_node(text, self._parser, base_url=base_url)
+        return self._parser.parse(text=text, base_url=base_url)
 
     def xpath(self, query, namespaces=None, **kwargs):
         """
