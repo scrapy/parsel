@@ -11,7 +11,7 @@ Parsel
    :alt: PyPI Version
 
 .. image:: https://img.shields.io/codecov/c/github/scrapy/parsel/master.svg
-   :target: http://codecov.io/github/scrapy/parsel?branch=master
+   :target: https://codecov.io/github/scrapy/parsel?branch=master
    :alt: Coverage report
 
 

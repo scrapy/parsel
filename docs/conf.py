@@ -119,12 +119,13 @@ texinfo_documents = [
 intersphinx_mapping = {
     'cssselect': ('https://cssselect.readthedocs.io/en/latest', None),
     'python': ('https://docs.python.org/3', None),
+    'requests': ('https://requests.kennethreitz.org/en/latest', None),
 }
 
 
 # --- Nitpicking options ------------------------------------------------------
 
-nitpicky = True
+# nitpicky = True  # https://github.com/scrapy/cssselect/pull/110
 nitpick_ignore = [
     ('py:class', 'ExpressionError'),
     ('py:class', 'SelectorSyntaxError'),

@@ -27,8 +27,8 @@ And extract data from those elements::
     >>> selector.xpath('//h1/text()').getall()
     ['Hello, Parsel!']
 
-.. _CSS: http://www.w3.org/TR/selectors
-.. _XPath: http://www.w3.org/TR/xpath
+.. _CSS: https://www.w3.org/TR/selectors
+.. _XPath: https://www.w3.org/TR/xpath
 
 Learning CSS and XPath
 ======================
@@ -60,10 +60,10 @@ things can only be done with XPath_.
 Using selectors
 ===============
 
-To explain how to use the selectors we'll use the `requests`_ library
+To explain how to use the selectors we'll use the :mod:`requests` library
 to download an example page located in the Parsel's documentation:
 
-    http://parsel.readthedocs.org/en/latest/_static/selectors-sample1.html
+    https://parsel.readthedocs.org/en/latest/_static/selectors-sample1.html
 
 .. _topics-selectors-htmlcode:
 
@@ -80,7 +80,7 @@ So, let's download that page and create a selector for it:
 
 >>> import requests
 >>> from parsel import Selector
->>> url = 'http://parsel.readthedocs.org/en/latest/_static/selectors-sample1.html'
+>>> url = 'https://parsel.readthedocs.org/en/latest/_static/selectors-sample1.html'
 >>> text = requests.get(url).text
 >>> selector = Selector(text=text)
 
@@ -623,13 +623,13 @@ Some XPath tips
 ---------------
 
 Here are some tips that you may find useful when using XPath
-with Parsel, based on `this post from ScrapingHub's blog`_.
+with Parsel, based on `this post from Zyte's blog`_.
 If you are not much familiar with XPath yet,
 you may want to take a look first at this `XPath tutorial`_.
 
 
 .. _`XPath tutorial`: http://www.zvon.org/comp/r/tut-XPath_1.html
-.. _`this post from ScrapingHub's blog`: https://blog.scrapinghub.com/2014/07/17/xpath-tips-from-the-web-scraping-trenches/
+.. _`this post from Zyte's blog`: https://www.zyte.com/blog/xpath-tips-from-the-web-scraping-trenches/
 
 
 Using text nodes in a condition
@@ -966,7 +966,7 @@ method for that.
 
 Let's show an example that illustrates this with the Python Insider blog atom feed.
 
-Let's download the atom feed using `requests`_ and create a selector:
+Let's download the atom feed using :mod:`requests` and create a selector:
 
 .. skip: start
 
@@ -1030,7 +1030,7 @@ of relevance, are:
    though.
 
 .. _Google Base XML feed: https://support.google.com/merchants/answer/160589?hl=en&ref_topic=2473799
-.. _requests: http://www.python-requests.org/
+.. _requests: https://www.python-requests.org/
 
 
 Ad-hoc namespaces references
@@ -1171,7 +1171,7 @@ bigger because the `lxml`_ library can be used for many other tasks, besides
 selecting markup documents.
 
 
-.. _BeautifulSoup: http://www.crummy.com/software/BeautifulSoup/
-.. _lxml: http://lxml.de/
+.. _BeautifulSoup: https://www.crummy.com/software/BeautifulSoup/
+.. _lxml: https://lxml.de/
 .. _PyQuery: https://pypi.python.org/pypi/pyquery
 .. _ElementTree: https://docs.python.org/2/library/xml.etree.elementtree.html
