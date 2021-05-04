@@ -281,6 +281,15 @@ class Selector(object):
         """
         return self.xpath(self._css2xpath(query))
 
+    def links(self):
+        return [
+            link for link in self.xpath('//a/@href').getall()
+            if link and not (
+                    link.startswith('#')
+                    and not link.startswith(('javascript:', 'mailto:'))
+            )
+        ]
+
     def _css2xpath(self, query):
         return self._csstranslator.css_to_xpath(query)
 
