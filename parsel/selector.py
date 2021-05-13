@@ -44,11 +44,14 @@ def _st(st):
         raise ValueError('Invalid type: %s' % st)
 
 
-def create_root_node(text, parser_cls, base_url=None):
+def create_root_node(text, parser_cls, base_url=None, encoding='utf8'):
     """Create root node for text using given parser class.
     """
-    body = text.strip().replace('\x00', '').encode('utf8') or b'<html/>'
-    parser = parser_cls(recover=True, encoding='utf8')
+    if isinstance(text, bytes):
+        body = text
+    elif isinstance(text, six.text_type):
+        body = text.strip().replace('\x00', '').encode(encoding) or b'<html/>'
+    parser = parser_cls(recover=True, encoding=encoding)
     root = etree.fromstring(body, parser=parser, base_url=base_url)
     if root is None:
         root = etree.fromstring(b'<html/>', parser=parser, base_url=base_url)
@@ -197,18 +200,19 @@ class Selector(object):
     selectorlist_cls = SelectorList
 
     def __init__(self, text=None, type=None, namespaces=None, root=None,
-                 base_url=None, _expr=None):
+                 base_url=None, _expr=None, encoding='utf8'):
         self.type = st = _st(type or self._default_type)
         self._parser = _ctgroup[st]['_parser']
         self._csstranslator = _ctgroup[st]['_csstranslator']
         self._tostring_method = _ctgroup[st]['_tostring_method']
 
         if text is not None:
-            if not isinstance(text, six.text_type):
-                msg = "text argument should be of type %s, got %s" % (
+            if isinstance(text, six.text_type) or isinstance(text, bytes):
+                root = self._get_root(text, base_url, encoding=encoding)
+            else:
+                msg = "text argument should be of type %s or bytes, got %s" % (
                     six.text_type, text.__class__)
                 raise TypeError(msg)
-            root = self._get_root(text, base_url)
         elif root is None:
             raise ValueError("Selector needs either text or root argument")
 
@@ -221,8 +225,8 @@ class Selector(object):
     def __getstate__(self):
         raise TypeError("can't pickle Selector objects")
 
-    def _get_root(self, text, base_url=None):
-        return create_root_node(text, self._parser, base_url=base_url)
+    def _get_root(self, text, base_url=None, encoding='utf8'):
+        return create_root_node(text, self._parser, base_url=base_url, encoding=encoding)
 
     def xpath(self, query, namespaces=None, **kwargs):
         """
