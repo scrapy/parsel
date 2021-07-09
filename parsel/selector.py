@@ -47,7 +47,7 @@ def _st(st):
 def create_root_node(text, parser_cls, base_url=None, encoding='utf8'):
     """Create root node for text using given parser class.
     """
-    if isinstance(text, bytes):
+    if isinstance(text, (six.text_type, bytes)):
         body = text
     elif isinstance(text, six.text_type):
         body = text.strip().replace('\x00', '').encode(encoding) or b'<html/>'
@@ -207,7 +207,7 @@ class Selector(object):
         self._tostring_method = _ctgroup[st]['_tostring_method']
 
         if text is not None:
-            if isinstance(text, six.text_type) or isinstance(text, bytes):
+            if isinstance(text, (six.text_type, bytes)):
                 root = self._get_root(text, base_url, encoding=encoding)
             else:
                 msg = "text argument should be of type %s or bytes, got %s" % (
