@@ -350,7 +350,7 @@ class Selector:
             if el.tag.startswith('{'):
                 el.tag = el.tag.split('}', 1)[1]
             # loop on element attributes also
-            for an in list(el.attrib.keys()):
+            for an in el.attrib:
                 if an.startswith('{'):
                     el.attrib[an.split('}', 1)[1]] = el.attrib.pop(an)
         # remove namespace declarations
