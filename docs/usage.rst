@@ -11,8 +11,6 @@ that you want to parse::
     >>> text = u"<html><body><h1>Hello, Parsel!</h1></body></html>"
     >>> selector = Selector(text=text)
 
-.. note:: In Python 2, the ``text`` argument must be a ``unicode`` string.
-
 Then use `CSS`_ or `XPath`_ expressions to select elements::
 
     >>> selector.css('h1')
