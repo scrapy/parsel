@@ -7,12 +7,6 @@ jobs:
     strategy:
       matrix:
         include:
-        - python-version: 2.7
-          env:
-            TOXENV: py
-        - python-version: pypy-2.7
-          env:
-            TOXENV: pypy
         - python-version: 3.5
           env:
             TOXENV: py
