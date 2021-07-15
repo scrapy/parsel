@@ -25,9 +25,9 @@ setup(
     },
     include_package_data=True,
     install_requires=[
-        'w3lib>=1.19.0',
+        'cssselect>=0.9',
         'lxml',
-        'cssselect>=0.9'
+        'w3lib>=1.19.0',
     ],
     python_requires='>=3.6',
     license="BSD",
