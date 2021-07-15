@@ -58,11 +58,6 @@ class SelectorList(list):
     class, which provides a few additional methods.
     """
 
-    # __getslice__ is deprecated but `list` builtin implements it only in Py2
-    def __getslice__(self, i, j):
-        o = super().__getslice__(i, j)
-        return self.__class__(o)
-
     def __getitem__(self, pos):
         o = super().__getitem__(pos)
         return self.__class__(o) if isinstance(pos, slice) else o
