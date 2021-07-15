@@ -49,7 +49,7 @@ def _is_listlike(x):
     True
     >>> _is_listlike((x for x in range(3)))
     True
-    >>> _is_listlike(xrange(5))
+    >>> _is_listlike(range(5))
     True
     """
     return hasattr(x, "__iter__") and not isinstance(x, (str, bytes))
