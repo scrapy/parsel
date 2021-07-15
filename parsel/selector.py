@@ -4,7 +4,6 @@ XPath selectors based on lxml
 
 import sys
 
-import six
 from lxml import etree, html
 
 from .utils import flatten, iflatten, extract_regex, shorten
@@ -204,9 +203,10 @@ class Selector(object):
         self._tostring_method = _ctgroup[st]['_tostring_method']
 
         if text is not None:
-            if not isinstance(text, six.text_type):
-                msg = "text argument should be of type %s, got %s" % (
-                    six.text_type, text.__class__)
+            if not isinstance(text, str):
+                msg = "text argument should be of type str, got %s" % (
+                    text.__class__
+                )
                 raise TypeError(msg)
             root = self._get_root(text, base_url)
         elif root is None:
@@ -255,9 +255,7 @@ class Selector(object):
                              smart_strings=self._lxml_smart_strings,
                              **kwargs)
         except etree.XPathError as exc:
-            msg = "XPath error: %s in %s" % (exc, query)
-            msg = msg if six.PY3 else msg.encode('unicode_escape')
-            six.reraise(ValueError, ValueError(msg), sys.exc_info()[2])
+            raise ValueError("XPath error: %s in %s" % (exc, query))
 
         if type(result) is not list:
             result = [result]
@@ -328,7 +326,7 @@ class Selector(object):
             elif self.root is False:
                 return '0'
             else:
-                return six.text_type(self.root)
+                return str(self.root)
     extract = get
 
     def getall(self):

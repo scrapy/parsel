@@ -1,6 +1,5 @@
 import re
 import weakref
-import six
 import unittest
 import pickle
 
@@ -137,8 +136,6 @@ class SelectorTestCase(unittest.TestCase):
         sel = self.sscls(text=body)
 
         representation = "<Selector xpath='//input/@name' data='{}...'>".format(37 * 'b')
-        if six.PY2:
-            representation = "<Selector xpath='//input/@name' data=u'{}...'>".format(37 * 'b')
 
         self.assertEqual(
             [repr(it) for it in sel.xpath('//input/@name')],
@@ -149,8 +146,6 @@ class SelectorTestCase(unittest.TestCase):
         body = "<p><input name='{}' value='\xa9'/></p>".format(50 * 'b')
 
         representation = '<Selector xpath=\'//input[@value="©"]/@value\' data=\'©\'>'
-        if six.PY2:
-            representation = "<Selector xpath=u'//input[@value=\"\\xa9\"]/@value' data=u'\\xa9'>"
 
         sel = self.sscls(text=body)
         self.assertEqual(
@@ -574,8 +569,7 @@ class SelectorTestCase(unittest.TestCase):
         "Test *Unicode* invalid xpath raises ValueError with the invalid xpath"
         x = self.sscls(text="<html></html>")
         xpath = "//test[@foo='\\u0431ar]"
-        encoded = xpath if six.PY3 else xpath.encode('unicode_escape')
-        self.assertRaisesRegex(ValueError, re.escape(encoded), x.xpath, xpath)
+        self.assertRaisesRegex(ValueError, re.escape(xpath), x.xpath, xpath)
 
     def test_http_header_encoding_precedence(self):
         # u'\xa3'     = pound symbol in unicode

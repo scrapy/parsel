@@ -30,7 +30,6 @@ setup(
     install_requires=[
         'w3lib>=1.19.0',
         'lxml',
-        'six>=1.6.0',
         'cssselect>=0.9'
     ],
     license="BSD",

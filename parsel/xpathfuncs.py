@@ -1,8 +1,6 @@
 import re
 from lxml import etree
 
-from six import string_types
-
 from w3lib.html import HTML5_WHITESPACE
 
 regex = '[{}]+'.format(HTML5_WHITESPACE)
@@ -45,7 +43,7 @@ def has_class(context, *classes):
             raise ValueError(
                 'XPath error: has-class must have at least 1 argument')
         for c in classes:
-            if not isinstance(c, string_types):
+            if not isinstance(c, str):
                 raise ValueError(
                     'XPath error: has-class arguments must be strings')
         context.eval_context['args_checked'] = True

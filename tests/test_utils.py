@@ -1,7 +1,6 @@
 from parsel.utils import shorten, extract_regex
 
 from pytest import mark, raises
-import six
 
 
 @mark.parametrize(
@@ -19,7 +18,7 @@ import six
     )
 )
 def test_shorten(width, expected):
-    if isinstance(expected, six.string_types):
+    if isinstance(expected, str):
         assert shorten('foobar', width) == expected
     else:
         with raises(expected):
