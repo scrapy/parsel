@@ -30,7 +30,7 @@ jobs:
       if: matrix.system-libraries
       run: |
         sudo apt-get update
-        sudo apt-get install ${{ join(matrix.python-version, " ") }}
+        sudo apt-get install ${{ join(matrix.python-version, ' ') }}
 
     - name: Set up Python ${{ matrix.python-version }}
       uses: actions/setup-python@v2
