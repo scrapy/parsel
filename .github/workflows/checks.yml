@@ -20,9 +20,17 @@ jobs:
         - python-version: 3.8  # Keep in sync with .readthedocs.yml
           env:
             TOXENV: docs
+          system-libraries:
+          - gs
 
     steps:
     - uses: actions/checkout@v2
+
+    - name: Install system libraries
+      if: matrix.system-libraries
+      run: |
+        sudo apt-get update
+        sudo apt-get install ${{ join(matrix.python-version, " ") }}
 
     - name: Set up Python ${{ matrix.python-version }}
       uses: actions/setup-python@v2
