@@ -578,9 +578,9 @@ class SelectorTestCase(unittest.TestCase):
         self.assertRaisesRegex(ValueError, re.escape(xpath), x.xpath, xpath)
 
     def test_http_header_encoding_precedence(self):
-        # u'\xa3'     = pound symbol in unicode
-        # u'\xc2\xa3' = pound symbol in utf-8
-        # u'\xa3'     = pound symbol in latin-1 (iso-8859-1)
+        # '\xa3'     = pound symbol in unicode
+        # '\xc2\xa3' = pound symbol in utf-8
+        # '\xa3'     = pound symbol in latin-1 (iso-8859-1)
 
         text = '''<html>
         <head><meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1"></head>
@@ -852,11 +852,11 @@ class ExsltTestCase(unittest.TestCase):
             ['second link'])
 
         # re:match() is rather special: it returns a node-set of <match> nodes
-        # [u'<match>http://www.bayes.co.uk/xml/index.xml?/xml/utils/rechecker.xml</match>',
-        # u'<match>http</match>',
-        # u'<match>www.bayes.co.uk</match>',
-        # u'<match></match>',
-        # u'<match>/xml/index.xml?/xml/utils/rechecker.xml</match>']
+        # ['<match>http://www.bayes.co.uk/xml/index.xml?/xml/utils/rechecker.xml</match>',
+        # '<match>http</match>',
+        # '<match>www.bayes.co.uk</match>',
+        # '<match></match>',
+        # '<match>/xml/index.xml?/xml/utils/rechecker.xml</match>']
         self.assertEqual(
             sel.xpath(r're:match(//a[re:test(@href, "\.xml$")]/@href,'
                       r'"(\w+):\/\/([^/:]+)(:\d*)?([^# ]*)")/text()').extract(),
