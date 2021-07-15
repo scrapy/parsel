@@ -46,7 +46,7 @@ class XPathExpr(OriginalXPathExpr):
         return self
 
 
-class TranslatorMixin(object):
+class TranslatorMixin:
     """This mixin adds support to CSS pseudo elements via dynamic dispatch.
 
     Currently supported pseudo-elements are ``::text`` and ``::attr(ATTR_NAME)``.

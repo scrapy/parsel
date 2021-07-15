@@ -2,8 +2,6 @@
 XPath selectors based on lxml
 """
 
-import sys
-
 from lxml import etree, html
 
 from .utils import flatten, iflatten, extract_regex, shorten
@@ -163,7 +161,7 @@ class SelectorList(list):
             x.remove()
 
 
-class Selector(object):
+class Selector:
     """
     :class:`Selector` allows you to select parts of an XML or HTML text using CSS
     or XPath expressions and extract data from it.

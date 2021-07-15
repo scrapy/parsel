@@ -1,8 +1,5 @@
 #!/usr/bin/env python
 
-import sys
-
-from pkg_resources import parse_version
 from setuptools import setup, __version__ as setuptools_version
 
 
