@@ -23,6 +23,7 @@ sys.path.insert(0, project_root)
 extensions = [
     'notfound.extension',
     'sphinx.ext.autodoc',
+    'sphinx.ext.imgconverter',  # SVG support in LaTeX
     'sphinx.ext.intersphinx',
     'sphinx.ext.viewcode',
 ]
@@ -55,6 +56,8 @@ exclude_patterns = ['_build']
 
 # The name of the Pygments (syntax highlighting) style to use.
 pygments_style = 'sphinx'
+
+suppress_warnings = ['epub.unknown_project_files']
 
 
 # -- Options for HTML output -------------------------------------------
