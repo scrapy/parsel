@@ -1130,7 +1130,7 @@ Converting CSS to XPath
 
 When you're using an API that only accepts XPath expressions, it's sometimes
 useful to convert CSS to XPath. This allows you to take advantage of the
-conciseness of CSS to query elements by classes and the easeness of
+conciseness of CSS to query elements by classes and the easiness of
 manipulating XPath expressions at the same time.
 
 On those occasions, use the function :func:`~parsel.css2xpath`:
