@@ -23,7 +23,7 @@ class XPathExpr(OriginalXPathExpr):
         return x
 
     def __str__(self):
-        path = super(XPathExpr, self).__str__()
+        path = super().__str__()
         if self.textnode:
             if path == '*':
                 path = 'text()'
@@ -40,7 +40,7 @@ class XPathExpr(OriginalXPathExpr):
         return path
 
     def join(self, combiner, other):
-        super(XPathExpr, self).join(combiner, other)
+        super().join(combiner, other)
         self.textnode = other.textnode
         self.attribute = other.attribute
         return self
@@ -53,7 +53,7 @@ class TranslatorMixin(object):
     """
 
     def xpath_element(self, selector):
-        xpath = super(TranslatorMixin, self).xpath_element(selector)
+        xpath = super().xpath_element(selector)
         return XPathExpr.from_xpath(xpath)
 
     def xpath_pseudo_element(self, xpath, pseudo_element):
@@ -98,13 +98,13 @@ class TranslatorMixin(object):
 class GenericTranslator(TranslatorMixin, OriginalGenericTranslator):
     @lru_cache(maxsize=256)
     def css_to_xpath(self, css, prefix='descendant-or-self::'):
-        return super(GenericTranslator, self).css_to_xpath(css, prefix)
+        return super().css_to_xpath(css, prefix)
 
 
 class HTMLTranslator(TranslatorMixin, OriginalHTMLTranslator):
     @lru_cache(maxsize=256)
     def css_to_xpath(self, css, prefix='descendant-or-self::'):
-        return super(HTMLTranslator, self).css_to_xpath(css, prefix)
+        return super().css_to_xpath(css, prefix)
 
 
 _translator = HTMLTranslator()

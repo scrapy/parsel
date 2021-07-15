@@ -21,7 +21,7 @@ class CannotRemoveElementWithoutParent(Exception):
 class SafeXMLParser(etree.XMLParser):
     def __init__(self, *args, **kwargs):
         kwargs.setdefault('resolve_entities', False)
-        super(SafeXMLParser, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
 
 
 _ctgroup = {
@@ -62,11 +62,11 @@ class SelectorList(list):
 
     # __getslice__ is deprecated but `list` builtin implements it only in Py2
     def __getslice__(self, i, j):
-        o = super(SelectorList, self).__getslice__(i, j)
+        o = super().__getslice__(i, j)
         return self.__class__(o)
 
     def __getitem__(self, pos):
-        o = super(SelectorList, self).__getitem__(pos)
+        o = super().__getitem__(pos)
         return self.__class__(o) if isinstance(pos, slice) else o
 
     def __getstate__(self):
