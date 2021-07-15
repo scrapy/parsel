@@ -26,7 +26,7 @@ Example (`open online demo`_):
 .. code-block:: python
 
     >>> from parsel import Selector
-    >>> selector = Selector(text=u"""<html>
+    >>> selector = Selector(text="""<html>
             <body>
                 <h1>Hello, Parsel!</h1>
                 <ul>

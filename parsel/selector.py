@@ -2,9 +2,6 @@
 XPath selectors based on lxml
 """
 
-import sys
-
-import six
 from lxml import etree, html
 
 from .utils import flatten, iflatten, extract_regex, shorten
@@ -22,7 +19,7 @@ class CannotRemoveElementWithoutParent(Exception):
 class SafeXMLParser(etree.XMLParser):
     def __init__(self, *args, **kwargs):
         kwargs.setdefault('resolve_entities', False)
-        super(SafeXMLParser, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
 
 
 _ctgroup = {
@@ -61,13 +58,8 @@ class SelectorList(list):
     class, which provides a few additional methods.
     """
 
-    # __getslice__ is deprecated but `list` builtin implements it only in Py2
-    def __getslice__(self, i, j):
-        o = super(SelectorList, self).__getslice__(i, j)
-        return self.__class__(o)
-
     def __getitem__(self, pos):
-        o = super(SelectorList, self).__getitem__(pos)
+        o = super().__getitem__(pos)
         return self.__class__(o) if isinstance(pos, slice) else o
 
     def __getstate__(self):
@@ -164,7 +156,7 @@ class SelectorList(list):
             x.remove()
 
 
-class Selector(object):
+class Selector:
     """
     :class:`Selector` allows you to select parts of an XML or HTML text using CSS
     or XPath expressions and extract data from it.
@@ -204,9 +196,10 @@ class Selector(object):
         self._tostring_method = _ctgroup[st]['_tostring_method']
 
         if text is not None:
-            if not isinstance(text, six.text_type):
-                msg = "text argument should be of type %s, got %s" % (
-                    six.text_type, text.__class__)
+            if not isinstance(text, str):
+                msg = "text argument should be of type str, got %s" % (
+                    text.__class__
+                )
                 raise TypeError(msg)
             root = self._get_root(text, base_url)
         elif root is None:
@@ -255,9 +248,7 @@ class Selector(object):
                              smart_strings=self._lxml_smart_strings,
                              **kwargs)
         except etree.XPathError as exc:
-            msg = u"XPath error: %s in %s" % (exc, query)
-            msg = msg if six.PY3 else msg.encode('unicode_escape')
-            six.reraise(ValueError, ValueError(msg), sys.exc_info()[2])
+            raise ValueError("XPath error: %s in %s" % (exc, query))
 
         if type(result) is not list:
             result = [result]
@@ -324,11 +315,11 @@ class Selector(object):
                                   with_tail=False)
         except (AttributeError, TypeError):
             if self.root is True:
-                return u'1'
+                return '1'
             elif self.root is False:
-                return u'0'
+                return '0'
             else:
-                return six.text_type(self.root)
+                return str(self.root)
     extract = get
 
     def getall(self):
@@ -354,7 +345,7 @@ class Selector(object):
             if el.tag.startswith('{'):
                 el.tag = el.tag.split('}', 1)[1]
             # loop on element attributes also
-            for an in el.attrib.keys():
+            for an in el.attrib:
                 if an.startswith('{'):
                     el.attrib[an.split('}', 1)[1]] = el.attrib.pop(an)
         # remove namespace declarations

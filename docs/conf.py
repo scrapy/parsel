@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 
 import os
 import sys
@@ -38,8 +37,8 @@ source_suffix = '.rst'
 master_doc = 'index'
 
 # General information about the project.
-project = u'Parsel'
-copyright = u'2015, Scrapy Project'
+project = 'Parsel'
+copyright = '2015, Scrapy Project'
 
 # The version info for the project you're documenting, acts as replacement
 # for |version| and |release|, also used in various other places throughout
@@ -83,8 +82,8 @@ latex_elements = {}
 # [howto/manual]).
 latex_documents = [
     ('index', 'parsel.tex',
-     u'Parsel Documentation',
-     u'Scrapy Project', 'manual'),
+     'Parsel Documentation',
+     'Scrapy Project', 'manual'),
 ]
 
 
@@ -94,8 +93,8 @@ latex_documents = [
 # (source start file, name, description, authors, manual section).
 man_pages = [
     ('index', 'parsel',
-     u'Parsel Documentation',
-     [u'Scrapy Project'], 1)
+     'Parsel Documentation',
+     ['Scrapy Project'], 1)
 ]
 
 
@@ -106,8 +105,8 @@ man_pages = [
 #  dir menu entry, description, category)
 texinfo_documents = [
     ('index', 'parsel',
-     u'Parsel Documentation',
-     u'Scrapy Project',
+     'Parsel Documentation',
+     'Scrapy Project',
      'parsel',
      'One line description of project.',
      'Miscellaneous'),
