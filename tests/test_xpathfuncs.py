@@ -1,5 +1,3 @@
-# coding: utf-8
-
 from parsel import Selector
 from parsel.xpathfuncs import set_xpathfunc
 import unittest
