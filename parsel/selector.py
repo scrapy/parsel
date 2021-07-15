@@ -255,7 +255,7 @@ class Selector(object):
                              smart_strings=self._lxml_smart_strings,
                              **kwargs)
         except etree.XPathError as exc:
-            msg = u"XPath error: %s in %s" % (exc, query)
+            msg = "XPath error: %s in %s" % (exc, query)
             msg = msg if six.PY3 else msg.encode('unicode_escape')
             six.reraise(ValueError, ValueError(msg), sys.exc_info()[2])
 
@@ -324,9 +324,9 @@ class Selector(object):
                                   with_tail=False)
         except (AttributeError, TypeError):
             if self.root is True:
-                return u'1'
+                return '1'
             elif self.root is False:
-                return u'0'
+                return '0'
             else:
                 return six.text_type(self.root)
     extract = get
@@ -354,7 +354,7 @@ class Selector(object):
             if el.tag.startswith('{'):
                 el.tag = el.tag.split('}', 1)[1]
             # loop on element attributes also
-            for an in el.attrib.keys():
+            for an in list(el.attrib.keys()):
                 if an.startswith('{'):
                     el.attrib[an.split('}', 1)[1]] = el.attrib.pop(an)
         # remove namespace declarations
