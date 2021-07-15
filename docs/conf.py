@@ -134,3 +134,9 @@ nitpick_ignore = [
     ('py:class', 'cssselect.xpath.XPathExpr'),
     ('py:class', 'lxml.etree.XMLParser'),
 ]
+
+
+# --- Image Conerter options --------------------------------------------------
+
+# https://github.com/ImageMagick/ImageMagick/issues/974
+image_converter = 'magick'
