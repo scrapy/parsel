@@ -32,6 +32,7 @@ setup(
         'lxml',
         'cssselect>=0.9'
     ],
+    python_requires='>=3.6',
     license="BSD",
     zip_safe=False,
     keywords='parsel',
