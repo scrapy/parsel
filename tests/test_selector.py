@@ -154,8 +154,12 @@ class SelectorTestCase(unittest.TestCase):
         )
 
     def test_check_text_argument_type(self):
-        self.assertRaisesRegex(TypeError, 'text argument should be of type',
-                                self.sscls, b'<html/>')
+        self.assertRaisesRegex(
+            TypeError,
+            'text argument should be of type',
+            self.sscls,
+            b'<html/>',
+        )
 
     def test_extract_first(self):
         """Test if extract_first() returns first element"""
@@ -266,9 +270,11 @@ class SelectorTestCase(unittest.TestCase):
         self.assertRaises(ValueError, self.sscls, text='', type='_na_')
 
     def test_text_or_root_is_required(self):
-        self.assertRaisesRegex(ValueError,
-                                'Selector needs either text or root argument',
-                                self.sscls)
+        self.assertRaisesRegex(
+            ValueError,
+            'Selector needs either text or root argument',
+            self.sscls,
+        )
 
     def test_bool(self):
         text = '<a href="" >false</a><a href="nonempty">true</a>'
