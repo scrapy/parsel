@@ -23,7 +23,6 @@ sys.path.insert(0, project_root)
 extensions = [
     'notfound.extension',
     'sphinx.ext.autodoc',
-    'sphinxcontrib.inkscapeconverter',  # SVG support in LaTeX
     'sphinx.ext.intersphinx',
     'sphinx.ext.viewcode',
 ]

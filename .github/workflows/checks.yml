@@ -16,8 +16,6 @@ jobs:
           python-version: 3.9
         - name: docs
           python-version: 3.8  # Keep in sync with .readthedocs.yml
-          system-libraries:
-          - inkscape
 
     steps:
     - uses: actions/checkout@v2
