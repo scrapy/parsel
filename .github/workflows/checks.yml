@@ -7,13 +7,13 @@ jobs:
     strategy:
       matrix:
         include:
-        - python-version: 3.8
+        - python-version: 3.9
           env:
             TOXENV: security
-        - python-version: 3.8
+        - python-version: 3.9
           env:
             TOXENV: flake8
-        - python-version: 3.8
+        - python-version: 3.9
           env:
             TOXENV: pylint
         - python-version: 3.8  # Keep in sync with .readthedocs.yml
