@@ -23,7 +23,7 @@ sys.path.insert(0, project_root)
 extensions = [
     'notfound.extension',
     'sphinx.ext.autodoc',
-    'sphinx.ext.imgconverter',  # SVG support in LaTeX
+    'sphinxcontrib.inkscapeconverter',  # SVG support in LaTeX
     'sphinx.ext.intersphinx',
     'sphinx.ext.viewcode',
 ]
@@ -134,9 +134,3 @@ nitpick_ignore = [
     ('py:class', 'cssselect.xpath.XPathExpr'),
     ('py:class', 'lxml.etree.XMLParser'),
 ]
-
-
-# --- Image Conerter options --------------------------------------------------
-
-# https://github.com/ImageMagick/ImageMagick/issues/974
-image_converter = 'magick'

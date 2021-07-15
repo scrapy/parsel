@@ -1,3 +1,4 @@
 sphinx
 sphinx-notfound-page
 sphinx_rtd_theme
+sphinxcontrib-svg2pdfconverter
