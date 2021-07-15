@@ -2,9 +2,13 @@
 Parsel
 ======
 
-.. image:: https://img.shields.io/travis/scrapy/parsel/master.svg
-   :target: https://travis-ci.org/scrapy/parsel
-   :alt: Build Status
+.. image:: https://github.com/scrapy/parsel/actions/workflows/tests.yml/badge.svg
+   :target: https://github.com/scrapy/parsel/actions/workflows/tests.yml
+   :alt: Tests
+
+.. image:: https://img.shields.io/pypi/pyversions/parsel.svg
+   :target: https://github.com/scrapy/parsel/actions/workflows/tests.yml
+   :alt: Supported Python versions
 
 .. image:: https://img.shields.io/pypi/v/parsel.svg
    :target: https://pypi.python.org/pypi/parsel
