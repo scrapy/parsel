@@ -56,6 +56,8 @@ exclude_patterns = ['_build']
 # The name of the Pygments (syntax highlighting) style to use.
 pygments_style = 'sphinx'
 
+suppress_warnings = ['epub.unknown_project_files']
+
 
 # -- Options for HTML output -------------------------------------------
 
