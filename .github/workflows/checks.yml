@@ -20,6 +20,9 @@ jobs:
         - python-version: 3.8  # Keep in sync with .readthedocs.yml
           env:
             TOXENV: docs
+        - python-version: 3.9
+          env:
+            TOXENV: typing
 
     steps:
     - uses: actions/checkout@v2

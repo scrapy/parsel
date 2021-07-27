@@ -2,10 +2,15 @@
 XPath selectors based on lxml
 """
 
+import typing
+from typing import Any, Dict, Generic, List, Optional, Mapping, Pattern, Union
+
 from lxml import etree, html
 
 from .utils import flatten, iflatten, extract_regex, shorten
 from .csstranslator import HTMLTranslator, GenericTranslator
+
+_SelectorType = typing.TypeVar('_SelectorType', bound='Selector')
 
 
 class CannotRemoveElementWithoutRoot(Exception):
@@ -17,7 +22,7 @@ class CannotRemoveElementWithoutParent(Exception):
 
 
 class SafeXMLParser(etree.XMLParser):
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args, **kwargs) -> None:
         kwargs.setdefault('resolve_entities', False)
         super().__init__(*args, **kwargs)
 
@@ -32,7 +37,7 @@ _ctgroup = {
 }
 
 
-def _st(st):
+def _st(st: Optional[str]) -> str:
     if st is None:
         return 'html'
     elif st in _ctgroup:
@@ -52,20 +57,33 @@ def create_root_node(text, parser_cls, base_url=None):
     return root
 
 
-class SelectorList(list):
+class SelectorList(List[_SelectorType]):
     """
     The :class:`SelectorList` class is a subclass of the builtin ``list``
     class, which provides a few additional methods.
     """
 
-    def __getitem__(self, pos):
+    @typing.overload
+    def __getitem__(self, pos: int) -> _SelectorType:
+        pass
+
+    @typing.overload
+    def __getitem__(self, pos: slice) -> 'SelectorList[_SelectorType]':
+        pass
+
+    def __getitem__(self, pos: Union[int, slice]) -> Union[_SelectorType, 'SelectorList[_SelectorType]']:
         o = super().__getitem__(pos)
         return self.__class__(o) if isinstance(pos, slice) else o
 
-    def __getstate__(self):
+    def __getstate__(self) -> None:
         raise TypeError("can't pickle SelectorList objects")
 
-    def xpath(self, xpath, namespaces=None, **kwargs):
+    def xpath(
+        self,
+        xpath: str,
+        namespaces: Optional[Mapping[str, str]] = None,
+        **kwargs,
+    ) -> 'SelectorList[_SelectorType]':
         """
         Call the ``.xpath()`` method for each element in this list and return
         their results flattened as another :class:`SelectorList`.
@@ -84,7 +102,7 @@ class SelectorList(list):
         """
         return self.__class__(flatten([x.xpath(xpath, namespaces=namespaces, **kwargs) for x in self]))
 
-    def css(self, query):
+    def css(self, query: str) -> 'SelectorList[_SelectorType]':
         """
         Call the ``.css()`` method for each element in this list and return
         their results flattened as another :class:`SelectorList`.
@@ -93,7 +111,7 @@ class SelectorList(list):
         """
         return self.__class__(flatten([x.css(query) for x in self]))
 
-    def re(self, regex, replace_entities=True):
+    def re(self, regex: Union[str, Pattern[str]], replace_entities: bool = True) -> List[str]:
         """
         Call the ``.re()`` method for each element in this list and return
         their results flattened, as a list of unicode strings.
@@ -105,7 +123,18 @@ class SelectorList(list):
         """
         return flatten([x.re(regex, replace_entities=replace_entities) for x in self])
 
-    def re_first(self, regex, default=None, replace_entities=True):
+    @typing.overload
+    def re_first(self, regex: Union[str, Pattern[str]], default: None = None,
+                 replace_entities: bool = True) -> Optional[str]:
+        pass
+
+    @typing.overload
+    def re_first(self, regex: Union[str, Pattern[str]], default: str,
+                 replace_entities: bool = True) -> str:
+        pass
+
+    def re_first(self, regex: Union[str, Pattern[str]], default: Optional[str] = None,
+                 replace_entities: bool = True) -> Optional[str]:
         """
         Call the ``.re()`` method for the first element in this list and
         return the result in an unicode string. If the list is empty or the
@@ -121,7 +150,7 @@ class SelectorList(list):
             return el
         return default
 
-    def getall(self):
+    def getall(self) -> List[str]:
         """
         Call the ``.get()`` method for each element is this list and return
         their results flattened, as a list of unicode strings.
@@ -129,7 +158,15 @@ class SelectorList(list):
         return [x.get() for x in self]
     extract = getall
 
-    def get(self, default=None):
+    @typing.overload
+    def get(self, default: None = None) -> Optional[str]:
+        pass
+
+    @typing.overload
+    def get(self, default: str) -> str:
+        pass
+
+    def get(self, default: Optional[str] = None) -> Optional[str]:
         """
         Return the result of ``.get()`` for the first element in this list.
         If the list is empty, return the default value.
@@ -140,7 +177,7 @@ class SelectorList(list):
     extract_first = get
 
     @property
-    def attrib(self):
+    def attrib(self) -> Mapping[str, str]:
         """Return the attributes dictionary for the first element.
         If the list is empty, return an empty dict.
         """
@@ -148,7 +185,7 @@ class SelectorList(list):
             return x.attrib
         return {}
 
-    def remove(self):
+    def remove(self) -> None:
         """
         Remove matched nodes from the parent for each element in this list.
         """
@@ -173,7 +210,7 @@ class Selector:
     __slots__ = ['text', 'namespaces', 'type', '_expr', 'root',
                  '__weakref__', '_parser', '_csstranslator', '_tostring_method']
 
-    _default_type = None
+    _default_type: Optional[str] = None
     _default_namespaces = {
         "re": "http://exslt.org/regular-expressions",
 
@@ -186,10 +223,11 @@ class Selector:
         "set": "http://exslt.org/sets"
     }
     _lxml_smart_strings = False
-    selectorlist_cls = SelectorList
+    selectorlist_cls = SelectorList['Selector']
 
-    def __init__(self, text=None, type=None, namespaces=None, root=None,
-                 base_url=None, _expr=None):
+    def __init__(self, text: Optional[str] = None, type: Optional[str] = None,
+                 namespaces: Optional[Mapping[str, str]] = None, root: Optional[Any] = None,
+                 base_url: Optional[str] = None, _expr: Optional[str] = None) -> None:
         self.type = st = _st(type or self._default_type)
         self._parser = _ctgroup[st]['_parser']
         self._csstranslator = _ctgroup[st]['_csstranslator']
@@ -211,13 +249,15 @@ class Selector:
         self.root = root
         self._expr = _expr
 
-    def __getstate__(self):
+    def __getstate__(self) -> Any:
         raise TypeError("can't pickle Selector objects")
 
-    def _get_root(self, text, base_url=None):
+    def _get_root(self, text: str, base_url: Optional[str] = None) -> Any:
         return create_root_node(text, self._parser, base_url=base_url)
 
-    def xpath(self, query, namespaces=None, **kwargs):
+    def xpath(
+        self: _SelectorType, query: str, namespaces: Optional[Mapping[str, str]] = None, **kwargs,
+    ) -> SelectorList[_SelectorType]:
         """
         Find nodes matching the xpath ``query`` and return the result as a
         :class:`SelectorList` instance with all elements flattened. List
@@ -259,7 +299,7 @@ class Selector:
                   for x in result]
         return self.selectorlist_cls(result)
 
-    def css(self, query):
+    def css(self: _SelectorType, query: str) -> SelectorList[_SelectorType]:
         """
         Apply the given CSS selector and return a :class:`SelectorList` instance.
 
@@ -272,10 +312,10 @@ class Selector:
         """
         return self.xpath(self._css2xpath(query))
 
-    def _css2xpath(self, query):
+    def _css2xpath(self, query: str) -> Any:
         return self._csstranslator.css_to_xpath(query)
 
-    def re(self, regex, replace_entities=True):
+    def re(self, regex: Union[str, Pattern[str]], replace_entities: bool = True) -> List[str]:
         """
         Apply the given regex and return a list of unicode strings with the
         matches.
@@ -290,7 +330,18 @@ class Selector:
         """
         return extract_regex(regex, self.get(), replace_entities=replace_entities)
 
-    def re_first(self, regex, default=None, replace_entities=True):
+    @typing.overload
+    def re_first(self, regex: Union[str, Pattern[str]], default: None = None,
+                 replace_entities: bool = True) -> Optional[str]:
+        pass
+
+    @typing.overload
+    def re_first(self, regex: Union[str, Pattern[str]], default: str,
+                 replace_entities: bool = True) -> str:
+        pass
+
+    def re_first(self, regex: Union[str, Pattern[str]], default: Optional[str] = None,
+                 replace_entities: bool = True) -> Optional[str]:
         """
         Apply the given regex and return the first unicode string which
         matches. If there is no match, return the default value (``None`` if
@@ -303,7 +354,7 @@ class Selector:
         """
         return next(iflatten(self.re(regex, replace_entities=replace_entities)), default)
 
-    def get(self):
+    def get(self) -> str:
         """
         Serialize and return the matched nodes in a single unicode string.
         Percent encoded content is unquoted.
@@ -322,13 +373,13 @@ class Selector:
                 return str(self.root)
     extract = get
 
-    def getall(self):
+    def getall(self) -> List[str]:
         """
         Serialize and return the matched node in a 1-element list of unicode strings.
         """
         return [self.get()]
 
-    def register_namespace(self, prefix, uri):
+    def register_namespace(self, prefix: str, uri: str) -> None:
         """
         Register the given namespace to be used in this :class:`Selector`.
         Without registering namespaces you can't select or extract data from
@@ -336,7 +387,7 @@ class Selector:
         """
         self.namespaces[prefix] = uri
 
-    def remove_namespaces(self):
+    def remove_namespaces(self) -> None:
         """
         Remove all namespaces, allowing to traverse the document using
         namespace-less xpaths. See :ref:`removing-namespaces`.
@@ -351,7 +402,7 @@ class Selector:
         # remove namespace declarations
         etree.cleanup_namespaces(self.root)
 
-    def remove(self):
+    def remove(self) -> None:
         """
         Remove matched nodes from the parent element.
         """
@@ -376,12 +427,12 @@ class Selector:
             )
 
     @property
-    def attrib(self):
+    def attrib(self) -> Dict[str, str]:
         """Return the attributes dictionary for underlying element.
         """
         return dict(self.root.attrib)
 
-    def __bool__(self):
+    def __bool__(self) -> bool:
         """
         Return ``True`` if there is any real content selected or ``False``
         otherwise.  In other words, the boolean value of a :class:`Selector` is
@@ -390,7 +441,7 @@ class Selector:
         return bool(self.get())
     __nonzero__ = __bool__
 
-    def __str__(self):
+    def __str__(self) -> str:
         data = repr(shorten(self.get(), width=40))
         return "<%s xpath=%r data=%s>" % (type(self).__name__, self._expr, data)
     __repr__ = __str__

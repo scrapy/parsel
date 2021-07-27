@@ -9,6 +9,13 @@ __version__ = '1.6.0'
 
 from parsel.selector import Selector, SelectorList  # NOQA
 from parsel.csstranslator import css2xpath  # NOQA
-from parsel import xpathfuncs # NOQA
+from parsel import xpathfuncs  # NOQA
+
+__all__ = [
+    'Selector',
+    'SelectorList',
+    'css2xpath',
+    'xpathfuncs',
+]
 
 xpathfuncs.setup()

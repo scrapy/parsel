@@ -1,4 +1,5 @@
 [MASTER]
+ignore=tests/typing
 persistent=no
 
 [MESSAGES CONTROL]
