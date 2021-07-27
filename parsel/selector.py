@@ -3,7 +3,7 @@ XPath selectors based on lxml
 """
 
 import typing
-from typing import Any, Dict, Generic, List, Optional, Mapping, Pattern, Union
+from typing import Any, Dict, List, Optional, Mapping, Pattern, Union
 
 from lxml import etree, html
 
