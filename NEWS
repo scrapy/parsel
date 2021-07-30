@@ -3,6 +3,8 @@
 History
 -------
 
+* Add PEP 561-style type information
+
 1.6.0 (2020-05-07)
 ~~~~~~~~~~~~~~~~~~
 

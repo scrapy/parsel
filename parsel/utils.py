@@ -1,4 +1,5 @@
 import re
+from typing import Any, List, Pattern, Union
 from w3lib.html import replace_entities as w3lib_replace_entities
 
 
@@ -31,7 +32,7 @@ def iflatten(x):
             yield el
 
 
-def _is_listlike(x):
+def _is_listlike(x: Any) -> bool:
     """
     >>> _is_listlike("foo")
     False
@@ -55,7 +56,8 @@ def _is_listlike(x):
     return hasattr(x, "__iter__") and not isinstance(x, (str, bytes))
 
 
-def extract_regex(regex, text, replace_entities=True):
+def extract_regex(regex: Union[str, Pattern[str]], text: str,
+                  replace_entities: bool = True) -> List[str]:
     """Extract a list of unicode strings from the given text/encoding using the following policies:
     * if the regex contains a named group called "extract" that will be returned
     * if the regex contains multiple numbered groups, all those will be returned (flattened)
@@ -82,7 +84,7 @@ def extract_regex(regex, text, replace_entities=True):
     return [w3lib_replace_entities(s, keep=['lt', 'amp']) for s in strings]
 
 
-def shorten(text, width, suffix='...'):
+def shorten(text: str, width: int, suffix: str = '...') -> str:
     """Truncate the given text to fit in the given width."""
     if len(text) <= width:
         return text
