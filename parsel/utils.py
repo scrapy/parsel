@@ -56,8 +56,9 @@ def _is_listlike(x: Any) -> bool:
     return hasattr(x, "__iter__") and not isinstance(x, (str, bytes))
 
 
-def extract_regex(regex: Union[str, Pattern[str]], text: str,
-                  replace_entities: bool = True) -> List[str]:
+def extract_regex(
+    regex: Union[str, Pattern[str]], text: str, replace_entities: bool = True
+) -> List[str]:
     """Extract a list of unicode strings from the given text/encoding using the following policies:
     * if the regex contains a named group called "extract" that will be returned
     * if the regex contains multiple numbered groups, all those will be returned (flattened)
@@ -66,10 +67,10 @@ def extract_regex(regex: Union[str, Pattern[str]], text: str,
     if isinstance(regex, str):
         regex = re.compile(regex, re.UNICODE)
 
-    if 'extract' in regex.groupindex:
+    if "extract" in regex.groupindex:
         # named group
         try:
-            extracted = regex.search(text).group('extract')
+            extracted = regex.search(text).group("extract")
         except AttributeError:
             strings = []
         else:
@@ -81,15 +82,15 @@ def extract_regex(regex: Union[str, Pattern[str]], text: str,
     strings = flatten(strings)
     if not replace_entities:
         return strings
-    return [w3lib_replace_entities(s, keep=['lt', 'amp']) for s in strings]
+    return [w3lib_replace_entities(s, keep=["lt", "amp"]) for s in strings]
 
 
-def shorten(text: str, width: int, suffix: str = '...') -> str:
+def shorten(text: str, width: int, suffix: str = "...") -> str:
     """Truncate the given text to fit in the given width."""
     if len(text) <= width:
         return text
     if width > len(suffix):
-        return text[:width-len(suffix)] + suffix
+        return text[: width - len(suffix)] + suffix
     if width >= 0:
-        return suffix[len(suffix)-width:]
-    raise ValueError('width must be equal or greater than 0')
+        return suffix[len(suffix) - width :]
+    raise ValueError("width must be equal or greater than 0")

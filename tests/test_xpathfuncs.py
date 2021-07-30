@@ -14,16 +14,18 @@ class XPathFuncsTestCase(unittest.TestCase):
         sel = Selector(text=body)
         self.assertEqual(
             [x.extract() for x in sel.xpath('//p[has-class("foo")]/text()')],
-            ['First', 'Second'])
+            ["First", "Second"],
+        )
         self.assertEqual(
-            [x.extract() for x in sel.xpath('//p[has-class("bar")]/text()')],
-            ['Third'])
+            [x.extract() for x in sel.xpath('//p[has-class("bar")]/text()')], ["Third"]
+        )
         self.assertEqual(
-            [x.extract() for x in sel.xpath('//p[has-class("foo","bar")]/text()')],
-            [])
+            [x.extract() for x in sel.xpath('//p[has-class("foo","bar")]/text()')], []
+        )
         self.assertEqual(
             [x.extract() for x in sel.xpath('//p[has-class("foo","bar-baz")]/text()')],
-            ['First'])
+            ["First"],
+        )
 
     def test_has_class_error_no_args(self):
         body = """
@@ -31,8 +33,11 @@ class XPathFuncsTestCase(unittest.TestCase):
         """
         sel = Selector(text=body)
         self.assertRaisesRegex(
-            ValueError, 'has-class must have at least 1 argument',
-            sel.xpath, 'has-class()')
+            ValueError,
+            "has-class must have at least 1 argument",
+            sel.xpath,
+            "has-class()",
+        )
 
     def test_has_class_error_invalid_arg_type(self):
         body = """
@@ -40,8 +45,8 @@ class XPathFuncsTestCase(unittest.TestCase):
         """
         sel = Selector(text=body)
         self.assertRaisesRegex(
-            ValueError, 'has-class arguments must be strings',
-            sel.xpath, 'has-class(.)')
+            ValueError, "has-class arguments must be strings", sel.xpath, "has-class(.)"
+        )
 
     def test_has_class_error_invalid_unicode(self):
         body = """
@@ -49,8 +54,11 @@ class XPathFuncsTestCase(unittest.TestCase):
         """
         sel = Selector(text=body)
         self.assertRaisesRegex(
-            ValueError, 'All strings must be XML compatible',
-            sel.xpath, 'has-class("héllö")'.encode('utf-8'))
+            ValueError,
+            "All strings must be XML compatible",
+            sel.xpath,
+            'has-class("héllö")'.encode("utf-8"),
+        )
 
     def test_has_class_unicode(self):
         body = """
@@ -58,8 +66,8 @@ class XPathFuncsTestCase(unittest.TestCase):
         """
         sel = Selector(text=body)
         self.assertEqual(
-            [x.extract() for x in sel.xpath('//p[has-class("fóó")]/text()')],
-            ['First'])
+            [x.extract() for x in sel.xpath('//p[has-class("fóó")]/text()')], ["First"]
+        )
 
     def test_has_class_uppercase(self):
         body = """
@@ -67,8 +75,8 @@ class XPathFuncsTestCase(unittest.TestCase):
         """
         sel = Selector(text=body)
         self.assertEqual(
-            [x.extract() for x in sel.xpath('//p[has-class("foo")]/text()')],
-            ['First'])
+            [x.extract() for x in sel.xpath('//p[has-class("foo")]/text()')], ["First"]
+        )
 
     def test_has_class_newline(self):
         body = """
@@ -77,8 +85,8 @@ class XPathFuncsTestCase(unittest.TestCase):
         """
         sel = Selector(text=body)
         self.assertEqual(
-            [x.extract() for x in sel.xpath('//p[has-class("foo")]/text()')],
-            ['First'])
+            [x.extract() for x in sel.xpath('//p[has-class("foo")]/text()')], ["First"]
+        )
 
     def test_has_class_tab(self):
         body = """
@@ -86,11 +94,10 @@ class XPathFuncsTestCase(unittest.TestCase):
         """
         sel = Selector(text=body)
         self.assertEqual(
-            [x.extract() for x in sel.xpath('//p[has-class("foo")]/text()')],
-            ['First'])
+            [x.extract() for x in sel.xpath('//p[has-class("foo")]/text()')], ["First"]
+        )
 
     def test_set_xpathfunc(self):
-
         def myfunc(ctx):
             myfunc.call_count += 1
 
@@ -101,14 +108,14 @@ class XPathFuncsTestCase(unittest.TestCase):
         """
         sel = Selector(text=body)
         self.assertRaisesRegex(
-            ValueError, 'Unregistered function in myfunc',
-            sel.xpath, 'myfunc()')
+            ValueError, "Unregistered function in myfunc", sel.xpath, "myfunc()"
+        )
 
-        set_xpathfunc('myfunc', myfunc)
-        sel.xpath('myfunc()')
+        set_xpathfunc("myfunc", myfunc)
+        sel.xpath("myfunc()")
         self.assertEqual(myfunc.call_count, 1)
 
-        set_xpathfunc('myfunc', None)
+        set_xpathfunc("myfunc", None)
         self.assertRaisesRegex(
-            ValueError, 'Unregistered function in myfunc',
-            sel.xpath, 'myfunc()')
+            ValueError, "Unregistered function in myfunc", sel.xpath, "myfunc()"
+        )
