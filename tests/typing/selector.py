@@ -40,8 +40,8 @@ def incorrect() -> None:
 
     # Cannot use a string to define namespaces in xpath.
     selector.xpath(
-        "//somens:a/text()", namespaces='{"somens": "http://scrapy.org"}'
-    ).extract()  # type: ignore
+        "//somens:a/text()", namespaces='{"somens": "http://scrapy.org"}'  # type: ignore
+    ).extract()
 
     # Typo in the extract method name.
     selector.css("li").extact()  # type: ignore
