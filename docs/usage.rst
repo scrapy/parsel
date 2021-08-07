@@ -359,6 +359,15 @@ Use it to extract just the first matching string::
     >>> selector.xpath('//a[contains(@href, "image")]/text()').re_first(r'Name:\s*(.*)')
     'My image 1 '
 
+You can also use compiled regular expressions with both methods::
+
+    >>> import re
+    >>> regex = re.compile(r'Name:\s*(.*)')
+    >>> selector.xpath('//a[contains(@href, "image")]/text()').re_first(regex)
+    'My image 1 '
+
+As well as adding regex flags with the ``flags`` argument.
+
 .. _topics-selectors-relative-xpaths:
 
 Working with relative XPaths

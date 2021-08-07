@@ -119,7 +119,10 @@ class SelectorList(List[_SelectorType]):
         return self.__class__(flatten([x.css(query) for x in self]))
 
     def re(
-        self, regex: Union[str, Pattern[str]], replace_entities: bool = True
+        self,
+        regex: Union[str, Pattern[str]],
+        replace_entities: bool = True,
+        flags: int = 0,
     ) -> List[str]:
         """
         Call the ``.re()`` method for each element in this list and return
@@ -129,8 +132,14 @@ class SelectorList(List[_SelectorType]):
         corresponding character (except for ``&amp;`` and ``&lt;``.
         Passing ``replace_entities`` as ``False`` switches off these
         replacements.
+
+        It is possible to provide regex flags using the `flags` argument. They
+        will be applied only if the provided regex is not a compiled regular
+        expression.
         """
-        return flatten([x.re(regex, replace_entities=replace_entities) for x in self])
+        return flatten(
+            [x.re(regex, replace_entities=replace_entities, flags=flags) for x in self]
+        )
 
     @typing.overload
     def re_first(
@@ -138,6 +147,7 @@ class SelectorList(List[_SelectorType]):
         regex: Union[str, Pattern[str]],
         default: None = None,
         replace_entities: bool = True,
+        flags: int = 0,
     ) -> Optional[str]:
         pass
 
@@ -147,6 +157,7 @@ class SelectorList(List[_SelectorType]):
         regex: Union[str, Pattern[str]],
         default: str,
         replace_entities: bool = True,
+        flags: int = 0,
     ) -> str:
         pass
 
@@ -155,6 +166,7 @@ class SelectorList(List[_SelectorType]):
         regex: Union[str, Pattern[str]],
         default: Optional[str] = None,
         replace_entities: bool = True,
+        flags: int = 0,
     ) -> Optional[str]:
         """
         Call the ``.re()`` method for the first element in this list and
@@ -168,7 +180,7 @@ class SelectorList(List[_SelectorType]):
         replacements.
         """
         for el in iflatten(
-            x.re(regex, replace_entities=replace_entities) for x in self
+            x.re(regex, replace_entities=replace_entities, flags=flags) for x in self
         ):
             return el
         return default
@@ -358,21 +370,30 @@ class Selector:
         return self._csstranslator.css_to_xpath(query)
 
     def re(
-        self, regex: Union[str, Pattern[str]], replace_entities: bool = True
+        self,
+        regex: Union[str, Pattern[str]],
+        replace_entities: bool = True,
+        flags: int = 0,
     ) -> List[str]:
         """
         Apply the given regex and return a list of unicode strings with the
         matches.
 
         ``regex`` can be either a compiled regular expression or a string which
-        will be compiled to a regular expression using ``re.compile(regex)``.
+        will be compiled to a regular expression using ``re.compile()``.
 
         By default, character entity references are replaced by their
         corresponding character (except for ``&amp;`` and ``&lt;``).
         Passing ``replace_entities`` as ``False`` switches off these
         replacements.
+
+        It is possible to provide regex flags using the `flags` argument. They
+        will be applied only if the provided regex is not a compiled regular
+        expression.
         """
-        return extract_regex(regex, self.get(), replace_entities=replace_entities)
+        return extract_regex(
+            regex, self.get(), replace_entities=replace_entities, flags=flags
+        )
 
     @typing.overload
     def re_first(
@@ -380,6 +401,7 @@ class Selector:
         regex: Union[str, Pattern[str]],
         default: None = None,
         replace_entities: bool = True,
+        flags: int = 0,
     ) -> Optional[str]:
         pass
 
@@ -389,6 +411,7 @@ class Selector:
         regex: Union[str, Pattern[str]],
         default: str,
         replace_entities: bool = True,
+        flags: int = 0,
     ) -> str:
         pass
 
@@ -397,6 +420,7 @@ class Selector:
         regex: Union[str, Pattern[str]],
         default: Optional[str] = None,
         replace_entities: bool = True,
+        flags: int = 0,
     ) -> Optional[str]:
         """
         Apply the given regex and return the first unicode string which
@@ -407,9 +431,14 @@ class Selector:
         corresponding character (except for ``&amp;`` and ``&lt;``).
         Passing ``replace_entities`` as ``False`` switches off these
         replacements.
+
+        It is possible to provide regex flags using the `flags` argument. They
+        will be applied only if the provided regex is not a compiled regular
+        expression.
         """
         return next(
-            iflatten(self.re(regex, replace_entities=replace_entities)), default
+            iflatten(self.re(regex, replace_entities=replace_entities, flags=flags)),
+            default,
         )
 
     def get(self) -> str:

@@ -318,7 +318,7 @@ class SelectorTestCase(unittest.TestCase):
         self.assertEqual(sel.re_first(r"foo"), None)
         self.assertEqual(sel.re_first(r"foo", default="bar"), "bar")
 
-    def test_extract_first_re_default(self) -> None:
+    def test_re_first_default(self) -> None:
         """Test if re_first() returns default value when no results found"""
         body = '<ul><li id="1">1</li><li id="2">2</li></ul>'
         sel = self.sscls(text=body)
@@ -328,6 +328,30 @@ class SelectorTestCase(unittest.TestCase):
         )
         self.assertEqual(
             sel.xpath("/ul/li/text()").re_first(r"\w+", default="missing"), "missing"
+        )
+
+    def test_re_first_flags(self) -> None:
+        body = """
+        <script>
+            function example() {
+            "name": "Adrian",
+            "points": 3,
+            }
+        </script>
+        """
+        sel = self.sscls(text=body)
+
+        self.assertEqual(
+            sel.xpath("//script/text()").re_first(r"example\(\) ({.*})"), None
+        )
+        self.assertEqual(
+            sel.xpath("//script/text()").re_first(
+                r"example\(\) ({.*})", flags=re.DOTALL
+            ),
+            """{
+            "name": "Adrian",
+            "points": 3,
+            }""",
         )
 
     def test_select_unicode_query(self) -> None:
@@ -710,7 +734,6 @@ class SelectorTestCase(unittest.TestCase):
         self.assertEqual(
             x.xpath("//script")[0].re(name_re, replace_entities=False), [expected]
         )
-
         self.assertEqual(
             x.xpath("//script/text()").re_first(name_re, replace_entities=False),
             expected,
@@ -723,6 +746,28 @@ class SelectorTestCase(unittest.TestCase):
         body = "<div>Evento: cumplea\xf1os</div>"
         x = self.sscls(text=body)
         self.assertEqual(x.xpath("//div").re(r"Evento: (\w+)"), ["cumplea\xf1os"])
+
+    def test_re_flags(self) -> None:
+        body = """
+        <script>
+            function example() {
+            "name": "Adrian",
+            "points": 3,
+            }
+        </script>
+        """
+        sel = self.sscls(text=body)
+
+        self.assertEqual(sel.xpath("//script/text()").re(r"example\(\) ({.*})"), [])
+        self.assertEqual(
+            sel.xpath("//script/text()").re(r"example\(\) ({.*})", flags=re.DOTALL),
+            [
+                """{
+            "name": "Adrian",
+            "points": 3,
+            }"""
+            ],
+        )
 
     def test_selector_over_text(self) -> None:
         hs = self.sscls(text="<root>lala</root>")
