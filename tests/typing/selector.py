@@ -1,5 +1,7 @@
 # Basic usage of the Selector, strongly typed to test the typing of parsel's API.
 import re
+from typing import List
+
 from parsel import Selector
 
 
@@ -8,9 +10,9 @@ def correct() -> None:
         text="<html><body><ul><li>1</li><li>2</li><li>3</li></ul></body></html>"
     )
 
-    li_values: list[str] = selector.css("li").getall()
+    li_values: List[str] = selector.css("li").getall()
     selector.re_first(re.compile(r"[32]"), "").strip()
-    xpath_values: list[str] = selector.xpath(
+    xpath_values: List[str] = selector.xpath(
         "//somens:a/text()", namespaces={"somens": "http://scrapy.org"}
     ).extract()
 
