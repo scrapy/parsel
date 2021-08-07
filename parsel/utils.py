@@ -57,15 +57,20 @@ def _is_listlike(x: Any) -> bool:
 
 
 def extract_regex(
-    regex: Union[str, Pattern[str]], text: str, replace_entities: bool = True
+    regex: Union[str, Pattern[str]],
+    text: str,
+    replace_entities: bool = True,
+    flags: int = 0,
 ) -> List[str]:
     """Extract a list of unicode strings from the given text/encoding using the following policies:
+    * if the regex is a string it will be compiled using the provided flags
     * if the regex contains a named group called "extract" that will be returned
     * if the regex contains multiple numbered groups, all those will be returned (flattened)
     * if the regex doesn't contain any group the entire regex matching is returned
     """
     if isinstance(regex, str):
-        regex = re.compile(regex, re.UNICODE)
+        flags |= re.UNICODE
+        regex = re.compile(regex, flags)
 
     if "extract" in regex.groupindex:
         # named group
