@@ -26,8 +26,7 @@ def iflatten(x):
     Similar to ``.flatten()``, but returns iterator instead"""
     for el in x:
         if _is_listlike(el):
-            for el_ in flatten(el):
-                yield el_
+            yield from flatten(el)
         else:
             yield el
 
@@ -59,7 +58,7 @@ def _is_listlike(x: Any) -> bool:
 def extract_regex(
     regex: Union[str, Pattern[str]], text: str, replace_entities: bool = True
 ) -> List[str]:
-    """Extract a list of unicode strings from the given text/encoding using the following policies:
+    """Extract a list of strings from the given text/encoding using the following policies:
     * if the regex contains a named group called "extract" that will be returned
     * if the regex contains multiple numbered groups, all those will be returned (flattened)
     * if the regex doesn't contain any group the entire regex matching is returned

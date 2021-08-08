@@ -339,7 +339,7 @@ Using selectors with regular expressions
 
 :class:`~parsel.selector.Selector` also has a ``.re()`` method for extracting
 data using regular expressions. However, unlike using ``.xpath()`` or
-``.css()`` methods, ``.re()`` returns a list of unicode strings. So you
+``.css()`` methods, ``.re()`` returns a list of strings. So you
 can't construct nested ``.re()`` calls.
 
 Here's an example used to extract image names from the :ref:`HTML code
@@ -917,7 +917,7 @@ a :class:`~parsel.selector.Selector` instantiated with an HTML text like this::
       sel.xpath("//h1")
 
 2. Extract the text of all ``<h1>`` elements from an HTML text,
-   returning a list of unicode strings::
+   returning a list of strings::
 
       sel.xpath("//h1").getall()         # this includes the h1 tag
       sel.xpath("//h1/text()").getall()  # this excludes the h1 tag
