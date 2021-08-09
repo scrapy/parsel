@@ -138,7 +138,7 @@ class SelectorTestCase(unittest.TestCase):
         t = 'I say "Yeah!"'
         # naive string formatting with give something like:
         # ValueError: XPath error: Invalid predicate in //input[@value="I say "Yeah!""]/@name
-        self.assertRaises(ValueError, sel.xpath, '//input[@value="{}"]/@name'.format(t))
+        self.assertRaises(ValueError, sel.xpath, f'//input[@value="{t}"]/@name')
 
         # with XPath variables, escaping is done for you
         self.assertEqual(
@@ -149,7 +149,7 @@ class SelectorTestCase(unittest.TestCase):
         # the following gives you something like
         # ValueError: XPath error: Invalid predicate in //p[normalize-space()='I'm mixing single and "double quotes" and I don't care :)']//@name
         self.assertRaises(
-            ValueError, sel.xpath, "//p[normalize-space()='{}']//@name".format(lt)
+            ValueError, sel.xpath, f"//p[normalize-space()='{lt}']//@name"
         )
 
         self.assertEqual(

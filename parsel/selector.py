@@ -123,7 +123,7 @@ class SelectorList(List[_SelectorType]):
     ) -> List[str]:
         """
         Call the ``.re()`` method for each element in this list and return
-        their results flattened, as a list of unicode strings.
+        their results flattened, as a list of strings.
 
         By default, character entity references are replaced by their
         corresponding character (except for ``&amp;`` and ``&lt;``.
@@ -158,7 +158,7 @@ class SelectorList(List[_SelectorType]):
     ) -> Optional[str]:
         """
         Call the ``.re()`` method for the first element in this list and
-        return the result in an unicode string. If the list is empty or the
+        return the result in an string. If the list is empty or the
         regex doesn't match anything, return the default value (``None`` if
         the argument is not provided).
 
@@ -176,7 +176,7 @@ class SelectorList(List[_SelectorType]):
     def getall(self) -> List[str]:
         """
         Call the ``.get()`` method for each element is this list and return
-        their results flattened, as a list of unicode strings.
+        their results flattened, as a list of strings.
         """
         return [x.get() for x in self]
 
@@ -223,7 +223,7 @@ class Selector:
     :class:`Selector` allows you to select parts of an XML or HTML text using CSS
     or XPath expressions and extract data from it.
 
-    ``text`` is a ``unicode`` object in Python 2 or a ``str`` object in Python 3
+    ``text`` is a `str`` object
 
     ``type`` defines the selector type, it can be ``"html"``, ``"xml"`` or ``None`` (default).
     If ``type`` is ``None``, the selector defaults to ``"html"``.
@@ -328,7 +328,7 @@ class Selector:
                 query, namespaces=nsp, smart_strings=self._lxml_smart_strings, **kwargs
             )
         except etree.XPathError as exc:
-            raise ValueError("XPath error: %s in %s" % (exc, query))
+            raise ValueError(f"XPath error: {exc} in {query}")
 
         if type(result) is not list:
             result = [result]
@@ -361,7 +361,7 @@ class Selector:
         self, regex: Union[str, Pattern[str]], replace_entities: bool = True
     ) -> List[str]:
         """
-        Apply the given regex and return a list of unicode strings with the
+        Apply the given regex and return a list of strings with the
         matches.
 
         ``regex`` can be either a compiled regular expression or a string which
@@ -399,9 +399,9 @@ class Selector:
         replace_entities: bool = True,
     ) -> Optional[str]:
         """
-        Apply the given regex and return the first unicode string which
-        matches. If there is no match, return the default value (``None`` if
-        the argument is not provided).
+        Apply the given regex and return the first string which matches. If
+        there is no match, return the default value (``None`` if the argument
+        is not provided).
 
         By default, character entity references are replaced by their
         corresponding character (except for ``&amp;`` and ``&lt;``).
@@ -414,7 +414,7 @@ class Selector:
 
     def get(self) -> str:
         """
-        Serialize and return the matched nodes in a single unicode string.
+        Serialize and return the matched nodes in a single string.
         Percent encoded content is unquoted.
         """
         try:
@@ -436,7 +436,7 @@ class Selector:
 
     def getall(self) -> List[str]:
         """
-        Serialize and return the matched node in a 1-element list of unicode strings.
+        Serialize and return the matched node in a 1-element list of strings.
         """
         return [self.get()]
 
@@ -504,6 +504,6 @@ class Selector:
 
     def __str__(self) -> str:
         data = repr(shorten(self.get(), width=40))
-        return "<%s xpath=%r data=%s>" % (type(self).__name__, self._expr, data)
+        return f"<{type(self).__name__} xpath={self._expr!r} data={data}>"
 
     __repr__ = __str__

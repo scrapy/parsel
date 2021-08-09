@@ -3,7 +3,7 @@ from lxml import etree
 
 from w3lib.html import HTML5_WHITESPACE
 
-regex = "[{}]+".format(HTML5_WHITESPACE)
+regex = f"[{HTML5_WHITESPACE}]+"
 replace_html5_whitespaces = re.compile(regex).sub
 
 

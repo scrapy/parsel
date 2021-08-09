@@ -57,7 +57,7 @@ class XPathFuncsTestCase(unittest.TestCase):
             ValueError,
             "All strings must be XML compatible",
             sel.xpath,
-            'has-class("héllö")'.encode("utf-8"),
+            'has-class("héllö")'.encode(),
         )
 
     def test_has_class_unicode(self):
