@@ -47,8 +47,8 @@ def _st(st):
 def create_root_node(text, parser_cls, base_url=None, encoding='utf8'):
     """Create root node for text using given parser class.
     """
-    if isinstance(text, (six.text_type, bytes)):
-        body = text
+    if six.PY3 and isinstance(text, bytes):
+        body = text.replace(b'\x00', b'') or b'<html/>'
     elif isinstance(text, six.text_type):
         body = text.strip().replace('\x00', '').encode(encoding) or b'<html/>'
     parser = parser_cls(recover=True, encoding=encoding)
