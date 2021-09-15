@@ -53,9 +53,10 @@ def _st(st: Optional[str]) -> str:
 def create_root_node(text, parser_cls, base_url=None, encoding="utf8"):
     """Create root node for text using given parser class."""
     if isinstance(text, bytes):
-        body = text.strip().replace(b"\x00", b"") or b"<html/>"
-    elif isinstance(text, str):
-        body = text.strip().replace("\x00", "").encode(encoding) or b"<html/>"
+        body = text.replace(b"\x00", b"").strip()
+    else:
+        body = text.replace("\x00", "").strip().encode(encoding)
+    body = body or b"<html/>"
     parser = parser_cls(recover=True, encoding=encoding)
     root = etree.fromstring(body, parser=parser, base_url=base_url)
     if root is None:
