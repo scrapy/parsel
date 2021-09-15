@@ -1,10 +1,14 @@
 [MASTER]
+ignore=tests/typing
 persistent=no
 
 [MESSAGES CONTROL]
 disable=bad-continuation,
         c-extension-no-member,
+        deprecated-method,
+        fixme,
         import-error,
+        import-outside-toplevel,
         invalid-name,
         line-too-long,
         missing-class-docstring,
@@ -16,9 +20,12 @@ disable=bad-continuation,
         parse-error,
         raise-missing-from,
         redefined-builtin,
-        super-with-arguments,  # Required for Python 2 support
         too-few-public-methods,
         too-many-arguments,
+        too-many-lines,
+        too-many-public-methods,
         unidiomatic-typecheck,
-        useless-object-inheritance,  # Required for Python 2 support
+        unused-argument,
+        use-a-generator,
+        wrong-import-order,
         wrong-import-position

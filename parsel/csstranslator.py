@@ -1,7 +1,4 @@
-try:
-    from functools import lru_cache
-except ImportError:
-    from functools32 import lru_cache
+from functools import lru_cache
 
 from cssselect import GenericTranslator as OriginalGenericTranslator
 from cssselect import HTMLTranslator as OriginalHTMLTranslator
@@ -23,37 +20,37 @@ class XPathExpr(OriginalXPathExpr):
         return x
 
     def __str__(self):
-        path = super(XPathExpr, self).__str__()
+        path = super().__str__()
         if self.textnode:
-            if path == '*':
-                path = 'text()'
-            elif path.endswith('::*/*'):
-                path = path[:-3] + 'text()'
+            if path == "*":
+                path = "text()"
+            elif path.endswith("::*/*"):
+                path = path[:-3] + "text()"
             else:
-                path += '/text()'
+                path += "/text()"
 
         if self.attribute is not None:
-            if path.endswith('::*/*'):
+            if path.endswith("::*/*"):
                 path = path[:-2]
-            path += '/@%s' % self.attribute
+            path += "/@%s" % self.attribute
 
         return path
 
     def join(self, combiner, other):
-        super(XPathExpr, self).join(combiner, other)
+        super().join(combiner, other)
         self.textnode = other.textnode
         self.attribute = other.attribute
         return self
 
 
-class TranslatorMixin(object):
+class TranslatorMixin:
     """This mixin adds support to CSS pseudo elements via dynamic dispatch.
 
     Currently supported pseudo-elements are ``::text`` and ``::attr(ATTR_NAME)``.
     """
 
     def xpath_element(self, selector):
-        xpath = super(TranslatorMixin, self).xpath_element(selector)
+        xpath = super().xpath_element(selector)
         return XPathExpr.from_xpath(xpath)
 
     def xpath_pseudo_element(self, xpath, pseudo_element):
@@ -61,34 +58,36 @@ class TranslatorMixin(object):
         Dispatch method that transforms XPath to support pseudo-element
         """
         if isinstance(pseudo_element, FunctionalPseudoElement):
-            method = 'xpath_%s_functional_pseudo_element' % (
-                pseudo_element.name.replace('-', '_'))
+            method = "xpath_%s_functional_pseudo_element" % (
+                pseudo_element.name.replace("-", "_")
+            )
             method = _unicode_safe_getattr(self, method, None)
             if not method:
                 raise ExpressionError(
                     "The functional pseudo-element ::%s() is unknown"
-                    % pseudo_element.name)
+                    % pseudo_element.name
+                )
             xpath = method(xpath, pseudo_element)
         else:
-            method = 'xpath_%s_simple_pseudo_element' % (
-                pseudo_element.replace('-', '_'))
+            method = "xpath_%s_simple_pseudo_element" % (
+                pseudo_element.replace("-", "_")
+            )
             method = _unicode_safe_getattr(self, method, None)
             if not method:
                 raise ExpressionError(
-                    "The pseudo-element ::%s is unknown"
-                    % pseudo_element)
+                    "The pseudo-element ::%s is unknown" % pseudo_element
+                )
             xpath = method(xpath)
         return xpath
 
     def xpath_attr_functional_pseudo_element(self, xpath, function):
-        """Support selecting attribute values using ::attr() pseudo-element
-        """
-        if function.argument_types() not in (['STRING'], ['IDENT']):
+        """Support selecting attribute values using ::attr() pseudo-element"""
+        if function.argument_types() not in (["STRING"], ["IDENT"]):
             raise ExpressionError(
                 "Expected a single string or ident for ::attr(), got %r"
-                % function.arguments)
-        return XPathExpr.from_xpath(xpath,
-                                    attribute=function.arguments[0].value)
+                % function.arguments
+            )
+        return XPathExpr.from_xpath(xpath, attribute=function.arguments[0].value)
 
     def xpath_text_simple_pseudo_element(self, xpath):
         """Support selecting text nodes using ::text pseudo-element"""
@@ -97,14 +96,14 @@ class TranslatorMixin(object):
 
 class GenericTranslator(TranslatorMixin, OriginalGenericTranslator):
     @lru_cache(maxsize=256)
-    def css_to_xpath(self, css, prefix='descendant-or-self::'):
-        return super(GenericTranslator, self).css_to_xpath(css, prefix)
+    def css_to_xpath(self, css, prefix="descendant-or-self::"):
+        return super().css_to_xpath(css, prefix)
 
 
 class HTMLTranslator(TranslatorMixin, OriginalHTMLTranslator):
     @lru_cache(maxsize=256)
-    def css_to_xpath(self, css, prefix='descendant-or-self::'):
-        return super(HTMLTranslator, self).css_to_xpath(css, prefix)
+    def css_to_xpath(self, css, prefix="descendant-or-self::"):
+        return super().css_to_xpath(css, prefix)
 
 
 _translator = HTMLTranslator()
