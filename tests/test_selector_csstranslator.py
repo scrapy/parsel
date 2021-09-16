@@ -186,3 +186,8 @@ class CSSSelectorTest(unittest.TestCase):
             self.sel.css("div").css("area:last-child").extract(),
             ['<area shape="default" id="area-nohref">'],
         )
+
+class CSSSelectorTestBytes(CSSSelectorTest):
+
+    def setUp(self):
+        self.sel = self.sscls(text=bytes(HTMLBODY, encoding="utf8"))
