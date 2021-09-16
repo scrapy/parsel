@@ -246,6 +246,7 @@ class Selector:
         "_parser",
         "_csstranslator",
         "_tostring_method",
+        "encoding"
     ]
 
     _default_type: Optional[str] = None
@@ -264,7 +265,7 @@ class Selector:
 
     def __init__(
         self,
-        text: Optional[str] = None,
+        text: Union[str, bytes] = None,
         type: Optional[str] = None,
         namespaces: Optional[Mapping[str, str]] = None,
         root: Optional[Any] = None,
