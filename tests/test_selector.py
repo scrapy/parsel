@@ -2,7 +2,7 @@ import re
 import weakref
 import unittest
 import pickle
-from typing import Any
+from typing import Any, Optional, Mapping, Union
 
 from parsel import Selector, SelectorList
 from parsel.selector import (
@@ -1134,3 +1134,35 @@ class ExsltTestCase(unittest.TestCase):
             ).extract(),
             ["url", "name", "startDate", "location", "offers"],
         )
+
+
+class SelectorBytesInput(Selector):
+    def __init__(
+            self,
+            text: Union[str, bytes] = None,
+            type: Optional[str] = None,
+            namespaces: Optional[Mapping[str, str]] = None,
+            root: Optional[Any] = None,
+            base_url: Optional[str] = None,
+            _expr: Optional[str] = None,
+            encoding: Optional[str] = "utf8"
+    ) -> None:
+        if isinstance(text, str):
+            text = bytes(text, encoding=encoding)
+        super().__init__(
+            text=text,  # all text converted to bytes
+            type=type,
+            namespaces=namespaces,
+            root=root,
+            base_url=base_url,
+            _expr=_expr,
+            encoding=encoding
+        )
+
+
+class SelectorTestCaseBytes(SelectorTestCase):
+    sscls = SelectorBytesInput
+
+
+class ExsltTestCaseBytes(ExsltTestCase):
+    sscls = SelectorBytesInput
