@@ -221,9 +221,9 @@ class SelectorTestCase(unittest.TestCase):
     def test_check_text_argument_type(self) -> None:
         self.assertRaisesRegex(
             TypeError,
-            "text argument should be of type",
+            "text argument should be of type str or bytes",
             self.sscls,
-            b"<html/>",
+            1,
         )
 
     def test_extract_first(self) -> None:
