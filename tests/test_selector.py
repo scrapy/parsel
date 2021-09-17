@@ -195,7 +195,7 @@ class SelectorTestCase(unittest.TestCase):
             [e.attrib for e in sel.css("li")],
         )
 
-    @unittest.skipIf(type(sscls) != 'Selector' ,"repr of Selector subclass will be different")
+    @unittest.skipIf(type(sscls) != 'Selector', "repr of Selector subclass will be different")
     def test_representation_slice(self) -> None:
         body = "<p><input name='{}' value='\xa9'/></p>".format(50 * "b")
         sel = self.sscls(text=body)

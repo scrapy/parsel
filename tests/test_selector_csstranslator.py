@@ -187,6 +187,7 @@ class CSSSelectorTest(unittest.TestCase):
             ['<area shape="default" id="area-nohref">'],
         )
 
+
 class CSSSelectorTestBytes(CSSSelectorTest):
 
     def setUp(self):
