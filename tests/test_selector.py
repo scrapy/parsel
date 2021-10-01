@@ -1138,14 +1138,14 @@ class ExsltTestCase(unittest.TestCase):
 
 class SelectorBytesInput(Selector):
     def __init__(
-            self,
-            text: Union[str, bytes] = None,
-            type: Optional[str] = None,
-            namespaces: Optional[Mapping[str, str]] = None,
-            root: Optional[Any] = None,
-            base_url: Optional[str] = None,
-            _expr: Optional[str] = None,
-            encoding: Optional[str] = "utf8"
+        self,
+        text: Union[str, bytes] = None,
+        type: Optional[str] = None,
+        namespaces: Optional[Mapping[str, str]] = None,
+        root: Optional[Any] = None,
+        base_url: Optional[str] = None,
+        _expr: Optional[str] = None,
+        encoding: Optional[str] = "utf8",
     ) -> None:
         if isinstance(text, str):
             text = bytes(text, encoding=encoding)
@@ -1156,16 +1156,21 @@ class SelectorBytesInput(Selector):
             root=root,
             base_url=base_url,
             _expr=_expr,
-            encoding=encoding
+            encoding=encoding,
         )
 
 
 class SelectorTestCaseBytes(SelectorTestCase):
     sscls = SelectorBytesInput
 
-    def test_representation_slice(self) -> None: pass
-    def test_representation_unicode_query(self) -> None: pass
-    def test_weakref_slots(self) -> None: pass
+    def test_representation_slice(self) -> None:
+        pass
+
+    def test_representation_unicode_query(self) -> None:
+        pass
+
+    def test_weakref_slots(self) -> None:
+        pass
 
 
 class ExsltTestCaseBytes(ExsltTestCase):

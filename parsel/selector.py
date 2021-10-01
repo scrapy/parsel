@@ -246,7 +246,7 @@ class Selector:
         "_parser",
         "_csstranslator",
         "_tostring_method",
-        "encoding"
+        "encoding",
     ]
 
     _default_type: Optional[str] = None
@@ -271,7 +271,7 @@ class Selector:
         root: Optional[Any] = None,
         base_url: Optional[str] = None,
         _expr: Optional[str] = None,
-        encoding: Optional[str] = "utf8"
+        encoding: Optional[str] = "utf8",
     ) -> None:
         self.type = st = _st(type or self._default_type)
         self._parser = _ctgroup[st]["_parser"]
@@ -282,7 +282,9 @@ class Selector:
             if isinstance(text, (bytes, str)):
                 root = self._get_root(text, base_url, encoding=encoding)
             else:
-                msg = "text argument should be of type str or bytes, got %s" % (text.__class__)
+                msg = "text argument should be of type str or bytes, got %s" % (
+                    text.__class__
+                )
                 raise TypeError(msg)
         elif root is None:
             raise ValueError("Selector needs either text or root argument")
@@ -296,8 +298,15 @@ class Selector:
     def __getstate__(self) -> Any:
         raise TypeError("can't pickle Selector objects")
 
-    def _get_root(self, text: str, base_url: Optional[str] = None, encoding: Optional[str] = "utf8") -> Any:
-        return create_root_node(text, self._parser, base_url=base_url, encoding=encoding)
+    def _get_root(
+        self,
+        text: str,
+        base_url: Optional[str] = None,
+        encoding: Optional[str] = "utf8",
+    ) -> Any:
+        return create_root_node(
+            text, self._parser, base_url=base_url, encoding=encoding
+        )
 
     def xpath(
         self: _SelectorType,

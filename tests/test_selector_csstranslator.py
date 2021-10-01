@@ -189,6 +189,5 @@ class CSSSelectorTest(unittest.TestCase):
 
 
 class CSSSelectorTestBytes(CSSSelectorTest):
-
     def setUp(self):
         self.sel = self.sscls(text=bytes(HTMLBODY, encoding="utf8"))
