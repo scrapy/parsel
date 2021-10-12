@@ -4,7 +4,6 @@ sphinx:
   configuration: docs/conf.py
   fail_on_warning: true
 build:
-  image: latest
   os: ubuntu-20.04
   tools:
     # For available versions, see:
