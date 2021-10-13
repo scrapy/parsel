@@ -805,9 +805,9 @@ class SelectorTestCase(unittest.TestCase):
         """Check that classes are using slots and are weak-referenceable"""
         x = self.sscls(text="")
         weakref.ref(x)
-        assert not hasattr(x, "__dict__"), (
-            f"{x.__class__.__name__} does not use __slots__"
-        )
+        assert not hasattr(
+            x, "__dict__"
+        ), f"{x.__class__.__name__} does not use __slots__"
 
     def test_remove_namespaces(self) -> None:
         xml = """<?xml version="1.0" encoding="UTF-8"?>
