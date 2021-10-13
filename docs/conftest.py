@@ -11,7 +11,7 @@ from parsel import Selector
 
 def load_selector(filename, **kwargs):
     input_path = os.path.join(os.path.dirname(__file__), '_static', filename)
-    with open(input_path) as input_file:
+    with open(input_path, encoding="utf-8") as input_file:
         return Selector(text=input_file.read(), **kwargs)
 
 

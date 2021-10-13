@@ -3,10 +3,10 @@
 from setuptools import setup, __version__ as setuptools_version
 
 
-with open("README.rst") as readme_file:
+with open("README.rst", encoding="utf-8") as readme_file:
     readme = readme_file.read()
 
-with open("NEWS") as history_file:
+with open("NEWS", encoding="utf-8") as history_file:
     history = history_file.read().replace(".. :changelog:", "")
 
 setup(
