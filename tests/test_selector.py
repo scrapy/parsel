@@ -825,3 +825,22 @@ class ExsltTestCase(unittest.TestCase):
                                //div[@itemtype="http://schema.org/Event"]
                                     //*[@itemscope]/*/@itemprop)''').extract(),
                          [u'url', u'name', u'startDate', u'location', u'offers'])
+
+
+class SelectorTextTestCase(unittest.TestCase):
+
+    sscls = Selector
+
+    def test_text_get(self):
+        sel = self.sscls(text=u'<p>title:</h1>some text</h1></p>')
+        txt = sel.get(text=True)
+        self.assertEqual(txt, 'title:some text')
+    
+    def test_text_getall(self):
+        sel = self.sscls(text=u'<ul><li>option1</li><li>option2</li></ul>').getall(text=True)
+        self.assertEqual(1, len(sel))
+        self.assertEqual('option1\noption2', sel[0])
+    
+    def test_text_cleaned_get(self):
+        sel = self.sscls(text=u'<p>paragraph</p><style>.items</style>').cleaned().get(text=True)
+        self.assertEqual('paragraph', sel)
