@@ -47,7 +47,7 @@ def _st(st: Optional[str]) -> str:
     elif st in _ctgroup:
         return st
     else:
-        raise ValueError("Invalid type: %s" % st)
+        raise ValueError(f"Invalid type: {st}")
 
 
 def create_root_node(text, parser_cls, base_url=None, encoding="utf8"):
@@ -282,9 +282,7 @@ class Selector:
             if isinstance(text, (bytes, str)):
                 root = self._get_root(text, base_url, encoding=encoding)
             else:
-                msg = "text argument should be of type str or bytes, got %s" % (
-                    text.__class__
-                )
+                msg = f"text argument should be of type str or bytes, got {text.__class__}"
                 raise TypeError(msg)
         elif root is None:
             raise ValueError("Selector needs either text or root argument")

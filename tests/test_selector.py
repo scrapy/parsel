@@ -196,19 +196,17 @@ class SelectorTestCase(unittest.TestCase):
         )
 
     def test_representation_slice(self) -> None:
-        body = "<p><input name='{}' value='\xa9'/></p>".format(50 * "b")
+        body = f"<p><input name='{50 * 'b'}' value='\xa9'/></p>"
         sel = self.sscls(text=body)
 
-        representation = "<Selector xpath='//input/@name' data='{}...'>".format(
-            37 * "b"
-        )
+        representation = f"<Selector xpath='//input/@name' data='{37 * 'b'}...'>"
 
         self.assertEqual(
             [repr(it) for it in sel.xpath("//input/@name")], [representation]
         )
 
     def test_representation_unicode_query(self) -> None:
-        body = "<p><input name='{}' value='\xa9'/></p>".format(50 * "b")
+        body = f"<p><input name='{50 * 'b'}' value='\xa9'/></p>"
 
         representation = "<Selector xpath='//input[@value=\"©\"]/@value' data='©'>"
 
@@ -807,9 +805,9 @@ class SelectorTestCase(unittest.TestCase):
         """Check that classes are using slots and are weak-referenceable"""
         x = self.sscls(text="")
         weakref.ref(x)
-        assert not hasattr(x, "__dict__"), (
-            "%s does not use __slots__" % x.__class__.__name__
-        )
+        assert not hasattr(
+            x, "__dict__"
+        ), f"{x.__class__.__name__} does not use __slots__"
 
     def test_remove_namespaces(self) -> None:
         xml = """<?xml version="1.0" encoding="UTF-8"?>
