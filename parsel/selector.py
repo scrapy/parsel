@@ -41,9 +41,12 @@ _ctgroup = {
 }
 
 
-def _st(st: Optional[str]) -> str:
+def _st(st: Optional[str], text) -> str:
     if st is None:
-        return "html"
+        if("<html>" in text and "</html>" in text):
+            return "html"
+        else:
+            return "xml"
     elif st in _ctgroup:
         return st
     else:
@@ -267,7 +270,7 @@ class Selector:
         base_url: Optional[str] = None,
         _expr: Optional[str] = None,
     ) -> None:
-        self.type = st = _st(type or self._default_type)
+        self.type = st = _st(type or self._default_type, text)
         self._parser = _ctgroup[st]["_parser"]
         self._csstranslator = _ctgroup[st]["_csstranslator"]
         self._tostring_method = _ctgroup[st]["_tostring_method"]
