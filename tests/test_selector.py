@@ -1129,7 +1129,7 @@ class ExsltTestCase(unittest.TestCase):
                                     //@itemprop,
                                //div[@itemtype="http://schema.org/Event"]
 
-                                    //*[@itemscope]/*/@itemprop)''').extract(),
+                                    //*[@itemscope]/*/@itemprop)""").extract(),
                          [u'url', u'name', u'startDate', u'location', u'offers'])
 
 
@@ -1188,11 +1188,3 @@ class SelectorTextTestCase(unittest.TestCase):
         html = self.sscls(text=self.html_body)
         self.assertEqual(1, 1)
         self.assertEqual(html.xpath('//div[@class="product"]/span').getall(text=True), [u'Price: 100', u'Price: 200'])
-
-
-
-                                    //*[@itemscope]/*/@itemprop)"""
-            ).extract(),
-            ["url", "name", "startDate", "location", "offers"],
-        )
-
