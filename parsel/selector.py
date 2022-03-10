@@ -595,7 +595,7 @@ class Selector:
         return dict(self.root.attrib)
 
     def cleaned(
-        self: _SelectorType, cleaner: Union[str, Cleaner] = "auto"
+        self: _SelectorType, cleaner: Union[str, Cleaner] = "html"
     ) -> _SelectorType:
         """
         Return a copy of a Selector, with underlying subtree cleaned.
