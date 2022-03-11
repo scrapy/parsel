@@ -1152,40 +1152,40 @@ class SelectorTextTestCase(unittest.TestCase):
             '''
 
     def test_text_get(self):
-        sel = self.sscls(text=u'<p>title:</h1>some text</h1></p>')
+        sel = self.sscls(text='<p>title:</h1>some text</h1></p>')
         txt = sel.get(text=True)
         self.assertEqual(txt, 'title:some text')
 
     def test_text_getall(self):
-        sel = self.sscls(text=u'<ul><li>option1</li><li>option2</li></ul>').getall(text=True)
+        sel = self.sscls(text='<ul><li>option1</li><li>option2</li></ul>').getall(text=True)
         self.assertEqual(1, len(sel))
         self.assertEqual('option1\noption2', sel[0])
 
     def test_text_cleaned_get(self):
-        sel = self.sscls(text=u'<p>paragraph</p><style>.items</style>').cleaned('html').get(text=True)
+        sel = self.sscls(text='<p>paragraph</p><style>.items</style>').cleaned('html').get(text=True)
         self.assertEqual('paragraph', sel)
 
     def test_text_get_guess_punct_space_false(self):
-        sel = self.sscls(text=u'<p>hello<b>"Folks"</b></p>')
+        sel = self.sscls(text='<p>hello<b>"Folks"</b></p>')
         txt = sel.get(text=True, guess_punct_space=False)
         self.assertEqual(txt, 'hello "Folks"')
 
     def test_text_get_guess_layout_false(self):
-        sel = self.sscls(text=u'<ul><li>option1</li><li>option2</li></ul>')
+        sel = self.sscls(text='<ul><li>option1</li><li>option2</li></ul>')
         txt = sel.get(text=True, guess_layout=False)
         self.assertEqual(txt, 'option1 option2')
 
     def test_text_get_guess_layout_true(self):
-        sel = self.sscls(text=u'<ul><li>option1</li><li>option2</li></ul>')
+        sel = self.sscls(text='<ul><li>option1</li><li>option2</li></ul>')
         txt = sel.get(text=True, guess_layout=True)
         self.assertEqual(txt, 'option1\noption2')
 
     def test_text_css_multiple(self):
         html = self.sscls(text=self.html_body)
         items = html.css('.product .price').getall(text=True)
-        self.assertEqual(items, [u'Price: 100', u'Price: 200'])
+        self.assertEqual(items, ['Price: 100', 'Price: 200'])
 
     def test_text_xpath_get(self):
         html = self.sscls(text=self.html_body)
         self.assertEqual(1, 1)
-        self.assertEqual(html.xpath('//div[@class="product"]/span').getall(text=True), [u'Price: 100', u'Price: 200'])
+        self.assertEqual(html.xpath('//div[@class="product"]/span').getall(text=True), ['Price: 100', 'Price: 200'])
