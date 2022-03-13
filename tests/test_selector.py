@@ -1006,6 +1006,67 @@ class SelectorTestCase(unittest.TestCase):
         sel.css("body").remove()
         self.assertEqual(sel.get(), "<html></html>")
 
+    def test_jsonpath_selectors(self) -> None:
+
+        json_data = """{
+        "store": {
+            "book": [
+            {
+                "category": "reference",
+                "author": "Nigel Rees",
+                "title": "Sayings of the Century",
+                "price": 8.95
+            },
+            {
+                "category": "fiction",
+                "author": "Herman Melville",
+                "title": "Moby Dick",
+                "isbn": "0-553-21311-3",
+                "price": 8.99
+            },
+            {
+                "category": "fiction",
+                "author": "J.R.R. Tolkien",
+                "title": "The Lord of the Rings",
+                "isbn": "0-395-19395-8",
+                "price": 22.99
+            }
+            ],
+            "bicycle": {
+            "color": "red",
+            "price": 19.95
+            }
+        },
+        "expensive": 10
+        }"""
+
+        sel = self.sscls(text=json_data, type="json")
+        sel_list = sel.jsonpath("$..author")
+
+        self.assertIsSelector(sel)
+        self.assertIsSelectorList(sel_list)
+        self.assertEqual(
+            sel_list.getall(), ['"Nigel Rees"', '"Herman Melville"', '"J.R.R. Tolkien"']
+        )
+
+        sel_list = sel.jsonpath("$..bicycle")
+
+        self.assertIsSelectorList(sel_list)
+        self.assertEqual(sel_list.getall(), ['{"color": "red", "price": 19.95}'])
+
+        inner_lst = sel_list[0].jsonpath("$..color")
+
+        self.assertIsSelectorList(inner_lst)
+        self.assertEqual(inner_lst.getall(), ['"red"'])
+
+        sel_list = sel.jsonpath("$..book[*].title")
+
+        self.assertIsSelectorList(sel_list)
+        self.assertEqual(
+            sel_list.getall(),
+            ['"Sayings of the Century"', '"Moby Dick"', '"The Lord of the Rings"'],
+        )
+
 
 class ExsltTestCase(unittest.TestCase):
 
