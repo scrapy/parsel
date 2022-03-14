@@ -1,4 +1,5 @@
 [MASTER]
+ignore=tests/typing
 persistent=no
 
 [MESSAGES CONTROL]
@@ -19,12 +20,12 @@ disable=bad-continuation,
         parse-error,
         raise-missing-from,
         redefined-builtin,
-        super-with-arguments,  # Required for Python 2 support
         too-few-public-methods,
         too-many-arguments,
+        too-many-lines,
         too-many-public-methods,
         unidiomatic-typecheck,
         unused-argument,
-        useless-object-inheritance,  # Required for Python 2 support
+        use-a-generator,
         wrong-import-order,
         wrong-import-position,
