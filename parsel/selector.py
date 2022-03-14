@@ -355,7 +355,7 @@ class Selector:
         """
         if self.type == "json":
             data = self.root
-        elif isinstance(self.root, six.string_types):
+        elif isinstance(self.root, str):
             data = _load_json_or_none(self.root)
         elif self.root.text is None:
             data = _load_json_or_none(self._text)
@@ -368,7 +368,7 @@ class Selector:
             result = [result]
 
         def make_selector(x):  # closure function
-            if isinstance(x, six.text_type):
+            if isinstance(x, str):
                 return self.__class__(text=x, _expr=query, type=type or "text")
             else:
                 return self.__class__(root=x, _expr=query, type=type)
