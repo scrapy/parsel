@@ -402,9 +402,7 @@ class Selector:
         if self.type == "text":
             self._load_lxml_root(self.root, type="html")
         elif self.type not in ("html", "xml"):
-            raise ValueError(
-                f"Cannot use xpath on a Selector of type {self.type!r}"
-            )
+            raise ValueError(f"Cannot use xpath on a Selector of type {self.type!r}")
         try:
             xpathev = self.root.xpath
         except AttributeError:
@@ -445,9 +443,7 @@ class Selector:
         if self.type == "text":
             self._load_lxml_root(self.root, type="html")
         elif self.type not in ("html", "xml"):
-            raise ValueError(
-                f"Cannot use css on a Selector of type {self.type!r}"
-            )
+            raise ValueError(f"Cannot use css on a Selector of type {self.type!r}")
         return self.xpath(self._css2xpath(query))
 
     def _css2xpath(self, query: str) -> Any:
