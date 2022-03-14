@@ -1010,48 +1010,48 @@ class SelectorTestCase(unittest.TestCase):
 
     def test_invalid_type(self):
         with self.assertRaises(ValueError):
-            self.sscls(u'', type='xhtml')
+            self.sscls("", type="xhtml")
 
     def test_default_type(self):
-        text = u'foo'
+        text = "foo"
         selector = self.sscls(text)
-        self.assertEqual(selector.type, 'html')
+        self.assertEqual(selector.type, "html")
 
     def test_json_type(self):
         obj = 1
-        selector = self.sscls(six.text_type(obj), type='json')
+        selector = self.sscls(six.text_type(obj), type="json")
         self.assertEqual(selector.root, obj)
-        self.assertEqual(selector.type, 'json')
+        self.assertEqual(selector.type, "json")
 
     def test_html_root(self):
-        root = lxml.etree.fromstring('<html/>')
+        root = lxml.etree.fromstring("<html/>")
         selector = self.sscls(root=root)
         self.assertEqual(selector.root, root)
-        self.assertEqual(selector.type, 'html')
+        self.assertEqual(selector.type, "html")
 
     def test_json_root(self):
         obj = 1
         selector = self.sscls(root=obj)
         self.assertEqual(selector.root, obj)
-        self.assertEqual(selector.type, 'json')
+        self.assertEqual(selector.type, "json")
 
     def test_json_xpath(self):
         obj = 1
         selector = self.sscls(root=obj)
         with self.assertRaises(ValueError):
-            selector.xpath('//*')
+            selector.xpath("//*")
 
     def test_json_css(self):
         obj = 1
         selector = self.sscls(root=obj)
         with self.assertRaises(ValueError):
-            selector.css('*')
+            selector.css("*")
 
     def test_invalid_json(self):
-        text = u'<html/>'
-        selector = self.sscls(text, type='json')
+        text = "<html/>"
+        selector = self.sscls(text, type="json")
         self.assertEqual(selector.root, None)
-        self.assertEqual(selector.type, 'json')
+        self.assertEqual(selector.type, "json")
 
 
 class ExsltTestCase(unittest.TestCase):

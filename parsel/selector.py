@@ -284,23 +284,22 @@ class Selector:
         base_url: Optional[str] = None,
         _expr: Optional[str] = None,
     ) -> None:
-        if type not in ('html', 'json', 'text', 'xml', None):
-            raise ValueError('Invalid type: %s' % type)
+        if type not in ("html", "json", "text", "xml", None):
+            raise ValueError(f"Invalid type: {type}")
 
         self._text = text
 
         if text is None and root is _NOTSET:
             raise ValueError("Selector needs either text or root argument")
 
-        if text is not None and not isinstance(text, six.text_type):
-            msg = "text argument should be of type %s, got %s" % (
-                six.text_type, text.__class__)
+        if text is not None and not isinstance(text, str):
+            msg = f"text argument should be of type str, got {text.__class__}"
             raise TypeError(msg)
 
         if text is not None:
-            if type in ('html', 'xml', None):
-                self._load_lxml_root(text, type=type or 'html', base_url=base_url)
-            elif type == 'json':
+            if type in ("html", "xml", None):
+                self._load_lxml_root(text, type=type or "html", base_url=base_url)
+            elif type == "json":
                 self.root = _load_json_or_none(text)
                 self.type = type
             else:
@@ -309,8 +308,8 @@ class Selector:
         else:
             self.root = root
             if type is None and isinstance(self.root, etree._Element):
-                type = 'html'
-            self.type = type or 'json'
+                type = "html"
+            self.type = type or "json"
 
         self._expr = _expr
         self.namespaces = dict(self._default_namespaces)
@@ -354,7 +353,7 @@ class Selector:
 
             selector.jmespath('author.name', options=jmespath.Options(dict_cls=collections.OrderedDict))
         """
-        if self.type == 'json':
+        if self.type == "json":
             data = self.root
         elif isinstance(self.root, six.string_types):
             data = _load_json_or_none(self.root)
@@ -370,7 +369,7 @@ class Selector:
 
         def make_selector(x):  # closure function
             if isinstance(x, six.text_type):
-                return self.__class__(text=x, _expr=query, type=type or 'text')
+                return self.__class__(text=x, _expr=query, type=type or "text")
             else:
                 return self.__class__(root=x, _expr=query, type=type)
 
@@ -400,11 +399,12 @@ class Selector:
 
             selector.xpath('//a[href=$url]', url="http://www.example.com")
         """
-        if self.type == 'text':
-            self._load_lxml_root(self.root, type='html')
-        elif self.type not in ('html', 'xml'):
-            raise ValueError('Cannot use xpath on a Selector of type {}'
-                             .format(repr(self.type)))
+        if self.type == "text":
+            self._load_lxml_root(self.root, type="html")
+        elif self.type not in ("html", "xml"):
+            raise ValueError(
+                "Cannot use xpath on a Selector of type {}".format(repr(self.type))
+            )
         try:
             xpathev = self.root.xpath
         except AttributeError:
@@ -442,11 +442,12 @@ class Selector:
 
         .. _cssselect: https://pypi.python.org/pypi/cssselect/
         """
-        if self.type == 'text':
-            self._load_lxml_root(self.root, type='html')
-        elif self.type not in ('html', 'xml'):
-            raise ValueError('Cannot use css on a Selector of type {}'
-                             .format(repr(self.type)))
+        if self.type == "text":
+            self._load_lxml_root(self.root, type="html")
+        elif self.type not in ("html", "xml"):
+            raise ValueError(
+                "Cannot use css on a Selector of type {}".format(repr(self.type))
+            )
         return self.xpath(self._css2xpath(query))
 
     def _css2xpath(self, query: str) -> Any:
@@ -512,7 +513,7 @@ class Selector:
         Serialize and return the matched nodes in a single string.
         Percent encoded content is unquoted.
         """
-        if self.type in ('text', 'json'):
+        if self.type in ("text", "json"):
             return self.root
         try:
             return etree.tostring(
@@ -601,9 +602,7 @@ class Selector:
 
     def __str__(self) -> str:
         data = repr(shorten(self.get(), width=40))
-        expr_field = 'jmespath' if self.type == 'json' else 'xpath'
-        return (
-            f"<{type(self).__name__} {expr_field}={self._expr!r} data={data}>"
-        )
+        expr_field = "jmespath" if self.type == "json" else "xpath"
+        return f"<{type(self).__name__} {expr_field}={self._expr!r} data={data}>"
 
     __repr__ = __str__
