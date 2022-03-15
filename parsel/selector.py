@@ -130,7 +130,7 @@ class SelectorList(List[_SelectorType]):
         Call the ``.jsonpath`` method for each element in the list and return
         their results flattened as  another :class:`SelectorList`.
 
-        ``query is the same argument as the one in :meth:`Selector.jsonpath`
+        ``query`` is the same argument as the one in :meth:`Selector.jsonpath`
         """
         return self.__class__(flatten([x.jsonpath(query) for x in self]))
 
@@ -582,6 +582,6 @@ class Selector:
     def __str__(self) -> str:
         data = repr(shorten(self.get(), width=40))
         expr_field = "jsonpath" if self.type == "json" else "xpath"
-        return f"<{type(self).__name__} {expr_field}={self._expr} data={data}>"
+        return f"<{type(self).__name__} {expr_field}={self._expr!r} data={data}>"
 
     __repr__ = __str__
