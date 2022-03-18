@@ -6,6 +6,7 @@ import typing
 from typing import Any, Dict, List, Optional, Mapping, Pattern, Union
 
 from lxml import etree, html
+from lxml.html import html5parser
 
 from .utils import flatten, iflatten, extract_regex, shorten
 from .csstranslator import HTMLTranslator, GenericTranslator
@@ -38,6 +39,10 @@ _ctgroup = {
         "_csstranslator": GenericTranslator(),
         "_tostring_method": "xml",
     },
+    'html5': {'_parser': html5parser.HTMLParser,
+              '_csstranslator': HTMLTranslator(),
+              '_tostring_method': 'html',
+    },
 }
 
 
@@ -55,6 +60,13 @@ def create_root_node(text, parser_cls, base_url=None):
     body = text.strip().replace("\x00", "").encode("utf8") or b"<html/>"
     parser = parser_cls(recover=True, encoding="utf8")
     root = etree.fromstring(body, parser=parser, base_url=base_url)
+    if parser == html5parser.HTMLParser:
+        try:
+            root = parser.parse(body, useChardet=False, override_encoding='utf8').getroot()
+        except ValueError:
+            raise TypeError('HTML5parser does not support control characters')
+    else:
+        root = etree.fromstring(body, parser=parser, base_url=base_url)
     if root is None:
         root = etree.fromstring(b"<html/>", parser=parser, base_url=base_url)
     return root
@@ -225,7 +237,7 @@ class Selector:
 
     ``text`` is a `str`` object
 
-    ``type`` defines the selector type, it can be ``"html"``, ``"xml"`` or ``None`` (default).
+    ``type`` defines the selector type, it can be ``"html"``, ``"xml"``, ``"html5"`` or ``None`` (default).
     If ``type`` is ``None``, the selector defaults to ``"html"``.
 
     ``base_url`` allows setting a URL for the document. This is needed when looking up external entities with relative paths.
