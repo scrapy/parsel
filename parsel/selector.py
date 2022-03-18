@@ -7,6 +7,7 @@ from typing import Any, Dict, List, Optional, Mapping, Pattern, Union
 
 from lxml import etree, html
 from lxml.html import html5parser
+from lxml.html.html5parser import document_fromstring
 
 from .utils import flatten, iflatten, extract_regex, shorten
 from .csstranslator import HTMLTranslator, GenericTranslator
@@ -71,6 +72,10 @@ def create_root_node(text, parser_cls, base_url=None):
         root = etree.fromstring(b"<html/>", parser=parser, base_url=base_url)
     return root
 
+def selector_for_html5(response):
+  root = document_fromstring(response.text)
+  selector = Selector(response, type='html', root=root)
+  return selector
 
 class SelectorList(List[_SelectorType]):
     """
