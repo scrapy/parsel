@@ -53,7 +53,10 @@ class TranslatorTestMixin:
         cases = [
             ("::attr(name)", "descendant-or-self::*/@name"),
             ("a::attr(href)", "descendant-or-self::a/@href"),
-            ("a ::attr(img)", "descendant-or-self::a/descendant-or-self::*/@img"),
+            (
+                "a ::attr(img)",
+                "descendant-or-self::a/descendant-or-self::*/@img",
+            ),
             ("a > ::attr(class)", "descendant-or-self::a/*/@class"),
         ]
         for css, xpath in cases:
@@ -149,7 +152,9 @@ class CSSSelectorTest(unittest.TestCase):
         self.sel = self.sscls(text=HTMLBODY)
 
     def x(self, *a, **kw):
-        return [v.strip() for v in self.sel.css(*a, **kw).extract() if v.strip()]
+        return [
+            v.strip() for v in self.sel.css(*a, **kw).extract() if v.strip()
+        ]
 
     def test_selector_simple(self):
         for x in self.sel.css("input"):
@@ -165,10 +170,13 @@ class CSSSelectorTest(unittest.TestCase):
         self.assertEqual(self.x("#p-b2 ::text"), ["guy"])
         self.assertEqual(self.x("#paragraph::text"), ["lorem ipsum text"])
         self.assertEqual(
-            self.x("#paragraph ::text"), ["lorem ipsum text", "hi", "there", "guy"]
+            self.x("#paragraph ::text"),
+            ["lorem ipsum text", "hi", "there", "guy"],
         )
         self.assertEqual(self.x("p::text"), ["lorem ipsum text"])
-        self.assertEqual(self.x("p ::text"), ["lorem ipsum text", "hi", "there", "guy"])
+        self.assertEqual(
+            self.x("p ::text"), ["lorem ipsum text", "hi", "there", "guy"]
+        )
 
     def test_attribute_function(self):
         self.assertEqual(self.x("#p-b2::attr(id)"), ["p-b2"])
@@ -181,7 +189,9 @@ class CSSSelectorTest(unittest.TestCase):
         )
 
     def test_nested_selector(self):
-        self.assertEqual(self.sel.css("p").css("b::text").extract(), ["hi", "guy"])
+        self.assertEqual(
+            self.sel.css("p").css("b::text").extract(), ["hi", "guy"]
+        )
         self.assertEqual(
             self.sel.css("div").css("area:last-child").extract(),
             ['<area shape="default" id="area-nohref">'],

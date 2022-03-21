@@ -14,7 +14,9 @@ class XPathExpr(OriginalXPathExpr):
 
     @classmethod
     def from_xpath(cls, xpath, textnode=False, attribute=None):
-        x = cls(path=xpath.path, element=xpath.element, condition=xpath.condition)
+        x = cls(
+            path=xpath.path, element=xpath.element, condition=xpath.condition
+        )
         x.textnode = textnode
         x.attribute = attribute
         return x
@@ -81,7 +83,9 @@ class TranslatorMixin:
             raise ExpressionError(
                 f"Expected a single string or ident for ::attr(), got {function.arguments!r}"
             )
-        return XPathExpr.from_xpath(xpath, attribute=function.arguments[0].value)
+        return XPathExpr.from_xpath(
+            xpath, attribute=function.arguments[0].value
+        )
 
     def xpath_text_simple_pseudo_element(self, xpath):
         """Support selecting text nodes using ::text pseudo-element"""

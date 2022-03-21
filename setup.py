@@ -24,7 +24,12 @@ setup(
         "parsel": "parsel",
     },
     include_package_data=True,
-    install_requires=["cssselect>=0.9", "lxml", "w3lib>=1.19.0", "jsonpath_ng>=1.5.3"],
+    install_requires=[
+        "cssselect>=0.9",
+        "lxml",
+        "w3lib>=1.19.0",
+        "jsonpath_ng>=1.5.3",
+    ],
     python_requires=">=3.6",
     license="BSD",
     zip_safe=False,

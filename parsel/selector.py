@@ -99,7 +99,9 @@ class SelectorList(List[_SelectorType]):
             selector.xpath('//a[href=$url]', url="http://www.example.com")
         """
         return self.__class__(
-            flatten([x.xpath(xpath, namespaces=namespaces, **kwargs) for x in self])
+            flatten(
+                [x.xpath(xpath, namespaces=namespaces, **kwargs) for x in self]
+            )
         )
 
     def css(self, query: str) -> "SelectorList[_SelectorType]":
@@ -123,7 +125,9 @@ class SelectorList(List[_SelectorType]):
         Passing ``replace_entities`` as ``False`` switches off these
         replacements.
         """
-        return flatten([x.re(regex, replace_entities=replace_entities) for x in self])
+        return flatten(
+            [x.re(regex, replace_entities=replace_entities) for x in self]
+        )
 
     def jsonpath(self, query: str) -> "SelectorList[_SelectorType]":
         """
@@ -290,7 +294,9 @@ class Selector:
 
         if text is not None:
             if type in ("html", "xml", None):
-                self._load_lxml_root(text, type=type or "html", base_url=base_url)
+                self._load_lxml_root(
+                    text, type=type or "html", base_url=base_url
+                )
             elif type == "json":
                 self.root = _load_json_or_none(text)
                 self.type = type
@@ -362,7 +368,10 @@ class Selector:
             nsp.update(namespaces)
         try:
             result = xpathev(
-                query, namespaces=nsp, smart_strings=self._lxml_smart_strings, **kwargs
+                query,
+                namespaces=nsp,
+                smart_strings=self._lxml_smart_strings,
+                **kwargs,
             )
         except etree.XPathError as exc:
             raise ValueError(f"XPath error: {exc} in {query}")
@@ -392,7 +401,9 @@ class Selector:
         if self.type == "text":
             self._load_lxml_root(self.root, type="html")
         elif self.type not in ("html", "xml"):
-            raise ValueError(f"Cannot use css on a Selector of type {repr(self.type)}")
+            raise ValueError(
+                f"Cannot use css on a Selector of type {repr(self.type)}"
+            )
         return self.xpath(self._css2xpath(query))
 
     def jsonpath(
@@ -408,22 +419,14 @@ class Selector:
             data = self.root
         elif isinstance(self.root, str):
             data = _load_json_or_none(self.root)
-        else:
-            data = _load_json_or_none(self._text)
 
         jsonpath_expr = jsonpathParser(query)
-        result = [json.dumps(match.value) for match in jsonpath_expr.find(data)]
-
-        if result is None:
-            result = []
-        elif not isinstance(result, list):
-            result = [result]
+        result = [
+            json.dumps(match.value) for match in jsonpath_expr.find(data)
+        ]
 
         def make_selector(x):
-            if isinstance(x, str):
-                return self.__class__(text=x, _expr=query, type=type or "text")
-            else:
-                return self.__class__(root=x, _expr=query, type=type)
+            return self.__class__(text=x, _expr=query, type=type or "text")
 
         result = [make_selector(x) for x in result]
         return self.selectorlist_cls(result)
@@ -446,7 +449,9 @@ class Selector:
         Passing ``replace_entities`` as ``False`` switches off these
         replacements.
         """
-        return extract_regex(regex, self.get(), replace_entities=replace_entities)
+        return extract_regex(
+            regex, self.get(), replace_entities=replace_entities
+        )
 
     @typing.overload
     def re_first(
@@ -483,7 +488,8 @@ class Selector:
         replacements.
         """
         return next(
-            iflatten(self.re(regex, replace_entities=replace_entities)), default
+            iflatten(self.re(regex, replace_entities=replace_entities)),
+            default,
         )
 
     def get(self) -> str:
@@ -582,6 +588,8 @@ class Selector:
     def __str__(self) -> str:
         data = repr(shorten(self.get(), width=40))
         expr_field = "jsonpath" if self.type == "json" else "xpath"
-        return f"<{type(self).__name__} {expr_field}={self._expr!r} data={data}>"
+        return (
+            f"<{type(self).__name__} {expr_field}={self._expr!r} data={data}>"
+        )
 
     __repr__ = __str__

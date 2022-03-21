@@ -6,7 +6,9 @@ from sybil import Sybil
 try:
     from sybil.parsers.codeblock import PythonCodeBlockParser
 except ImportError:
-    from sybil.parsers.codeblock import CodeBlockParser as PythonCodeBlockParser
+    from sybil.parsers.codeblock import (
+        CodeBlockParser as PythonCodeBlockParser,
+    )
 from sybil.parsers.doctest import DocTestParser
 from sybil.parsers.skip import skip
 

@@ -83,7 +83,13 @@ latex_elements = {}
 # (source start file, target name, title, author, documentclass
 # [howto/manual]).
 latex_documents = [
-    ("index", "parsel.tex", "Parsel Documentation", "Scrapy Project", "manual"),
+    (
+        "index",
+        "parsel.tex",
+        "Parsel Documentation",
+        "Scrapy Project",
+        "manual",
+    ),
 ]
 
 
@@ -91,7 +97,9 @@ latex_documents = [
 
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
-man_pages = [("index", "parsel", "Parsel Documentation", ["Scrapy Project"], 1)]
+man_pages = [
+    ("index", "parsel", "Parsel Documentation", ["Scrapy Project"], 1)
+]
 
 
 # -- Options for Texinfo output ----------------------------------------

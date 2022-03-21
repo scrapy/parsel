@@ -3,7 +3,6 @@ import weakref
 import unittest
 import pickle
 from typing import Any
-
 from parsel import Selector, SelectorList
 from parsel.selector import (
     CannotRemoveElementWithoutRoot,
@@ -23,7 +22,9 @@ class SelectorTestCase(unittest.TestCase):
 
     def test_pickle_selector(self) -> None:
         sel = self.sscls(text="<html><body><p>some text</p></body></html>")
-        self.assertRaises(TypeError, lambda s: pickle.dumps(s, protocol=2), sel)
+        self.assertRaises(
+            TypeError, lambda s: pickle.dumps(s, protocol=2), sel
+        )
 
     def test_pickle_selector_list(self) -> None:
         sel = self.sscls(
@@ -33,7 +34,9 @@ class SelectorTestCase(unittest.TestCase):
         empty_sel_list = sel.css("p")
         self.assertIsSelectorList(sel_list)
         self.assertIsSelectorList(empty_sel_list)
-        self.assertRaises(TypeError, lambda s: pickle.dumps(s, protocol=2), sel_list)
+        self.assertRaises(
+            TypeError, lambda s: pickle.dumps(s, protocol=2), sel_list
+        )
         self.assertRaises(
             TypeError, lambda s: pickle.dumps(s, protocol=2), empty_sel_list
         )
@@ -49,7 +52,8 @@ class SelectorTestCase(unittest.TestCase):
             self.assertIsSelector(x)
 
         self.assertEqual(
-            sel.xpath("//input").extract(), [x.extract() for x in sel.xpath("//input")]
+            sel.xpath("//input").extract(),
+            [x.extract() for x in sel.xpath("//input")],
         )
 
         self.assertEqual(
@@ -84,7 +88,10 @@ class SelectorTestCase(unittest.TestCase):
         sel = self.sscls(text=body)
 
         self.assertEqual(
-            [x.extract() for x in sel.xpath("//input[@value=$number]/@name", number=1)],
+            [
+                x.extract()
+                for x in sel.xpath("//input[@value=$number]/@name", number=1)
+            ],
             ["a"],
         )
         self.assertEqual(
@@ -97,18 +104,24 @@ class SelectorTestCase(unittest.TestCase):
 
         self.assertEqual(
             sel.xpath(
-                "count(//input[@value=$number or @name=$letter])", number=2, letter="a"
+                "count(//input[@value=$number or @name=$letter])",
+                number=2,
+                letter="a",
             ).extract(),
             ["2.0"],
         )
 
         # you can also pass booleans
         self.assertEqual(
-            sel.xpath("boolean(count(//input)=$cnt)=$test", cnt=2, test=True).extract(),
+            sel.xpath(
+                "boolean(count(//input)=$cnt)=$test", cnt=2, test=True
+            ).extract(),
             ["1"],
         )
         self.assertEqual(
-            sel.xpath("boolean(count(//input)=$cnt)=$test", cnt=4, test=True).extract(),
+            sel.xpath(
+                "boolean(count(//input)=$cnt)=$test", cnt=4, test=True
+            ).extract(),
             ["0"],
         )
         self.assertEqual(
@@ -138,11 +151,16 @@ class SelectorTestCase(unittest.TestCase):
         t = 'I say "Yeah!"'
         # naive string formatting with give something like:
         # ValueError: XPath error: Invalid predicate in //input[@value="I say "Yeah!""]/@name
-        self.assertRaises(ValueError, sel.xpath, f'//input[@value="{t}"]/@name')
+        self.assertRaises(
+            ValueError, sel.xpath, f'//input[@value="{t}"]/@name'
+        )
 
         # with XPath variables, escaping is done for you
         self.assertEqual(
-            [x.extract() for x in sel.xpath("//input[@value=$text]/@name", text=t)],
+            [
+                x.extract()
+                for x in sel.xpath("//input[@value=$text]/@name", text=t)
+            ],
             ["a"],
         )
         lt = """I'm mixing single and "double quotes" and I don't care :)"""
@@ -155,7 +173,9 @@ class SelectorTestCase(unittest.TestCase):
         self.assertEqual(
             [
                 x.extract()
-                for x in sel.xpath("//p[normalize-space()=$lng]//@name", lng=lt)
+                for x in sel.xpath(
+                    "//p[normalize-space()=$lng]//@name", lng=lt
+                )
             ],
             ["a"],
         )
@@ -179,7 +199,9 @@ class SelectorTestCase(unittest.TestCase):
         )
 
         # for a SelectorList, bring the attributes of first-element only
-        self.assertEqual({"id": "some-list", "class": "list-cls"}, sel.css("ul").attrib)
+        self.assertEqual(
+            {"id": "some-list", "class": "list-cls"}, sel.css("ul").attrib
+        )
         self.assertEqual(
             {"class": "item-cls", "id": "list-item-1"}, sel.css("li").attrib
         )
@@ -199,7 +221,9 @@ class SelectorTestCase(unittest.TestCase):
         body = f"<p><input name='{50 * 'b'}' value='\xa9'/></p>"
         sel = self.sscls(text=body)
 
-        representation = f"<Selector xpath='//input/@name' data='{37 * 'b'}...'>"
+        representation = (
+            f"<Selector xpath='//input/@name' data='{37 * 'b'}...'>"
+        )
 
         self.assertEqual(
             [repr(it) for it in sel.xpath("//input/@name")], [representation]
@@ -208,7 +232,9 @@ class SelectorTestCase(unittest.TestCase):
     def test_representation_unicode_query(self) -> None:
         body = f"<p><input name='{50 * 'b'}' value='\xa9'/></p>"
 
-        representation = "<Selector xpath='//input[@value=\"©\"]/@value' data='©'>"
+        representation = (
+            "<Selector xpath='//input[@value=\"©\"]/@value' data='©'>"
+        )
 
         sel = self.sscls(text=body)
         self.assertEqual(
@@ -245,7 +271,8 @@ class SelectorTestCase(unittest.TestCase):
         )
 
         self.assertEqual(
-            sel.xpath('/ul/li[@id="doesnt-exist"]/text()').extract_first(), None
+            sel.xpath('/ul/li[@id="doesnt-exist"]/text()').extract_first(),
+            None,
         )
 
     def test_extract_first_default(self) -> None:
@@ -254,7 +281,8 @@ class SelectorTestCase(unittest.TestCase):
         sel = self.sscls(text=body)
 
         self.assertEqual(
-            sel.xpath("//div/text()").extract_first(default="missing"), "missing"
+            sel.xpath("//div/text()").extract_first(default="missing"),
+            "missing",
         )
 
     def test_selector_get_alias(self) -> None:
@@ -265,7 +293,9 @@ class SelectorTestCase(unittest.TestCase):
         self.assertEqual(
             sel.xpath("//ul/li[position()>1]")[0].get(), '<li id="2">2</li>'
         )
-        self.assertEqual(sel.xpath("//ul/li[position()>1]/text()")[0].get(), "2")
+        self.assertEqual(
+            sel.xpath("//ul/li[position()>1]/text()")[0].get(), "2"
+        )
 
     def test_selector_getall_alias(self) -> None:
         """Test if get() returns extracted value on a Selector"""
@@ -273,7 +303,8 @@ class SelectorTestCase(unittest.TestCase):
         sel = self.sscls(text=body)
 
         self.assertListEqual(
-            sel.xpath("//ul/li[position()>1]")[0].getall(), ['<li id="2">2</li>']
+            sel.xpath("//ul/li[position()>1]")[0].getall(),
+            ['<li id="2">2</li>'],
         )
         self.assertListEqual(
             sel.xpath("//ul/li[position()>1]/text()")[0].getall(), ["2"]
@@ -309,7 +340,8 @@ class SelectorTestCase(unittest.TestCase):
 
         self.assertEqual(sel.xpath("/ul/li/text()").re_first(r"\w+"), None)
         self.assertEqual(
-            sel.xpath('/ul/li[@id="doesnt-exist"]/text()').re_first(r"\d"), None
+            sel.xpath('/ul/li[@id="doesnt-exist"]/text()').re_first(r"\d"),
+            None,
         )
 
         self.assertEqual(sel.re_first(r'id="(\d+)'), "1")
@@ -322,32 +354,42 @@ class SelectorTestCase(unittest.TestCase):
         sel = self.sscls(text=body)
 
         self.assertEqual(
-            sel.xpath("//div/text()").re_first(r"\w+", default="missing"), "missing"
+            sel.xpath("//div/text()").re_first(r"\w+", default="missing"),
+            "missing",
         )
         self.assertEqual(
-            sel.xpath("/ul/li/text()").re_first(r"\w+", default="missing"), "missing"
+            sel.xpath("/ul/li/text()").re_first(r"\w+", default="missing"),
+            "missing",
         )
 
     def test_select_unicode_query(self) -> None:
         body = "<p><input name='\xa9' value='1'/></p>"
         sel = self.sscls(text=body)
-        self.assertEqual(sel.xpath('//input[@name="\xa9"]/@value').extract(), ["1"])
+        self.assertEqual(
+            sel.xpath('//input[@name="\xa9"]/@value').extract(), ["1"]
+        )
 
     def test_list_elements_type(self) -> None:
         """Test Selector returning the same type in selection methods"""
         text = "<p>test<p>"
         self.assertEqual(
-            type(self.sscls(text=text).xpath("//p")[0]), type(self.sscls(text=text))
+            type(self.sscls(text=text).xpath("//p")[0]),
+            type(self.sscls(text=text)),
         )
         self.assertEqual(
-            type(self.sscls(text=text).css("p")[0]), type(self.sscls(text=text))
+            type(self.sscls(text=text).css("p")[0]),
+            type(self.sscls(text=text)),
         )
 
     def test_boolean_result(self) -> None:
         body = "<p><input name='a'value='1'/><input name='b'value='2'/></p>"
         xs = self.sscls(text=body)
-        self.assertEqual(xs.xpath("//input[@name='a']/@name='a'").extract(), ["1"])
-        self.assertEqual(xs.xpath("//input[@name='a']/@name='n'").extract(), ["0"])
+        self.assertEqual(
+            xs.xpath("//input[@name='a']/@name='a'").extract(), ["1"]
+        )
+        self.assertEqual(
+            xs.xpath("//input[@name='a']/@name='n'").extract(), ["0"]
+        )
 
     def test_differences_parsing_xml_vs_html(self) -> None:
         """Test that XML and HTML Selector's behave differently"""
@@ -355,7 +397,8 @@ class SelectorTestCase(unittest.TestCase):
         text = '<div><img src="a.jpg"><p>Hello</div>'
         hs = self.sscls(text=text, type="html")
         self.assertEqual(
-            hs.xpath("//div").extract(), ['<div><img src="a.jpg"><p>Hello</p></div>']
+            hs.xpath("//div").extract(),
+            ['<div><img src="a.jpg"><p>Hello</p></div>'],
         )
 
         xs = self.sscls(text=text, type="xml")
@@ -476,7 +519,9 @@ class SelectorTestCase(unittest.TestCase):
         self.assertEqual(
             sel.xpath('//div[@id="1"]').css("span::text").extract(), ["me"]
         )
-        self.assertEqual(sel.css("#1").xpath("./span/text()").extract(), ["me"])
+        self.assertEqual(
+            sel.css("#1").xpath("./span/text()").extract(), ["me"]
+        )
 
     def test_dont_strip(self) -> None:
         sel = self.sscls(text='<div>fff: <a href="#">zzz</a></div>')
@@ -543,22 +588,28 @@ class SelectorTestCase(unittest.TestCase):
         """
         x = self.sscls(text=body, type="xml")
         x.register_namespace(
-            "xmlns", "http://webservices.amazon.com/AWSECommerceService/2005-10-05"
+            "xmlns",
+            "http://webservices.amazon.com/AWSECommerceService/2005-10-05",
         )
         x.register_namespace("p", "http://www.scrapy.org/product")
         x.register_namespace("b", "http://somens.com")
         self.assertEqual(len(x.xpath("//xmlns:TestTag")), 1)
         self.assertEqual(x.xpath("//b:Operation/text()").extract()[0], "hello")
-        self.assertEqual(x.xpath("//xmlns:TestTag/@b:att").extract()[0], "value")
+        self.assertEqual(
+            x.xpath("//xmlns:TestTag/@b:att").extract()[0], "value"
+        )
         self.assertEqual(
             x.xpath("//p:SecondTestTag/xmlns:price/text()").extract()[0], "90"
         )
         self.assertEqual(
-            x.xpath("//p:SecondTestTag").xpath("./xmlns:price/text()")[0].extract(),
+            x.xpath("//p:SecondTestTag")
+            .xpath("./xmlns:price/text()")[0]
+            .extract(),
             "90",
         )
         self.assertEqual(
-            x.xpath("//p:SecondTestTag/xmlns:material/text()").extract()[0], "iron"
+            x.xpath("//p:SecondTestTag/xmlns:material/text()").extract()[0],
+            "iron",
         )
 
     def test_namespaces_multiple_adhoc(self) -> None:
@@ -573,7 +624,8 @@ class SelectorTestCase(unittest.TestCase):
         """
         x = self.sscls(text=body, type="xml")
         x.register_namespace(
-            "xmlns", "http://webservices.amazon.com/AWSECommerceService/2005-10-05"
+            "xmlns",
+            "http://webservices.amazon.com/AWSECommerceService/2005-10-05",
         )
         self.assertEqual(len(x.xpath("//xmlns:TestTag")), 1)
 
@@ -602,7 +654,8 @@ class SelectorTestCase(unittest.TestCase):
         # chained selectors still have knowledge of register_namespace() operations
         self.assertEqual(
             x.xpath(
-                "//p:SecondTestTag", namespaces={"p": "http://www.scrapy.org/product"}
+                "//p:SecondTestTag",
+                namespaces={"p": "http://www.scrapy.org/product"},
             )
             .xpath("./xmlns:price/text()")[0]
             .extract(),
@@ -613,7 +666,8 @@ class SelectorTestCase(unittest.TestCase):
         self.assertRaises(
             ValueError,
             x.xpath(
-                "//p:SecondTestTag", namespaces={"p": "http://www.scrapy.org/product"}
+                "//p:SecondTestTag",
+                namespaces={"p": "http://www.scrapy.org/product"},
             ).xpath,
             "p:name/text()",
         )
@@ -621,9 +675,13 @@ class SelectorTestCase(unittest.TestCase):
         # ad-hoc declarations need repeats when chaining
         self.assertEqual(
             x.xpath(
-                "//p:SecondTestTag", namespaces={"p": "http://www.scrapy.org/product"}
+                "//p:SecondTestTag",
+                namespaces={"p": "http://www.scrapy.org/product"},
             )
-            .xpath("p:name/text()", namespaces={"p": "http://www.scrapy.org/product"})
+            .xpath(
+                "p:name/text()",
+                namespaces={"p": "http://www.scrapy.org/product"},
+            )
             .extract_first(),
             "Dried Rose",
         )
@@ -642,11 +700,14 @@ class SelectorTestCase(unittest.TestCase):
         )
 
         # "p" prefix is not cached from previous calls
-        self.assertRaises(ValueError, x.xpath, "//p:SecondTestTag/xmlns:price/text()")
+        self.assertRaises(
+            ValueError, x.xpath, "//p:SecondTestTag/xmlns:price/text()"
+        )
 
         x.register_namespace("p", "http://www.scrapy.org/product")
         self.assertEqual(
-            x.xpath("//p:SecondTestTag/xmlns:material/text()").extract()[0], "iron"
+            x.xpath("//p:SecondTestTag/xmlns:material/text()").extract()[0],
+            "iron",
         )
 
     def test_make_links_absolute(self) -> None:
@@ -654,7 +715,8 @@ class SelectorTestCase(unittest.TestCase):
         sel = Selector(text=text, base_url="http://example.com")
         sel.root.make_links_absolute()
         self.assertEqual(
-            "http://example.com/file.html", sel.xpath("//a/@href").extract_first()
+            "http://example.com/file.html",
+            sel.xpath("//a/@href").extract_first(),
         )
 
     def test_re(self) -> None:
@@ -703,28 +765,37 @@ class SelectorTestCase(unittest.TestCase):
         # switching off replace_entities will preserve &quot; also
         expected = '"bar &amp; &quot;baz&quot;"'
         self.assertEqual(
-            x.xpath("//script/text()").re(name_re, replace_entities=False), [expected]
+            x.xpath("//script/text()").re(name_re, replace_entities=False),
+            [expected],
         )
         self.assertEqual(
-            x.xpath("//script")[0].re(name_re, replace_entities=False), [expected]
+            x.xpath("//script")[0].re(name_re, replace_entities=False),
+            [expected],
         )
 
         self.assertEqual(
-            x.xpath("//script/text()").re_first(name_re, replace_entities=False),
+            x.xpath("//script/text()").re_first(
+                name_re, replace_entities=False
+            ),
             expected,
         )
         self.assertEqual(
-            x.xpath("//script")[0].re_first(name_re, replace_entities=False), expected
+            x.xpath("//script")[0].re_first(name_re, replace_entities=False),
+            expected,
         )
 
     def test_re_intl(self) -> None:
         body = "<div>Evento: cumplea\xf1os</div>"
         x = self.sscls(text=body)
-        self.assertEqual(x.xpath("//div").re(r"Evento: (\w+)"), ["cumplea\xf1os"])
+        self.assertEqual(
+            x.xpath("//div").re(r"Evento: (\w+)"), ["cumplea\xf1os"]
+        )
 
     def test_selector_over_text(self) -> None:
         hs = self.sscls(text="<root>lala</root>")
-        self.assertEqual(hs.extract(), "<html><body><root>lala</root></body></html>")
+        self.assertEqual(
+            hs.extract(), "<html><body><root>lala</root></body></html>"
+        )
         xs = self.sscls(text="<root>lala</root>", type="xml")
         self.assertEqual(xs.extract(), "<root>lala</root>")
         self.assertEqual(xs.xpath(".").extract(), ["<root>lala</root>"])
@@ -750,13 +821,17 @@ class SelectorTestCase(unittest.TestCase):
         <head><meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1"></head>
         <body><span id="blank">\xa3</span></body></html>"""
         x = self.sscls(text=text)
-        self.assertEqual(x.xpath("//span[@id='blank']/text()").extract(), ["\xa3"])
+        self.assertEqual(
+            x.xpath("//span[@id='blank']/text()").extract(), ["\xa3"]
+        )
 
     def test_empty_bodies_shouldnt_raise_errors(self) -> None:
         self.sscls(text="").xpath("//text()").extract()
 
     def test_bodies_with_comments_only(self) -> None:
-        sel = self.sscls(text="<!-- hello world -->", base_url="http://example.com")
+        sel = self.sscls(
+            text="<!-- hello world -->", base_url="http://example.com"
+        )
         self.assertEqual("http://example.com", sel.root.base)
 
     def test_null_bytes_shouldnt_raise_errors(self) -> None:
@@ -782,7 +857,9 @@ class SelectorTestCase(unittest.TestCase):
         self.assertEqual(x1.xpath(".//text()").extract(), [])
 
     def test_select_on_text_nodes(self) -> None:
-        r = self.sscls(text="<div><b>Options:</b>opt1</div><div><b>Other</b>opt2</div>")
+        r = self.sscls(
+            text="<div><b>Options:</b>opt1</div><div><b>Other</b>opt2</div>"
+        )
         x1 = r.xpath(
             "//div/descendant::text()[preceding-sibling::b[contains(text(), 'Options')]]"
         )
@@ -796,7 +873,9 @@ class SelectorTestCase(unittest.TestCase):
     @unittest.skip("Text nodes lost parent node reference in lxml")
     def test_nested_select_on_text_nodes(self) -> None:
         # FIXME: does not work with lxml backend [upstream]
-        r = self.sscls(text="<div><b>Options:</b>opt1</div><div><b>Other</b>opt2</div>")
+        r = self.sscls(
+            text="<div><b>Options:</b>opt1</div><div><b>Other</b>opt2</div>"
+        )
         x1 = r.xpath("//div/descendant::text()")
         x2 = x1.xpath("./preceding-sibling::b[contains(text(), 'Options')]")
         self.assertEqual(x2.extract(), ["<b>Options:</b>"])
@@ -847,11 +926,19 @@ class SelectorTestCase(unittest.TestCase):
         self.assertEqual(len(sel.xpath("//stop")), 0)
         self.assertEqual(len(sel.xpath("./namespace::*")), 2)
         self.assertEqual(
-            len(sel.xpath("//f:link", namespaces={"f": "http://www.w3.org/2005/Atom"})),
+            len(
+                sel.xpath(
+                    "//f:link", namespaces={"f": "http://www.w3.org/2005/Atom"}
+                )
+            ),
             2,
         )
         self.assertEqual(
-            len(sel.xpath("//s:stop", namespaces={"s": "http://www.w3.org/2000/svg"})),
+            len(
+                sel.xpath(
+                    "//s:stop", namespaces={"s": "http://www.w3.org/2000/svg"}
+                )
+            ),
             2,
         )
         sel.remove_namespaces()
@@ -899,13 +986,19 @@ class SelectorTestCase(unittest.TestCase):
         li_text = x.xpath("//li/text()")
         self.assertFalse(any([hasattr(e.root, "getparent") for e in li_text]))
         div_class = x.xpath("//div/@class")
-        self.assertFalse(any([hasattr(e.root, "getparent") for e in div_class]))
+        self.assertFalse(
+            any([hasattr(e.root, "getparent") for e in div_class])
+        )
 
         smart_x = SmartStringsSelector(text=body)
         smart_li_text = smart_x.xpath("//li/text()")
-        self.assertTrue(all([hasattr(e.root, "getparent") for e in smart_li_text]))
+        self.assertTrue(
+            all([hasattr(e.root, "getparent") for e in smart_li_text])
+        )
         smart_div_class = smart_x.xpath("//div/@class")
-        self.assertTrue(all([hasattr(e.root, "getparent") for e in smart_div_class]))
+        self.assertTrue(
+            all([hasattr(e.root, "getparent") for e in smart_div_class])
+        )
 
     def test_xml_entity_expansion(self) -> None:
         malicious_xml = (
@@ -943,7 +1036,8 @@ class SelectorTestCase(unittest.TestCase):
     def test_replacement_null_char_from_body(self) -> None:
         text = "<html>\x00<body><p>Grainy</p></body></html>"
         self.assertEqual(
-            "<html><body><p>Grainy</p></body></html>", self.sscls(text).extract()
+            "<html><body><p>Grainy</p></body></html>",
+            self.sscls(text).extract(),
         )
 
     def test_remove_selector_list(self) -> None:
@@ -1006,6 +1100,41 @@ class SelectorTestCase(unittest.TestCase):
         sel.css("body").remove()
         self.assertEqual(sel.get(), "<html></html>")
 
+    def test_selector_init_with_etree_element(self):
+        from lxml import etree
+
+        element = etree.Element("root")
+        sel = self.sscls(root=element)
+        self.assertEqual(sel.type, "html")
+
+    def test_invalid_json(self) -> None:
+        invalid_json = "root"
+        sel = self.sscls(text=invalid_json, type="json")
+        self.assertEqual(sel.root, None)
+
+    def test_invalid_selector_calls(self) -> None:
+        json = '{"attrib":value}'
+        sel = self.sscls(text=json, type="json")
+
+        with self.assertRaises(ValueError):
+            sel.xpath("query")
+        with self.assertRaises(ValueError):
+            sel.css("query")
+
+    def test_xpath_selector_on_type_text(self) -> None:
+        html = "<html></html>"
+        sel = self.sscls(text=html, type="text")
+
+        sel_list = sel.xpath("//html")
+        self.assertEqual(sel_list[0].type, "html")
+
+    def test_css_selector_on_type_text(self) -> None:
+        html = "<html></html>"
+        sel = self.sscls(text=html, type="text")
+
+        sel_list = sel.css("html")
+        self.assertEqual(sel_list[0].type, "html")
+
     def test_jsonpath_selectors(self) -> None:
 
         json_data = """{
@@ -1046,13 +1175,14 @@ class SelectorTestCase(unittest.TestCase):
         self.assertIsSelector(sel)
         self.assertIsSelectorList(sel_list)
         self.assertEqual(
-            sel_list.getall(), ['"Nigel Rees"', '"Herman Melville"', '"J.R.R. Tolkien"']
+            sel_list.getall(),
+            ['"Nigel Rees"', '"Herman Melville"', '"J.R.R. Tolkien"'],
         )
 
         sel_list = sel.jsonpath("$..bicycle")
 
         self.assertIsSelectorList(sel_list)
-        self.assertEqual(sel_list.getall(), ['{"color": "red", "price": 19.95}'])
+        self.assertEqual(sel_list.get(), '{"color": "red", "price": 19.95}')
 
         inner_lst = sel_list[0].jsonpath("$..color")
 
@@ -1064,8 +1194,15 @@ class SelectorTestCase(unittest.TestCase):
         self.assertIsSelectorList(sel_list)
         self.assertEqual(
             sel_list.getall(),
-            ['"Sayings of the Century"', '"Moby Dick"', '"The Lord of the Rings"'],
+            [
+                '"Sayings of the Century"',
+                '"Moby Dick"',
+                '"The Lord of the Rings"',
+            ],
         )
+
+        sel_list_empty = sel.jsonpath("$..contact")
+        self.assertEqual(sel_list_empty, [])
 
 
 class ExsltTestCase(unittest.TestCase):
@@ -1087,18 +1224,30 @@ class ExsltTestCase(unittest.TestCase):
         # re:test()
         self.assertEqual(
             sel.xpath('//input[re:test(@name, "[A-Z]+", "i")]').extract(),
-            [x.extract() for x in sel.xpath('//input[re:test(@name, "[A-Z]+", "i")]')],
+            [
+                x.extract()
+                for x in sel.xpath('//input[re:test(@name, "[A-Z]+", "i")]')
+            ],
         )
         self.assertEqual(
-            [x.extract() for x in sel.xpath(r'//a[re:test(@href, "\.html$")]/text()')],
+            [
+                x.extract()
+                for x in sel.xpath(r'//a[re:test(@href, "\.html$")]/text()')
+            ],
             ["first link", "second link"],
         )
         self.assertEqual(
-            [x.extract() for x in sel.xpath('//a[re:test(@href, "first")]/text()')],
+            [
+                x.extract()
+                for x in sel.xpath('//a[re:test(@href, "first")]/text()')
+            ],
             ["first link"],
         )
         self.assertEqual(
-            [x.extract() for x in sel.xpath('//a[re:test(@href, "second")]/text()')],
+            [
+                x.extract()
+                for x in sel.xpath('//a[re:test(@href, "second")]/text()')
+            ],
             ["second link"],
         )
 
@@ -1128,7 +1277,9 @@ class ExsltTestCase(unittest.TestCase):
                 r're:replace(//a[re:test(@href, "\.xml$")]/@href,'
                 r'"(\w+)://(.+)(\.xml)", "","https://\2.html")'
             ).extract(),
-            ["https://www.bayes.co.uk/xml/index.xml?/xml/utils/rechecker.html"],
+            [
+                "https://www.bayes.co.uk/xml/index.xml?/xml/utils/rechecker.html"
+            ],
         )
 
     def test_set(self) -> None:
