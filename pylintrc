@@ -28,4 +28,5 @@ disable=bad-continuation,
         unused-argument,
         use-a-generator,
         wrong-import-order,
-        wrong-import-position
+        wrong-import-position,
+        unused-variable
