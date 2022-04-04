@@ -1152,7 +1152,7 @@ class SelectorTextTestCase(unittest.TestCase):
             """
 
     def test_text_get(self):
-        sel = self.sscls(text="<p>title:</h1>some text</h1></p>")
+        sel = self.sscls(text="<p>title:<h1>some text</h1></p>")
         txt = sel.get(text=True)
         self.assertEqual(txt, "title:some text")
 
@@ -1193,7 +1193,6 @@ class SelectorTextTestCase(unittest.TestCase):
 
     def test_text_xpath_get(self):
         html = self.sscls(text=self.html_body)
-        self.assertEqual(1, 1)
         self.assertEqual(
             html.xpath('//div[@class="product"]/span').getall(text=True),
             ["Price: 100", "Price: 200"],
