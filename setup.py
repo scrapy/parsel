@@ -28,6 +28,7 @@ setup(
         "cssselect>=0.9",
         "lxml",
         "w3lib>=1.19.0",
+        "jsonpath_ng>=1.5.3",
     ],
     python_requires=">=3.6",
     license="BSD",
