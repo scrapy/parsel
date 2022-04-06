@@ -1,5 +1,5 @@
 [MASTER]
-ignore=tests/typing
+ignore=typing
 persistent=no
 
 [MESSAGES CONTROL]
@@ -28,5 +28,4 @@ disable=bad-continuation,
         unused-argument,
         use-a-generator,
         wrong-import-order,
-        wrong-import-position,
-        unused-variable
+        wrong-import-position
