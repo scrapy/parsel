@@ -40,10 +40,14 @@ def has_class(context, *classes):
     """
     if not context.eval_context.get("args_checked"):
         if not classes:
-            raise ValueError("XPath error: has-class must have at least 1 argument")
+            raise ValueError(
+                "XPath error: has-class must have at least 1 argument"
+            )
         for c in classes:
             if not isinstance(c, str):
-                raise ValueError("XPath error: has-class arguments must be strings")
+                raise ValueError(
+                    "XPath error: has-class arguments must be strings"
+                )
         context.eval_context["args_checked"] = True
 
     node_cls = context.context_node.get("class")
