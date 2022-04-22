@@ -25,6 +25,11 @@ And extract data from those elements::
     >>> selector.xpath('//h1/text()').getall()
     ['Hello, Parsel!']
 
+Extract inner text
+
+    >>> selector.css('h1').get(text=True)
+    'Hello, Parsel!'
+
 .. _CSS: https://www.w3.org/TR/selectors
 .. _XPath: https://www.w3.org/TR/xpath
 
@@ -118,6 +123,11 @@ Notice that CSS selectors can select text or attribute nodes using CSS3
 pseudo-elements::
 
     >>> selector.css('title::text').get()
+    'Example website'
+
+    OR
+
+    >>> selctor.css('title').get(text=True)
     'Example website'
 
 As you can see, ``.xpath()`` and ``.css()`` methods return a
