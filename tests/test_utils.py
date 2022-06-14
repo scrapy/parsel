@@ -46,7 +46,12 @@ def test_shorten(width, expected):
             True,
             ["October"],
         ],
-        [r"\w+\s*\d+\s*\,?\s*\d+", "October  25 2019", True, ["October  25 2019"]],
+        [
+            r"\w+\s*\d+\s*\,?\s*\d+",
+            "October  25 2019",
+            True,
+            ["October  25 2019"],
+        ],
         [
             r"^.*$",
             "&quot;sometext&quot; &amp; &quot;moretext&quot;",

@@ -17,13 +17,21 @@ class XPathFuncsTestCase(unittest.TestCase):
             ["First", "Second"],
         )
         self.assertEqual(
-            [x.extract() for x in sel.xpath('//p[has-class("bar")]/text()')], ["Third"]
+            [x.extract() for x in sel.xpath('//p[has-class("bar")]/text()')],
+            ["Third"],
         )
         self.assertEqual(
-            [x.extract() for x in sel.xpath('//p[has-class("foo","bar")]/text()')], []
+            [
+                x.extract()
+                for x in sel.xpath('//p[has-class("foo","bar")]/text()')
+            ],
+            [],
         )
         self.assertEqual(
-            [x.extract() for x in sel.xpath('//p[has-class("foo","bar-baz")]/text()')],
+            [
+                x.extract()
+                for x in sel.xpath('//p[has-class("foo","bar-baz")]/text()')
+            ],
             ["First"],
         )
 
@@ -45,7 +53,10 @@ class XPathFuncsTestCase(unittest.TestCase):
         """
         sel = Selector(text=body)
         self.assertRaisesRegex(
-            ValueError, "has-class arguments must be strings", sel.xpath, "has-class(.)"
+            ValueError,
+            "has-class arguments must be strings",
+            sel.xpath,
+            "has-class(.)",
         )
 
     def test_has_class_error_invalid_unicode(self):
@@ -66,7 +77,8 @@ class XPathFuncsTestCase(unittest.TestCase):
         """
         sel = Selector(text=body)
         self.assertEqual(
-            [x.extract() for x in sel.xpath('//p[has-class("fóó")]/text()')], ["First"]
+            [x.extract() for x in sel.xpath('//p[has-class("fóó")]/text()')],
+            ["First"],
         )
 
     def test_has_class_uppercase(self):
@@ -75,7 +87,8 @@ class XPathFuncsTestCase(unittest.TestCase):
         """
         sel = Selector(text=body)
         self.assertEqual(
-            [x.extract() for x in sel.xpath('//p[has-class("foo")]/text()')], ["First"]
+            [x.extract() for x in sel.xpath('//p[has-class("foo")]/text()')],
+            ["First"],
         )
 
     def test_has_class_newline(self):
@@ -85,7 +98,8 @@ class XPathFuncsTestCase(unittest.TestCase):
         """
         sel = Selector(text=body)
         self.assertEqual(
-            [x.extract() for x in sel.xpath('//p[has-class("foo")]/text()')], ["First"]
+            [x.extract() for x in sel.xpath('//p[has-class("foo")]/text()')],
+            ["First"],
         )
 
     def test_has_class_tab(self):
@@ -94,7 +108,8 @@ class XPathFuncsTestCase(unittest.TestCase):
         """
         sel = Selector(text=body)
         self.assertEqual(
-            [x.extract() for x in sel.xpath('//p[has-class("foo")]/text()')], ["First"]
+            [x.extract() for x in sel.xpath('//p[has-class("foo")]/text()')],
+            ["First"],
         )
 
     def test_set_xpathfunc(self):
@@ -108,7 +123,10 @@ class XPathFuncsTestCase(unittest.TestCase):
         """
         sel = Selector(text=body)
         self.assertRaisesRegex(
-            ValueError, "Unregistered function in myfunc", sel.xpath, "myfunc()"
+            ValueError,
+            "Unregistered function in myfunc",
+            sel.xpath,
+            "myfunc()",
         )
 
         set_xpathfunc("myfunc", myfunc)
@@ -117,5 +135,8 @@ class XPathFuncsTestCase(unittest.TestCase):
 
         set_xpathfunc("myfunc", None)
         self.assertRaisesRegex(
-            ValueError, "Unregistered function in myfunc", sel.xpath, "myfunc()"
+            ValueError,
+            "Unregistered function in myfunc",
+            sel.xpath,
+            "myfunc()",
         )

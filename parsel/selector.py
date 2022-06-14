@@ -117,7 +117,9 @@ class SelectorList(List[_SelectorType]):
             selector.xpath('//a[href=$url]', url="http://www.example.com")
         """
         return self.__class__(
-            flatten([x.xpath(xpath, namespaces=namespaces, **kwargs) for x in self])
+            flatten(
+                [x.xpath(xpath, namespaces=namespaces, **kwargs) for x in self]
+            )
         )
 
     def css(self, query: str) -> "SelectorList[_SelectorType]":
@@ -141,7 +143,9 @@ class SelectorList(List[_SelectorType]):
         Passing ``replace_entities`` as ``False`` switches off these
         replacements.
         """
-        return flatten([x.re(regex, replace_entities=replace_entities) for x in self])
+        return flatten(
+            [x.re(regex, replace_entities=replace_entities) for x in self]
+        )
 
     @typing.overload
     def re_first(
@@ -413,7 +417,10 @@ class Selector:
             nsp.update(namespaces)
         try:
             result = xpathev(
-                query, namespaces=nsp, smart_strings=self._lxml_smart_strings, **kwargs
+                query,
+                namespaces=nsp,
+                smart_strings=self._lxml_smart_strings,
+                **kwargs,
             )
         except etree.XPathError as exc:
             raise ValueError(f"XPath error: {exc} in {query}")
@@ -464,7 +471,9 @@ class Selector:
         Passing ``replace_entities`` as ``False`` switches off these
         replacements.
         """
-        return extract_regex(regex, self.get(), replace_entities=replace_entities)
+        return extract_regex(
+            regex, self.get(), replace_entities=replace_entities
+        )
 
     @typing.overload
     def re_first(
@@ -501,7 +510,8 @@ class Selector:
         replacements.
         """
         return next(
-            iflatten(self.re(regex, replace_entities=replace_entities)), default
+            iflatten(self.re(regex, replace_entities=replace_entities)),
+            default,
         )
 
     def get(self) -> str:
