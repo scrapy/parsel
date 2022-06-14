@@ -26,6 +26,7 @@ setup(
     include_package_data=True,
     install_requires=[
         "cssselect>=0.9",
+        "jmespath",
         "lxml",
         "w3lib>=1.19.0",
     ],

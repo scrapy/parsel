@@ -5,7 +5,7 @@ persistent=no
 [MESSAGES CONTROL]
 disable=bad-continuation,
         c-extension-no-member,
-        deprecated-method,
+        deprecated-method,  # Required for Python 2 support
         fixme,
         import-error,
         import-outside-toplevel,
@@ -28,4 +28,4 @@ disable=bad-continuation,
         unused-argument,
         use-a-generator,
         wrong-import-order,
-        wrong-import-position
+        wrong-import-position,
