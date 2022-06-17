@@ -34,9 +34,7 @@ And extract data from those elements::
     >>> jmespath_selector.jmespath('user[0]').get()
     {'name': 'A', 'age': '25'}
      >>> jmespath_selector.jmespath("user[*].age.to_number(@)").getall()
-    [25,
-     32,
-     19]
+    [25, 32, 19]
 
 .. _CSS: https://www.w3.org/TR/selectors
 .. _XPath: https://www.w3.org/TR/xpath
