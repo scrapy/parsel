@@ -18,7 +18,7 @@ Then use `CSS`_ or `XPath`_ expressions to select elements::
     >>> selector.xpath('//h1')  # the same, but now with XPath
     [<Selector xpath='//h1' data='<h1>Hello, Parsel!</h1>'>]
 
-For JSON format text, use `JMESPath`_ expressions to select elements::
+For JSON format text, use `JMESPath`_ expressions to select fields inside the text::
 
     >>> text = '{"user":[{"name":"A","age":"25"},{"name":"B","age":"32"},{"name":"C","age":"19"}]}'
     >>> jmespath_selector = Selector(text=text)
