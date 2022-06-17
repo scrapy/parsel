@@ -116,12 +116,21 @@ class JMESPathTestCase(unittest.TestCase):
         """
         sel = Selector(text=data)
         self.assertEqual(sel.jmespath("[*].age.value").get(), "32")
-        self.assertEqual(sel.jmespath("[*].age").getall(), [
-            {'format_break': 'No', 'value': '32'}, '32a', ['22', '32', '55'], '25', 55
-        ])
+        self.assertEqual(
+            sel.jmespath("[*].age").getall(),
+            [
+                {"format_break": "No", "value": "32"},
+                "32a",
+                ["22", "32", "55"],
+                "25",
+                55,
+            ],
+        )
         self.assertEqual(sel.jmespath("[*].age.to_number(@)").getall(), [25, 55])
         self.assertEqual(sel.jmespath("[*].age | [1]").get(), "32a")
         self.assertEqual(sel.jmespath("[*].age.to_number(@) | [1]").get(), 55)
         self.assertEqual(sel.jmespath("[*].age[].to_number(@)").get(), 22)
 
-        self.assertEqual(sel.jmespath("[*].age.outer || [*].age.format_break").getall(), ["No"])
+        self.assertEqual(
+            sel.jmespath("[*].age.outer || [*].age.format_break").getall(), ["No"]
+        )
