@@ -211,11 +211,12 @@ Whenever the selected elements possess JSON format, it is possible to use  ``.jm
 
 For example, given the selector is parsing the following element::
 
-    {"user":[{"name":"A","age":"25"},{"name":"B","age":"32"},{"name":"C","age":"19"}]}
+    >>> text = '{"user":[{"name":"A","age":"25"},{"name":"B","age":"32"},{"name":"C","age":"19"}]}'
+    >>> jmespath_selector = Selector(text=text)
 
 It is possible to extract the age of the users as an integer by using the following line of code::
 
-    >>> selector.jmespath("[*].age.to_number(@)").getall()
+    >>> jmespath_selector.jmespath("[*].age.to_number(@)").getall()
     [25,
      32,
      19]
