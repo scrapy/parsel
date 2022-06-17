@@ -216,7 +216,7 @@ For example, given the selector is parsing the following element::
 
 It is possible to extract the age of the users as an integer by using the following line of code::
 
-    >>> jmespath_selector.jmespath("[*].age.to_number(@)").getall()
+    >>> jmespath_selector.jmespath("user[*].age.to_number(@)").getall()
     [25,
      32,
      19]
