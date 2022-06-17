@@ -18,18 +18,34 @@ Then use `CSS`_ or `XPath`_ expressions to select elements::
     >>> selector.xpath('//h1')  # the same, but now with XPath
     [<Selector xpath='//h1' data='<h1>Hello, Parsel!</h1>'>]
 
+For JSON format text, use `JMESPath`_ expressions to select elements::
+
+    >>> text = '{"user":[{"name":"A","age":"25"},{"name":"B","age":"32"},{"name":"C","age":"19"}]}'
+    >>> jmespath_selector = Selector(text=text)
+    >>> jmespath_selector.jmespath('user[0]')
+    [<Selector jmespath='user[0]' data={'name': 'A', 'age': '25'}>]
+
 And extract data from those elements::
 
     >>> selector.css('h1::text').get()
     'Hello, Parsel!'
     >>> selector.xpath('//h1/text()').getall()
     ['Hello, Parsel!']
+    >>> jmespath_selector.jmespath('user[0]').get()
+    {'name': 'A', 'age': '25'}
+     >>> jmespath_selector.jmespath("user[*].age.to_number(@)").getall()
+    [25,
+     32,
+     19]
+
+
 
 .. _CSS: https://www.w3.org/TR/selectors
 .. _XPath: https://www.w3.org/TR/xpath
+.. _JMESPath: https://jmespath.org/
 
-Learning CSS and XPath
-======================
+Learning CSS, XPath, and JMESPath
+=================================
 
 `CSS`_ is a language for applying styles to HTML documents. It defines
 selectors to associate those styles with specific HTML elements. Resources to
@@ -49,10 +65,19 @@ used with HTML. Resources to learn XPath_ include:
 You can use either CSS_ or XPath_. CSS_ is usually more readable, but some
 things can only be done with XPath_.
 
+`JMESPath`_ allows you to declaratively specify how to extract elements from a JSON document.
+Resources to learn JMESPATH_ include:
+
+-   `JMESPath Tutorial`_
+
+-   `JMESPath Specification`_
+
 .. _CSS selectors in the MDN: https://developer.mozilla.org/en-US/docs/Learn/CSS/Building_blocks/Selectors
 .. _XPath cheatsheet: https://devhints.io/xpath
 .. _XPath Tutorial in W3Schools: https://www.w3schools.com/xml/xpath_intro.asp
 .. _XPath/CSS Equivalents in Wikibooks: https://en.wikibooks.org/wiki/XPath/CSS_Equivalents
+.. _JMESPath Tutorial: https://jmespath.org/tutorial.html
+.. _JMESPath Specification: https://jmespath.org/specification.html
 
 
 Using selectors
@@ -203,31 +228,6 @@ Now we're going to get the base URL and some image links::
      'image3_thumb.jpg',
      'image4_thumb.jpg',
      'image5_thumb.jpg']
-
-JMESPath Selector
------------------
-Whenever the selected elements possess JSON format, it is possible to use  ``.jmespath()`` method from
-:class:`~parsel.selector.Selector`.
-
-For example, given the selector is parsing the following element::
-
-    >>> text = '{"user":[{"name":"A","age":"25"},{"name":"B","age":"32"},{"name":"C","age":"19"}]}'
-    >>> jmespath_selector = Selector(text=text)
-
-It is possible to extract the age of the users as an integer by using the following line of code::
-
-    >>> jmespath_selector.jmespath("user[*].age.to_number(@)").getall()
-    [25,
-     32,
-     19]
-
-JMESPath selectors can be chained with css and xpath selectors,
-as well as use `.re()` and `re_first()` and the other methods.
-
-To find out more about JMESPath, head to `JMESPath Specification`_.
-
-.. _JMESPath Specification: https://jmespath.org/specification.html
-
 
 .. _topics-selectors-css-extensions:
 
