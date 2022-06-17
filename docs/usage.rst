@@ -204,6 +204,30 @@ Now we're going to get the base URL and some image links::
      'image4_thumb.jpg',
      'image5_thumb.jpg']
 
+JMESPath Selector
+-----------------
+Whenever the selected elements possess JSON format, it is possible to use  ``.jmespath()`` method from
+:class:`~parsel.selector.Selector`.
+
+For example, given the selector is parsing the following element::
+
+    {"user":[{"name":"A","age":"25"},{"name":"B","age":"32"},{"name":"C","age":"19"}]}
+
+It is possible to extract the age of the users as an integer by using the following line of code::
+
+    >>> selector.jmespath("[*].age.to_number(@)").getall()
+    [25,
+     32,
+     19]
+
+JMESPath selectors can be chained with css and xpath selectors,
+as well as use `.re()` and `re_first()` and the other methods.
+
+To find out more about JMESPath, head to `JMESPath Specification`_.
+
+.. _JMESPath Specification: https://jmespath.org/specification.html
+
+
 .. _topics-selectors-css-extensions:
 
 Extensions to CSS Selectors
