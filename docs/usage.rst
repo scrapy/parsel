@@ -38,8 +38,6 @@ And extract data from those elements::
      32,
      19]
 
-
-
 .. _CSS: https://www.w3.org/TR/selectors
 .. _XPath: https://www.w3.org/TR/xpath
 .. _JMESPath: https://jmespath.org/
