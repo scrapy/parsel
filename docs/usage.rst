@@ -21,7 +21,7 @@ For JSON format text, use `JMESPath`_ expressions to select fields inside the te
     >>> text = '{"title":"Hello, Parsel!"}'
     >>> json_selector = Selector(text=text)
     >>> json_selector.jmespath('title')
-    [<Selector jmespath='user[0]' data='Hello, Parsel'>]
+    [<Selector jmespath='user[0]' data='Hello, Parsel!'>]
 
 And extract data from those elements::
 
