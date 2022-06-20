@@ -4,44 +4,42 @@
 Usage
 =====
 
-Create a :class:`~parsel.selector.Selector` object for the HTML or XML text
-that you want to parse::
+Create a :class:`~parsel.selector.Selector` object for the input text that you want to parse and use.
+
+For HTML or XML, use `CSS`_ or `XPath`_ expressions to select elements::
 
     >>> from parsel import Selector
-    >>> text = "<html><body><h1>Hello, Parsel!</h1></body></html>"
-    >>> selector = Selector(text=text)
-
-Then use `CSS`_ or `XPath`_ expressions to select elements::
-
-    >>> selector.css('h1')
+    >>> html = "<html><body><h1>Hello, Parsel!</h1></body></html>"
+    >>> html_selector = Selector(text=text)
+    >>> html_selector.css('h1')
     [<Selector xpath='descendant-or-self::h1' data='<h1>Hello, Parsel!</h1>'>]
-    >>> selector.xpath('//h1')  # the same, but now with XPath
+    >>> html_selector.xpath('//h1')  # the same, but now with XPath
     [<Selector xpath='//h1' data='<h1>Hello, Parsel!</h1>'>]
 
 For JSON format text, use `JMESPath`_ expressions to select fields inside the text::
 
-    >>> text = '{"user":[{"name":"A","age":"25"},{"name":"B","age":"32"},{"name":"C","age":"19"}]}'
-    >>> jmespath_selector = Selector(text=text)
-    >>> jmespath_selector.jmespath('user[0]')
-    [<Selector jmespath='user[0]' data={'name': 'A', 'age': '25'}>]
+    >>> text = '{"title":"Hello, Parsel!"}'
+    >>> json_selector = Selector(text=text)
+    >>> json_selector.jmespath('title')
+    [<Selector jmespath='user[0]' data='Hello, Parsel'>]
 
 And extract data from those elements::
 
-    >>> selector.css('h1::text').get()
+    >>> html_selector.css('h1::text').get()
     'Hello, Parsel!'
-    >>> selector.xpath('//h1/text()').getall()
+    >>> html_selector.xpath('//h1/text()').getall()
     ['Hello, Parsel!']
-    >>> jmespath_selector.jmespath('user[0]').get()
-    {'name': 'A', 'age': '25'}
-     >>> jmespath_selector.jmespath("user[*].age.to_number(@)").getall()
-    [25, 32, 19]
+    >>> json_selector.jmespath('title').get()
+    'Hello, Parsel!'
+     >>> jmespath_selector.jmespath('title').getall()
+    ['Hello, Parsel!']
 
 .. _CSS: https://www.w3.org/TR/selectors
 .. _XPath: https://www.w3.org/TR/xpath
 .. _JMESPath: https://jmespath.org/
 
-Learning CSS, XPath, and JMESPath
-=================================
+Learning expression languages
+=============================
 
 `CSS`_ is a language for applying styles to HTML documents. It defines
 selectors to associate those styles with specific HTML elements. Resources to
@@ -58,8 +56,8 @@ used with HTML. Resources to learn XPath_ include:
 
 -   `XPath cheatsheet`_
 
-You can use either CSS_ or XPath_. CSS_ is usually more readable, but some
-things can only be done with XPath_.
+For HTML and XML input, you can use either CSS_ or XPath_. CSS_ is usually more
+readable, but some things can only be done with XPath_.
 
 `JMESPath`_ allows you to declaratively specify how to extract elements from a JSON document.
 Resources to learn JMESPATH_ include:
