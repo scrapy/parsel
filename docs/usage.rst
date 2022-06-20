@@ -4,9 +4,9 @@
 Usage
 =====
 
-Create a :class:`~parsel.selector.Selector` object for the input text that you want to parse and use.
+Create a :class:`~parsel.selector.Selector` object for your input text.
 
-For HTML or XML, use `CSS`_ or `XPath`_ expressions to select elements::
+For HTML or XML, use `CSS`_ or `XPath`_ expressions to select data::
 
     >>> from parsel import Selector
     >>> html_text = "<html><body><h1>Hello, Parsel!</h1></body></html>"
@@ -16,7 +16,7 @@ For HTML or XML, use `CSS`_ or `XPath`_ expressions to select elements::
     >>> html_selector.xpath('//h1')  # the same, but now with XPath
     [<Selector xpath='//h1' data='<h1>Hello, Parsel!</h1>'>]
 
-For JSON format text, use `JMESPath`_ expressions to select fields inside the text::
+For JSON, use `JMESPath`_ expressions to select data::
 
     >>> json_text = '{"title":"Hello, Parsel!"}'
     >>> json_selector = Selector(text=json_text)
