@@ -16,7 +16,7 @@ For HTML or XML, use `CSS`_ or `XPath`_ expressions to select elements::
     >>> html_selector.xpath('//h1')  # the same, but now with XPath
     [<Selector xpath='//h1' data='<h1>Hello, Parsel!</h1>'>]
 
-For JSON format text, use `JMESPath`_ expressions to select fields inside the text::
+For JSON, use `JMESPath`_ expressions to select data::
 
     >>> json_text = '{"title":"Hello, Parsel!"}'
     >>> json_selector = Selector(text=json_text)
