@@ -27,10 +27,12 @@ And extract data from those elements::
 
     >>> html_selector.css('h1::text').get()
     'Hello, Parsel!'
-    >>> html_selector.xpath('//h1/text()').getall()
-    ['Hello, Parsel!']
+    >>> html_selector.xpath('//h1/text()').get()
+    'Hello, Parsel!'
     >>> json_selector.jmespath('title').get()
     'Hello, Parsel!'
+
+Whenever multiple data match the pattern, you can use `.getall()` to retrieve them.
 
 .. _CSS: https://www.w3.org/TR/selectors
 .. _XPath: https://www.w3.org/TR/xpath
@@ -54,10 +56,11 @@ used with HTML. Resources to learn XPath_ include:
 
 -   `XPath cheatsheet`_
 
-For HTML and XML input, you can use either CSS_ or XPath_. CSS_ is usually more
-readable, but some things can only be done with XPath_.
+For HTML and XML input, you can use either CSS_ or XPath_. CSS_ is usually
+more readable, but some things can only be done with XPath_.
 
-`JMESPath`_ allows you to declaratively specify how to extract elements from a JSON document.
+`JMESPath`_ allows you to declaratively specify how to extract elements from
+a JSON document.
 Resources to learn JMESPATH_ include:
 
 -   `JMESPath Tutorial`_
