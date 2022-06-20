@@ -38,29 +38,29 @@ Example (`open online demo`_):
                         <li><a href="http://example.com">Link 1</a></li>
                         <li><a href="http://scrapy.org">Link 2</a></li>
                     </ul>
-                    <content>
-                    {
-                        "page_header": "Hello, Parsel!",
-                        "links": [
-                            {"url": "http://example.com", "title": "Link 1"},
-                            {"url": "http://scrapy.org", "title": "Link 2"}
-                        ]
-                    }
-                    </content>
                 </body>
             </html>"""
-    >>> selector = Selector(text=html)
-    >>> selector.css('h1::text').get()
+    >>> html_selector = Selector(text=html)
+    >>> html_selector.css('h1::text').get()
     'Hello, Parsel!'
-    >>> selector.xpath('//h1/text()').re(r'\w+')
+    >>> html_selector.xpath('//h1/text()').re(r'\w+')
     ['Hello', 'Parsel']
     >>> for li in selector.css('ul > li'):
     ...     print(li.xpath('.//@href').get())
     http://example.com
     http://scrapy.org
-    >>> json_selector = selector.css("content")
-    >>> json_selector.jmespath("page_header").get()
-    'Hello, Parcel!'
+
+    >>> json = """
+            {
+                "page_title": "Hello, Parsel!",
+                "links": [
+                    {"url": "http://example.com", "title": "Link 1"},
+                    {"url": "http://scrapy.org", "title": "Link 2"}
+                ]
+            }"""
+    >>> json_selector = Selector(text=json)
+    >>> json_selector.jmespath("page_title").get()
+    'Hello, Parsel!'
     >>> json_selector.jmespath("links[*].title").getall()
     ['Link 1', 'Link 2']
 
