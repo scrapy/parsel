@@ -4,7 +4,7 @@
 Usage
 =====
 
-Create a :class:`~parsel.selector.Selector` object for the input text that you want to parse and use.
+Create a :class:`~parsel.selector.Selector` object for your input text.
 
 For HTML or XML, use `CSS`_ or `XPath`_ expressions to select elements::
 
