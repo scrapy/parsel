@@ -9,8 +9,8 @@ Create a :class:`~parsel.selector.Selector` object for the input text that you w
 For HTML or XML, use `CSS`_ or `XPath`_ expressions to select elements::
 
     >>> from parsel import Selector
-    >>> html = "<html><body><h1>Hello, Parsel!</h1></body></html>"
-    >>> html_selector = Selector(text=text)
+    >>> html_text = "<html><body><h1>Hello, Parsel!</h1></body></html>"
+    >>> html_selector = Selector(text=html_text)
     >>> html_selector.css('h1')
     [<Selector xpath='descendant-or-self::h1' data='<h1>Hello, Parsel!</h1>'>]
     >>> html_selector.xpath('//h1')  # the same, but now with XPath
@@ -18,8 +18,8 @@ For HTML or XML, use `CSS`_ or `XPath`_ expressions to select elements::
 
 For JSON format text, use `JMESPath`_ expressions to select fields inside the text::
 
-    >>> json = '{"title":"Hello, Parsel!"}'
-    >>> json_selector = Selector(text=json)
+    >>> json_text = '{"title":"Hello, Parsel!"}'
+    >>> json_selector = Selector(text=json_text)
     >>> json_selector.jmespath('title')
     [<Selector jmespath='user[0]' data='Hello, Parsel!'>]
 
@@ -31,8 +31,6 @@ And extract data from those elements::
     ['Hello, Parsel!']
     >>> json_selector.jmespath('title').get()
     'Hello, Parsel!'
-    >>> json_selector.jmespath('title').getall()
-    ['Hello, Parsel!']
 
 .. _CSS: https://www.w3.org/TR/selectors
 .. _XPath: https://www.w3.org/TR/xpath
