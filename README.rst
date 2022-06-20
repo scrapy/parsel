@@ -30,7 +30,7 @@ Example (`open online demo`_):
 .. code-block:: python
 
     >>> from parsel import Selector
-    >>> html = """
+    >>> html_text = """
             <html>
                 <body>
                     <h1>Hello, Parsel!</h1>
@@ -40,7 +40,7 @@ Example (`open online demo`_):
                     </ul>
                 </body>
             </html>"""
-    >>> html_selector = Selector(text=html)
+    >>> html_selector = Selector(text=html_text)
     >>> html_selector.css('h1::text').get()
     'Hello, Parsel!'
     >>> html_selector.xpath('//h1/text()').re(r'\w+')
@@ -50,7 +50,7 @@ Example (`open online demo`_):
     http://example.com
     http://scrapy.org
 
-    >>> json = """
+    >>> json_text = """
             {
                 "page_title": "Hello, Parsel!",
                 "links": [
@@ -58,7 +58,7 @@ Example (`open online demo`_):
                     {"url": "http://scrapy.org", "title": "Link 2"}
                 ]
             }"""
-    >>> json_selector = Selector(text=json)
+    >>> json_selector = Selector(text=json_text)
     >>> json_selector.jmespath("page_title").get()
     'Hello, Parsel!'
     >>> json_selector.jmespath("links[*].title").getall()

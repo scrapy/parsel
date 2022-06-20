@@ -18,8 +18,8 @@ For HTML or XML, use `CSS`_ or `XPath`_ expressions to select elements::
 
 For JSON format text, use `JMESPath`_ expressions to select fields inside the text::
 
-    >>> text = '{"title":"Hello, Parsel!"}'
-    >>> json_selector = Selector(text=text)
+    >>> json = '{"title":"Hello, Parsel!"}'
+    >>> json_selector = Selector(text=json)
     >>> json_selector.jmespath('title')
     [<Selector jmespath='user[0]' data='Hello, Parsel!'>]
 
