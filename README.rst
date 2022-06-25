@@ -19,9 +19,16 @@ Parsel
    :alt: Coverage report
 
 
-Parsel is a BSD-licensed Python_ library to extract and remove data from HTML_
-and XML_ using XPath_ and CSS_ selectors, as well as JSON_ using JMESPath_, optionally combined with
-`regular expressions`_.
+Parsel is a BSD-licensed Python_ library to extract data from HTML_, JSON, and
+XML_ documents.
+
+It supports:
+
+-   CSS_ and XPath_ expressions for HTML and XML documents
+
+-   JMESPath_ expressions for JSON documents
+
+-   `Regular expressions`_
 
 Find the Parsel online documentation at https://parsel.readthedocs.org.
 
