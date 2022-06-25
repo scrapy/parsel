@@ -116,10 +116,7 @@ class SelectorList(List[_SelectorType]):
         """
         return self.__class__(
             flatten(
-                [
-                    x.xpath(xpath, namespaces=namespaces, **kwargs)
-                    for x in self
-                ]
+                [x.xpath(xpath, namespaces=namespaces, **kwargs) for x in self]
             )
         )
 
@@ -332,11 +329,16 @@ class Selector:
 
     def _get_root(self, text: str, base_url: Optional[str] = None) -> Any:
         return create_root_node(
-            text, _ctgroup[self.type]["_parser"], base_url=base_url,
+            text,
+            _ctgroup[self.type]["_parser"],
+            base_url=base_url,
         )
 
     def jmespath(
-        self: _SelectorType, query: str, type: Optional[str] = None, **kwargs,
+        self: _SelectorType,
+        query: str,
+        type: Optional[str] = None,
+        **kwargs,
     ) -> SelectorList[_SelectorType]:
         """
         Find objects matching the JMESPath ``query`` and return the result as a
@@ -372,9 +374,7 @@ class Selector:
 
         def make_selector(x):  # closure function
             if isinstance(x, str):
-                return self.__class__(
-                    text=x, _expr=query, type=type or "text"
-                )
+                return self.__class__(text=x, _expr=query, type=type or "text")
             else:
                 return self.__class__(root=x, _expr=query, type=type)
 
