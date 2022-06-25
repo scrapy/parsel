@@ -428,7 +428,10 @@ class Selector:
 
         result = [
             self.__class__(
-                root=x, _expr=query, namespaces=self.namespaces, type=self.type
+                root=x,
+                _expr=query,
+                namespaces=self.namespaces,
+                type=self.type,
             )
             for x in result
         ]
