@@ -76,7 +76,7 @@ class SelectorList(List[_SelectorType]):
     def __getstate__(self) -> None:
         raise TypeError("can't pickle SelectorList objects")
 
-    def jmespath(self, query: str, **kwargs,) -> "SelectorList[_SelectorType]":
+    def jmespath(self, query: str, **kwargs) -> "SelectorList[_SelectorType]":
         """
         Call the ``.jmespath()`` method for each element in this list and return
         their results flattened as another :class:`SelectorList`.
