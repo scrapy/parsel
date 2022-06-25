@@ -361,9 +361,6 @@ class Selector:
         else:
             data = _load_json_or_none(self.root.text)
 
-        if data:
-            self._load_lxml_root(self.root, type="json")
-
         result = jmespath.search(query, data, **kwargs)
         if result is None:
             result = []
@@ -611,8 +608,6 @@ class Selector:
 
     def __str__(self) -> str:
         data = repr(shorten(self.get(), width=40))
-        return (
-            f"<{type(self).__name__} query={self._expr!r} data={data}>"
-        )
+        return f"<{type(self).__name__} query={self._expr!r} data={data}>"
 
     __repr__ = __str__
