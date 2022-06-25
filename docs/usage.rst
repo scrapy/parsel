@@ -25,12 +25,10 @@ For JSON, use `JMESPath`_ expressions to select data::
 
 And extract data from those elements::
 
-    >>> html_selector.css('h1::text').get()
+    >>> selector.css('h1::text').get()
     'Hello, Parsel!'
-    >>> html_selector.xpath('//h1/text()').get()
-    'Hello, Parsel!'
-    >>> json_selector.jmespath('title').get()
-    'Hello, Parsel!'
+    >>> selector.xpath('//h1/text()').getall()
+    ['Hello, Parsel!']
 
 Whenever multiple data match the pattern, you can use `.getall()` to retrieve them.
 
