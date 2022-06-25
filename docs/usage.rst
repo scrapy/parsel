@@ -12,16 +12,16 @@ For HTML or XML, use `CSS`_ or `XPath`_ expressions to select data::
     >>> html_text = "<html><body><h1>Hello, Parsel!</h1></body></html>"
     >>> html_selector = Selector(text=html_text)
     >>> html_selector.css('h1')
-    [<Selector xpath='descendant-or-self::h1' data='<h1>Hello, Parsel!</h1>'>]
+    [<Selector query='descendant-or-self::h1' data='<h1>Hello, Parsel!</h1>'>]
     >>> html_selector.xpath('//h1')  # the same, but now with XPath
-    [<Selector xpath='//h1' data='<h1>Hello, Parsel!</h1>'>]
+    [<Selector query='//h1' data='<h1>Hello, Parsel!</h1>'>]
 
 For JSON, use `JMESPath`_ expressions to select data::
 
     >>> json_text = '{"title":"Hello, Parsel!"}'
     >>> json_selector = Selector(text=json_text)
     >>> json_selector.jmespath('title')
-    [<Selector xpath='title' data='Hello, Parsel!'>]
+    [<Selector query='title' data='Hello, Parsel!'>]
 
 And extract data from those elements::
 
@@ -120,7 +120,7 @@ page, let's construct an XPath for selecting the text inside the title tag::
 You can also ask the same thing using CSS instead::
 
     >>> selector.css('title::text')
-    [<Selector xpath='descendant-or-self::title/text()' data='Example website'>]
+    [<Selector query='descendant-or-self::title/text()' data='Example website'>]
 
 To actually extract the textual data, you must call the selector ``.get()``
 or ``.getall()`` methods, as follows::
@@ -617,10 +617,10 @@ returns ``True`` for nodes that have all of the specified HTML classes::
     ... """)
     ...
     >>> sel.xpath('//p[has-class("foo")]')
-    [<Selector xpath='//p[has-class("foo")]' data='<p class="foo bar-baz">First</p>'>,
-     <Selector xpath='//p[has-class("foo")]' data='<p class="foo">Second</p>'>]
+    [<Selector query='//p[has-class("foo")]' data='<p class="foo bar-baz">First</p>'>,
+     <Selector query='//p[has-class("foo")]' data='<p class="foo">Second</p>'>]
     >>> sel.xpath('//p[has-class("foo", "bar-baz")]')
-    [<Selector xpath='//p[has-class("foo", "bar-baz")]' data='<p class="foo bar-baz">First</p>'>]
+    [<Selector query='//p[has-class("foo", "bar-baz")]' data='<p class="foo bar-baz">First</p>'>]
     >>> sel.xpath('//p[has-class("foo", "bar")]')
     []
 
@@ -1031,8 +1031,8 @@ directly by their names::
 
     >>> sel.remove_namespaces()
     >>> sel.xpath("//link")
-    [<Selector xpath='//link' data='<link rel="alternate" type="text/html...'>,
-     <Selector xpath='//link' data='<link rel="next" type="application/at...'>,
+    [<Selector query='//link' data='<link rel="alternate" type="text/html...'>,
+     <Selector query='//link' data='<link rel="next" type="application/at...'>,
      ...]
 
 If you wonder why the namespace removal procedure isn't called always by default
@@ -1077,8 +1077,8 @@ And try to select the links again, now using an "atom:" prefix
 for the "link" node test::
 
     >>> sel.xpath("//atom:link", namespaces={"atom": "http://www.w3.org/2005/Atom"})
-    [<Selector xpath='//atom:link' data='<link xmlns="http://www.w3.org/2005/A...'>,
-     <Selector xpath='//atom:link' data='<link xmlns="http://www.w3.org/2005/A...'>,
+    [<Selector query='//atom:link' data='<link xmlns="http://www.w3.org/2005/A...'>,
+     <Selector query='//atom:link' data='<link xmlns="http://www.w3.org/2005/A...'>,
      ...]
 
 You can pass several namespaces (here we're using shorter 1-letter prefixes)::
