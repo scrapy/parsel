@@ -115,7 +115,7 @@ So, by looking at the :ref:`HTML code <topics-selectors-htmlcode>` of that
 page, let's construct an XPath for selecting the text inside the title tag::
 
     >>> selector.xpath('//title/text()')
-    [<Selector xpath='//title/text()' data='Example website'>]
+    [<Selector query='//title/text()' data='Example website'>]
 
 You can also ask the same thing using CSS instead::
 

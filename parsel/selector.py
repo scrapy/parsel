@@ -611,9 +611,8 @@ class Selector:
 
     def __str__(self) -> str:
         data = repr(shorten(self.get(), width=40))
-        expr_field = "jmespath" if self.type == "json" else "xpath"
         return (
-            f"<{type(self).__name__} {expr_field}={self._expr!r} data={data}>"
+            f"<{type(self).__name__} query={self._expr!r} data={data}>"
         )
 
     __repr__ = __str__
