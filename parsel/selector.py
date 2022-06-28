@@ -514,12 +514,17 @@ class Selector:
 
         if text:
             return html_text.etree_to_text(
-                tree, guess_punct_space=guess_punct_space, guess_layout=guess_layout
+                tree,
+                guess_punct_space=guess_punct_space,
+                guess_layout=guess_layout,
             )
 
         try:
             return etree.tostring(
-                tree, method=self._tostring_method, encoding="unicode", with_tail=False
+                tree,
+                method=self._tostring_method,
+                encoding="unicode",
+                with_tail=False,
             )
         except (AttributeError, TypeError):
             if tree is True:
@@ -629,7 +634,10 @@ class Selector:
             cleaner = self._text_cleaner
         root = cleaner.clean_html(self.root)
         return self.__class__(
-            root=root, _expr=self._expr, namespaces=self.namespaces, type=self.type
+            root=root,
+            _expr=self._expr,
+            namespaces=self.namespaces,
+            type=self.type,
         )
 
     def __bool__(self) -> bool:

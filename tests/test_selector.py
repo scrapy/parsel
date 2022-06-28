@@ -1266,9 +1266,9 @@ class SelectorTextTestCase(unittest.TestCase):
         self.assertEqual(txt, "title:some text")
 
     def test_text_getall(self):
-        sel = self.sscls(text="<ul><li>option1</li><li>option2</li></ul>").getall(
-            text=True
-        )
+        sel = self.sscls(
+            text="<ul><li>option1</li><li>option2</li></ul>"
+        ).getall(text=True)
         self.assertEqual(1, len(sel))
         self.assertEqual("option1\noption2", sel[0])
 
