@@ -1263,7 +1263,7 @@ class SelectorTextTestCase(unittest.TestCase):
     def test_text_get(self):
         sel = self.sscls(text="<p>title:<h1>some text</h1></p>")
         txt = sel.get(text=True)
-        self.assertEqual(txt, "title:some text")
+        self.assertEqual(txt, "title:\n\nsome text")
 
     def test_text_getall(self):
         sel = self.sscls(
