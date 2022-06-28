@@ -181,6 +181,7 @@ class SelectorList(List[_SelectorType]):
 
     def getall(
         self,
+        *,
         text: bool = False,
         cleaner: Union[str, None, Cleaner] = "auto",
         guess_punct_space: bool = True,
@@ -217,6 +218,7 @@ class SelectorList(List[_SelectorType]):
     def get(
         self,
         default: Optional[str] = None,
+        *,
         text: bool = False,
         cleaner: Union[str, None, Cleaner] = "auto",
         guess_punct_space: bool = True,
@@ -462,6 +464,7 @@ class Selector:
 
     def get(
         self,
+        *,
         text: bool = False,
         cleaner: Union[str, None, Cleaner] = "auto",
         guess_punct_space: bool = True,
@@ -538,6 +541,7 @@ class Selector:
 
     def getall(
         self,
+        *,
         text: bool = False,
         cleaner: Union[str, None, Cleaner] = "auto",
         guess_punct_space: bool = True,
