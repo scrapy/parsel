@@ -136,8 +136,8 @@ class JMESPathTestCase(unittest.TestCase):
         )
         self.assertEqual(
             sel.xpath("//div/content").jmespath("user[*].age").re("(\d+)"),
-            ['18', '32', '22', '25'],
+            ["18", "32", "22", "25"],
         )
         self.assertEqual(
-            sel.xpath("//div/content").jmespath("total").re_first("(\d+)"), '4'
+            sel.xpath("//div/content").jmespath("total").re_first("(\d+)"), "4"
         )
