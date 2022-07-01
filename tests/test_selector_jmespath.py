@@ -94,7 +94,6 @@ class JMESPathTestCase(unittest.TestCase):
         self.assertEqual(sel.xpath("//div/content").jmespath("total").get(), 4)
 
     def test_jmestpath_with_re(self):
-        # tests selector of jmespath using the extractor .re() instead of .get()
         html_text = """
             <div>
                 <h1>Information</h1>
