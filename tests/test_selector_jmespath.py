@@ -127,17 +127,17 @@ class JMESPathTestCase(unittest.TestCase):
         self.assertEqual(
             sel.xpath("//div/content/text()")
             .jmespath("user[*].name")
-            .re("(\w+)"),
+            .re(r"(\w+)"),
             ["A", "B", "C", "D"],
         )
         self.assertEqual(
-            sel.xpath("//div/content").jmespath("user[*].name").re("(\w+)"),
+            sel.xpath("//div/content").jmespath("user[*].name").re(r"(\w+)"),
             ["A", "B", "C", "D"],
         )
         self.assertEqual(
-            sel.xpath("//div/content").jmespath("user[*].age").re("(\d+)"),
+            sel.xpath("//div/content").jmespath("user[*].age").re(r"(\d+)"),
             ["18", "32", "22", "25"],
         )
         self.assertEqual(
-            sel.xpath("//div/content").jmespath("total").re_first("(\d+)"), "4"
+            sel.xpath("//div/content").jmespath("total").re_first(r"(\d+)"), "4"
         )
