@@ -371,7 +371,7 @@ class Selector:
             if isinstance(x, str):
                 return self.__class__(text=x, _expr=query, type="text")
             else:
-                return self.__class__(root=json.dumps(x), _expr=query)
+                return self.__class__(root=x, _expr=query)
 
         result = [make_selector(x) for x in result]
         return self.selectorlist_cls(result)
@@ -474,8 +474,11 @@ class Selector:
         Passing ``replace_entities`` as ``False`` switches off these
         replacements.
         """
+        data = self.get()
+        if not isinstance(data, str):
+            data = json.dumps(data, default="" if self.type == "json" else repr)
         return extract_regex(
-            regex, self.get(), replace_entities=replace_entities
+            regex, data, replace_entities=replace_entities
         )
 
     @typing.overload
