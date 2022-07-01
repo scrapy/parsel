@@ -92,3 +92,53 @@ class JMESPathTestCase(unittest.TestCase):
             ["A", "B", "C", "D"],
         )
         self.assertEqual(sel.xpath("//div/content").jmespath("total").get(), 4)
+
+    def test_jmestpath_with_re(self):
+        # tests selector of jmespath using the extractor .re() instead of .get()
+        html_text = """
+            <div>
+                <h1>Information</h1>
+                <content>
+                {
+                  "user": [
+                            {
+                                      "name": "A",
+                                      "age": 18
+                            },
+                            {
+                                      "name": "B",
+                                      "age": 32
+                            },
+                            {
+                                      "name": "C",
+                                      "age": 22
+                            },
+                            {
+                                      "name": "D",
+                                      "age": 25
+                            }
+                  ],
+                  "total": 4,
+                  "status": "ok"
+                }
+                </content>
+            </div>
+            """
+        sel = Selector(text=html_text)
+        self.assertEqual(
+            sel.xpath("//div/content/text()")
+            .jmespath("user[*].name")
+            .re("(\w+)"),
+            ["A", "B", "C", "D"],
+        )
+        self.assertEqual(
+            sel.xpath("//div/content").jmespath("user[*].name").re("(\w+)"),
+            ["A", "B", "C", "D"],
+        )
+        self.assertEqual(
+            sel.xpath("//div/content").jmespath("user[*].age").re("(\d+)"),
+            ['18', '32', '22', '25'],
+        )
+        self.assertEqual(
+            sel.xpath("//div/content").jmespath("total").re_first("(\d+)"), '4'
+        )

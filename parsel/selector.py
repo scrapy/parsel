@@ -371,7 +371,7 @@ class Selector:
             if isinstance(x, str):
                 return self.__class__(text=x, _expr=query, type="text")
             else:
-                return self.__class__(root=x, _expr=query)
+                return self.__class__(root=json.dumps(x), _expr=query)
 
         result = [make_selector(x) for x in result]
         return self.selectorlist_cls(result)
