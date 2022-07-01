@@ -27,7 +27,7 @@ And extract data from those elements::
 
     >>> html_selector.xpath('//h1/text()').get()
     'Hello, Parsel!'
-    >>> html_selector.jmespath('title').getall()
+    >>> json_selector.jmespath('title').getall()
     ['Hello, Parsel!']
 
 .. _CSS: https://www.w3.org/TR/selectors
