@@ -36,14 +36,19 @@ class JMESPathTestCase(unittest.TestCase):
         sel = Selector(text=data)
         self.assertEqual(
             sel.jmespath("html").get(),
-            "<div><a>AAA<br>Test</a>aaa</div>" "<div><a>BBB</a>bbb<b>BbB</b></div>",
+            "<div><a>AAA<br>Test</a>aaa</div>"
+            "<div><a>BBB</a>bbb<b>BbB</b></div>",
         )
         self.assertEqual(
             sel.jmespath("html").xpath("//div/a/text()").getall(),
             ["AAA", "Test", "BBB"],
         )
-        self.assertEqual(sel.jmespath("html").css("div > b").getall(), ["<b>BbB</b>"])
-        self.assertEqual(sel.jmespath("content").jmespath("name.age").get(), 18)
+        self.assertEqual(
+            sel.jmespath("html").css("div > b").getall(), ["<b>BbB</b>"]
+        )
+        self.assertEqual(
+            sel.jmespath("content").jmespath("name.age").get(), 18
+        )
 
     def test_html_has_json(self):
         html_text = """
@@ -77,7 +82,9 @@ class JMESPathTestCase(unittest.TestCase):
         """
         sel = Selector(text=html_text)
         self.assertEqual(
-            sel.xpath("//div/content/text()").jmespath("user[*].name").getall(),
+            sel.xpath("//div/content/text()")
+            .jmespath("user[*].name")
+            .getall(),
             ["A", "B", "C", "D"],
         )
         self.assertEqual(

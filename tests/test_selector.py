@@ -60,7 +60,8 @@ class SelectorTestCase(unittest.TestCase):
         )
 
         self.assertEqual(
-            [x.extract() for x in sel.xpath("//input[@name='a']/@name")], ["a"]
+            [x.extract() for x in sel.xpath("//input[@name='a']/@name")],
+            ["a"],
         )
         self.assertEqual(
             [
@@ -225,7 +226,7 @@ class SelectorTestCase(unittest.TestCase):
         sel = self.sscls(text=body)
 
         representation = (
-            f"<Selector xpath='//input/@name' data='{37 * 'b'}...'>"
+            f"<Selector query='//input/@name' data='{37 * 'b'}...'>"
         )
 
         self.assertEqual(
@@ -236,7 +237,7 @@ class SelectorTestCase(unittest.TestCase):
         body = f"<p><input name='{50 * 'b'}' value='\xa9'/></p>"
 
         representation = (
-            "<Selector xpath='//input[@value=\"©\"]/@value' data='©'>"
+            "<Selector query='//input[@value=\"©\"]/@value' data='©'>"
         )
 
         sel = self.sscls(text=body)
@@ -555,7 +556,8 @@ class SelectorTestCase(unittest.TestCase):
 
         self.assertEqual(
             x.xpath(
-                "//somens:a/text()", namespaces={"somens": "http://scrapy.org"}
+                "//somens:a/text()",
+                namespaces={"somens": "http://scrapy.org"},
             ).extract(),
             ["take this"],
         )
@@ -649,7 +651,8 @@ class SelectorTestCase(unittest.TestCase):
         # "xmlns" is still defined
         self.assertEqual(
             x.xpath(
-                "//xmlns:TestTag/@b:att", namespaces={"b": "http://somens.com"}
+                "//xmlns:TestTag/@b:att",
+                namespaces={"b": "http://somens.com"},
             ).extract()[0],
             "value",
         )
@@ -931,7 +934,8 @@ class SelectorTestCase(unittest.TestCase):
         self.assertEqual(
             len(
                 sel.xpath(
-                    "//f:link", namespaces={"f": "http://www.w3.org/2005/Atom"}
+                    "//f:link",
+                    namespaces={"f": "http://www.w3.org/2005/Atom"},
                 )
             ),
             2,

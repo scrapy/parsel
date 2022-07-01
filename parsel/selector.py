@@ -76,11 +76,7 @@ class SelectorList(List[_SelectorType]):
     def __getstate__(self) -> None:
         raise TypeError("can't pickle SelectorList objects")
 
-    def jmespath(
-        self,
-        query: str,
-        **kwargs,
-    ) -> "SelectorList[_SelectorType]":
+    def jmespath(self, query: str, **kwargs) -> "SelectorList[_SelectorType]":
         """
         Call the ``.jmespath()`` method for each element in this list and return
         their results flattened as another :class:`SelectorList`.
@@ -92,7 +88,9 @@ class SelectorList(List[_SelectorType]):
 
             selector.jmespath('author.name', options=jmespath.Options(dict_cls=collections.OrderedDict))
         """
-        return self.__class__(flatten([x.jmespath(query, **kwargs) for x in self]))
+        return self.__class__(
+            flatten([x.jmespath(query, **kwargs) for x in self])
+        )
 
     def xpath(
         self,
@@ -302,7 +300,9 @@ class Selector:
 
         if text is not None:
             if type in ("html", "xml", None):
-                self._load_lxml_root(text, type=type or "html", base_url=base_url)
+                self._load_lxml_root(
+                    text, type=type or "html", base_url=base_url
+                )
             elif type == "json":
                 self.root = _load_json_or_none(text)
                 self.type = type
@@ -365,6 +365,7 @@ class Selector:
             data = _load_json_or_none(self._text)
         else:
             data = _load_json_or_none(self.root.text)
+
         result = jmespath.search(query, data, **kwargs)
         if result is None:
             result = []
@@ -406,7 +407,9 @@ class Selector:
         if self.type == "text":
             self._load_lxml_root(self.root, type="html")
         elif self.type not in ("html", "xml"):
-            raise ValueError(f"Cannot use xpath on a Selector of type {self.type!r}")
+            raise ValueError(
+                f"Cannot use xpath on a Selector of type {self.type!r}"
+            )
         try:
             xpathev = self.root.xpath
         except AttributeError:
@@ -430,7 +433,10 @@ class Selector:
 
         result = [
             self.__class__(
-                root=x, _expr=query, namespaces=self.namespaces, type=self.type
+                root=x,
+                _expr=query,
+                namespaces=self.namespaces,
+                type=self.type,
             )
             for x in result
         ]
@@ -450,7 +456,9 @@ class Selector:
         if self.type == "text":
             self._load_lxml_root(self.root, type="html")
         elif self.type not in ("html", "xml"):
-            raise ValueError(f"Cannot use css on a Selector of type {self.type!r}")
+            raise ValueError(
+                f"Cannot use css on a Selector of type {self.type!r}"
+            )
         return self.xpath(self._css2xpath(query))
 
     def _css2xpath(self, query: str) -> Any:
@@ -608,7 +616,6 @@ class Selector:
 
     def __str__(self) -> str:
         data = repr(shorten(self.get(), width=40))
-        expr_field = "jmespath" if self.type == "json" else "xpath"
-        return f"<{type(self).__name__} {expr_field}={self._expr!r} data={data}>"
+        return f"<{type(self).__name__} query={self._expr!r} data={data}>"
 
     __repr__ = __str__
