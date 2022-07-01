@@ -337,7 +337,6 @@ class Selector:
     def jmespath(
         self: _SelectorType,
         query: str,
-        type: Optional[str] = None,
         **kwargs,
     ) -> SelectorList[_SelectorType]:
         """
@@ -347,10 +346,6 @@ class Selector:
 
         ``query`` is a string containing the `JMESPath
         <https://jmespath.org/>`_ query to apply.
-
-        ``type`` is a string that allows the same values as the matching
-        argument of the ``__init__`` method. If not specified, it defaults to
-        ``"json"``.
 
         Any additional named arguments are passed to the underlying
         ``jmespath.search`` call, e.g.::
@@ -374,9 +369,9 @@ class Selector:
 
         def make_selector(x):  # closure function
             if isinstance(x, str):
-                return self.__class__(text=x, _expr=query, type=type or "text")
+                return self.__class__(text=x, _expr=query, type="text")
             else:
-                return self.__class__(root=x, _expr=query, type=type)
+                return self.__class__(root=x, _expr=query)
 
         result = [make_selector(x) for x in result]
         return self.selectorlist_cls(result)
