@@ -1101,6 +1101,16 @@ class SelectorTestCase(unittest.TestCase):
         sel.css("body").remove()
         self.assertEqual(sel.get(), "<html></html>")
 
+    def test_dont_remove_text_after_deleted_element(self) -> None:
+        sel = self.sscls(
+            text="""<html><body>Text before.<span>Text in.</span> Text after.</body></html>
+            """
+        )
+        sel.css("span").remove()
+        self.assertEqual(
+            sel.get(), "<html><body>Text before. Text after.</body></html>"
+        )
+
 
 class ExsltTestCase(unittest.TestCase):
 

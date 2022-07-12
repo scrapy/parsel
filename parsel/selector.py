@@ -478,7 +478,7 @@ class Selector:
         Remove matched nodes from the parent element.
         """
         try:
-            parent = self.root.getparent()
+            self.root.getparent()
         except AttributeError:
             # 'str' object has no attribute 'getparent'
             raise CannotRemoveElementWithoutRoot(
@@ -489,8 +489,8 @@ class Selector:
             )
 
         try:
-            parent.remove(self.root)
-        except AttributeError:
+            self.root.drop_tree()
+        except (AttributeError, AssertionError):
             # 'NoneType' object has no attribute 'remove'
             raise CannotRemoveElementWithoutParent(
                 "The node you're trying to remove has no parent, "
