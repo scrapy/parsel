@@ -476,8 +476,9 @@ class Selector:
         """
         data = self.get()
         if not isinstance(data, str):
-            data = json.dumps(
-                data, default="" if self.type == "json" else repr
+            raise ValueError(
+                "re() can only be called on Selector instances "
+                "that select strings"
             )
         return extract_regex(regex, data, replace_entities=replace_entities)
 
