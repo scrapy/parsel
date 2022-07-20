@@ -134,11 +134,13 @@ class JMESPathTestCase(unittest.TestCase):
             sel.xpath("//div/content").jmespath("user[*].name").re(r"(\w+)"),
             ["A", "B", "C", "D"],
         )
+
+        with self.assertRaises(ValueError):
+            sel.xpath("//div/content").jmespath("user[*].age").re(r"(\d+)")
+
         self.assertEqual(
-            sel.xpath("//div/content").jmespath("user[*].age").re(r"(\d+)"),
+            sel.xpath("//div/content")
+            .jmespath("user[*].age.to_string(@)")
+            .re(r"(\d+)"),
             ["18", "32", "22", "25"],
-        )
-        self.assertEqual(
-            sel.xpath("//div/content").jmespath("total").re_first(r"(\d+)"),
-            "4",
         )
