@@ -475,11 +475,6 @@ class Selector:
         replacements.
         """
         data = self.get()
-        if not isinstance(data, str):
-            raise ValueError(
-                "re() can only be called on Selector instances "
-                "that select strings"
-            )
         return extract_regex(regex, data, replace_entities=replace_entities)
 
     @typing.overload
