@@ -135,7 +135,7 @@ class JMESPathTestCase(unittest.TestCase):
             ["A", "B", "C", "D"],
         )
 
-        with self.assertRaises(ValueError):
+        with self.assertRaises(TypeError):
             sel.xpath("//div/content").jmespath("user[*].age").re(r"(\d+)")
 
         self.assertEqual(
