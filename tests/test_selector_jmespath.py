@@ -139,13 +139,14 @@ class JMESPathTestCase(unittest.TestCase):
             sel.xpath("//div/content").jmespath("user[*].age").re(r"(\d+)")
 
         self.assertEqual(
-            sel.xpath("//div/content").jmespath("unavailable").re(r"(\d+)"),
-            []
+            sel.xpath("//div/content").jmespath("unavailable").re(r"(\d+)"), []
         )
 
         self.assertEqual(
-            sel.xpath("//div/content").jmespath("unavailable").re_first(r"(\d+)"),
-            None
+            sel.xpath("//div/content")
+            .jmespath("unavailable")
+            .re_first(r"(\d+)"),
+            None,
         )
 
         self.assertEqual(
