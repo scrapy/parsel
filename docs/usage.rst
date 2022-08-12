@@ -120,6 +120,15 @@ pseudo-elements::
     >>> selector.css('title::text').get()
     'Example website'
 
+Extract text witout ::text
+==========================
+You can extract inner text without specifying ``::text`` in your selctor instead
+an optional paramter text=True in the ``get()`` or ``getall()`` methods. 
+
+    >>> selector.css('title').get(text=True)
+
+You can pass additional paramter ``guess_punct_space``, ``guess_layout`` and ``guess_layout``
+
 As you can see, ``.xpath()`` and ``.css()`` methods return a
 :class:`~parsel.selector.SelectorList` instance, which is a list of new
 selectors. This API can be used for quickly selecting nested data::
