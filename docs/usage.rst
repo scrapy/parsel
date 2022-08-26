@@ -120,12 +120,10 @@ pseudo-elements::
     >>> selector.css('title::text').get()
     'Example website'
 
-Extract text witout ::text
-==========================
-You can extract inner text without specifying ``::text`` in your selctor instead
+You can extract inner text without specifying ``::text`` in your selector instead
 an optional paramter text=True in the ``get()`` or ``getall()`` methods. 
 
-    >>> selector.css('title').get(text=True)
+    >>> selector.css('#images').get(text=True)
 
 You can pass additional paramter ``guess_punct_space``, ``guess_layout`` and ``guess_layout``
 
