@@ -318,7 +318,7 @@ class Selector:
                 type = "html"
             elif bool(_load_json_or_none(self.root)):
                 type = "json"
-            if isinstance(self.root, dict) or isinstance(self.root, list):
+            if isinstance(self.root, (dict, list)):
                 type = "json"
 
             self.type = type or "json"
