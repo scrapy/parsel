@@ -235,10 +235,12 @@ _NOTSET = object()
 
 
 def _load_json_or_none(text):
-    try:
-        return json.loads(text)
-    except ValueError:
-        return None
+    if isinstance(text, (str, bytes, bytearray)):
+        try:
+            return json.loads(text)
+        except ValueError:
+            return None
+    return None
 
 
 class Selector:
@@ -289,8 +291,6 @@ class Selector:
         if type not in ("html", "json", "text", "xml", None):
             raise ValueError(f"Invalid type: {type}")
 
-        self._text = text
-
         if text is None and root is _NOTSET:
             raise ValueError("Selector needs either text or root argument")
 
@@ -298,21 +298,29 @@ class Selector:
             msg = f"text argument should be of type str, got {text.__class__}"
             raise TypeError(msg)
 
+        self._text = text
         if text is not None:
-            if type in ("html", "xml", None):
+            if type == "text":
+                self.type = type
+                self.root = text
+            elif (
+                type == "json" or bool(_load_json_or_none(text))
+            ) and not isinstance(_load_json_or_none(text), str):
+                self.type = "json"
+                self.root = _load_json_or_none(text)
+            elif type in ("html", "xml", None):
                 self._load_lxml_root(
                     text, type=type or "html", base_url=base_url
                 )
-            elif type == "json":
-                self.root = _load_json_or_none(text)
-                self.type = type
-            else:
-                self.root = text
-                self.type = type
         else:
             self.root = root
             if type is None and isinstance(self.root, etree._Element):
                 type = "html"
+            elif bool(_load_json_or_none(self.root)):
+                type = "json"
+            if isinstance(self.root, dict) or isinstance(self.root, list):
+                type = "json"
+
             self.type = type or "json"
 
         self._expr = _expr
@@ -327,10 +335,15 @@ class Selector:
     def __getstate__(self) -> Any:
         raise TypeError("can't pickle Selector objects")
 
-    def _get_root(self, text: str, base_url: Optional[str] = None) -> Any:
+    def _get_root(
+        self,
+        text: str,
+        base_url: Optional[str] = None,
+        type: Optional[str] = None,
+    ) -> Any:
         return create_root_node(
             text,
-            _ctgroup[self.type]["_parser"],
+            _ctgroup[type or self.type]["_parser"],
             base_url=base_url,
         )
 
@@ -352,10 +365,10 @@ class Selector:
 
             selector.jmespath('author.name', options=jmespath.Options(dict_cls=collections.OrderedDict))
         """
-        if self.type == "json":
-            data = self.root
-        elif isinstance(self.root, str):
+        if isinstance(self.root, str):
             data = _load_json_or_none(self.root)
+        elif self.type == "json":
+            data = self.root
         elif self.root.text is None:
             data = _load_json_or_none(self._text)
         else:
@@ -399,16 +412,20 @@ class Selector:
 
             selector.xpath('//a[href=$url]', url="http://www.example.com")
         """
-        if self.type == "text":
-            self._load_lxml_root(self.root, type="html")
-        elif self.type not in ("html", "xml"):
+        if self.type not in ("html", "xml", "text"):
             raise ValueError(
                 f"Cannot use xpath on a Selector of type {self.type!r}"
             )
-        try:
-            xpathev = self.root.xpath
-        except AttributeError:
-            return self.selectorlist_cls([])
+        if self.type in ("html", "xml"):
+            try:
+                xpathev = self.root.xpath
+            except AttributeError:
+                return self.selectorlist_cls([])
+        else:
+            try:
+                xpathev = self._get_root(self._text, type="html").xpath
+            except AttributeError:
+                return self.selectorlist_cls([])
 
         nsp = dict(self.namespaces)
         if namespaces is not None:
