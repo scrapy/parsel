@@ -1,0 +1,29 @@
+[MASTER]
+ignore=typing
+persistent=no
+
+[MESSAGES CONTROL]
+disable=c-extension-no-member,
+        deprecated-method,
+        fixme,
+        import-error,
+        import-outside-toplevel,
+        invalid-name,
+        line-too-long,
+        missing-class-docstring,
+        missing-function-docstring,
+        missing-module-docstring,
+        no-else-return,
+        no-member,
+        parse-error,
+        raise-missing-from,
+        redefined-builtin,
+        too-few-public-methods,
+        too-many-arguments,
+        too-many-lines,
+        too-many-public-methods,
+        unidiomatic-typecheck,
+        unused-argument,
+        use-a-generator,
+        wrong-import-order,
+        wrong-import-position

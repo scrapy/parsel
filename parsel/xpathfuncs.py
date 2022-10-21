@@ -1,11 +1,9 @@
 import re
 from lxml import etree
 
-from six import string_types
-
 from w3lib.html import HTML5_WHITESPACE
 
-regex = '[{}]+'.format(HTML5_WHITESPACE)
+regex = f"[{HTML5_WHITESPACE}]+"
 replace_html5_whitespaces = re.compile(regex).sub
 
 
@@ -20,7 +18,7 @@ def set_xpathfunc(fname, func):
 
     See more `in lxml documentation`_.
 
-    .. _`in lxml documentation`: http://lxml.de/extensions.html#xpath-extension-functions
+    .. _`in lxml documentation`: https://lxml.de/extensions.html#xpath-extension-functions
 
     """
     ns_fns = etree.FunctionNamespace(None)
@@ -31,7 +29,7 @@ def set_xpathfunc(fname, func):
 
 
 def setup():
-    set_xpathfunc('has-class', has_class)
+    set_xpathfunc("has-class", has_class)
 
 
 def has_class(context, *classes):
@@ -40,22 +38,24 @@ def has_class(context, *classes):
     Return True if all ``classes`` are present in element's class attr.
 
     """
-    if not context.eval_context.get('args_checked'):
+    if not context.eval_context.get("args_checked"):
         if not classes:
             raise ValueError(
-                'XPath error: has-class must have at least 1 argument')
+                "XPath error: has-class must have at least 1 argument"
+            )
         for c in classes:
-            if not isinstance(c, string_types):
+            if not isinstance(c, str):
                 raise ValueError(
-                    'XPath error: has-class arguments must be strings')
-        context.eval_context['args_checked'] = True
+                    "XPath error: has-class arguments must be strings"
+                )
+        context.eval_context["args_checked"] = True
 
-    node_cls = context.context_node.get('class')
+    node_cls = context.context_node.get("class")
     if node_cls is None:
         return False
-    node_cls = ' ' + node_cls + ' '
-    node_cls = replace_html5_whitespaces(' ', node_cls)
+    node_cls = " " + node_cls + " "
+    node_cls = replace_html5_whitespaces(" ", node_cls)
     for cls in classes:
-        if ' ' + cls + ' ' not in node_cls:
+        if " " + cls + " " not in node_cls:
             return False
     return True

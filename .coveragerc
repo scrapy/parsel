@@ -1,3 +1,7 @@
 [run]
 branch = true
 include = parsel/*
+
+[report]
+exclude_lines =
+    @typing.overload

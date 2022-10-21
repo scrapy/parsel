@@ -2,16 +2,20 @@
 Parsel
 ======
 
-.. image:: https://img.shields.io/travis/scrapy/parsel/master.svg
-   :target: https://travis-ci.org/scrapy/parsel
-   :alt: Build Status
+.. image:: https://github.com/scrapy/parsel/actions/workflows/tests.yml/badge.svg
+   :target: https://github.com/scrapy/parsel/actions/workflows/tests.yml
+   :alt: Tests
+
+.. image:: https://img.shields.io/pypi/pyversions/parsel.svg
+   :target: https://github.com/scrapy/parsel/actions/workflows/tests.yml
+   :alt: Supported Python versions
 
 .. image:: https://img.shields.io/pypi/v/parsel.svg
    :target: https://pypi.python.org/pypi/parsel
    :alt: PyPI Version
 
 .. image:: https://img.shields.io/codecov/c/github/scrapy/parsel/master.svg
-   :target: http://codecov.io/github/scrapy/parsel?branch=master
+   :target: https://codecov.io/github/scrapy/parsel?branch=master
    :alt: Coverage report
 
 
@@ -26,7 +30,7 @@ Example (`open online demo`_):
 .. code-block:: python
 
     >>> from parsel import Selector
-    >>> selector = Selector(text=u"""<html>
+    >>> selector = Selector(text="""<html>
             <body>
                 <h1>Hello, Parsel!</h1>
                 <ul>
