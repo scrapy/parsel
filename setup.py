@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-from setuptools import setup, __version__ as setuptools_version
+from setuptools import setup
 
 
 with open("README.rst", encoding="utf-8") as readme_file:
