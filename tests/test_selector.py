@@ -1,8 +1,12 @@
 import re
+import warnings
 import weakref
 import unittest
 import pickle
 from typing import Any
+
+from lxml import etree
+from pkg_resources import parse_version
 
 from parsel import Selector, SelectorList
 from parsel.selector import (
@@ -1101,15 +1105,78 @@ class SelectorTestCase(unittest.TestCase):
         sel.css("body").remove()
         self.assertEqual(sel.get(), "<html></html>")
 
-    def test_dont_remove_text_after_deleted_element(self) -> None:
-        sel = self.sscls(
-            text="""<html><body>Text before.<span>Text in.</span> Text after.</body></html>
-            """
-        )
-        sel.css("span").remove()
-        self.assertEqual(
-            sel.get(), "<html><body>Text before. Text after.</body></html>"
-        )
+
+    def test_deep_nesting(self):
+        lxml_version = parse_version(etree.__version__)
+        lxml_huge_tree_version = parse_version("4.2")
+
+        content = """
+        <html>
+        <body>
+        <span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span>
+        <span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span>
+        <span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span>
+        <span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span>
+        <span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span>
+        <span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span>
+        <span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span>
+        <span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span>
+        <span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span>
+        <span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span>
+        <span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span>
+        <span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span>
+        <span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span>
+        <span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span>
+        <span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span>
+        <span><span><span><span><span><span><span><span><span><span><span><span>
+        hello world
+        </span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span>
+        </span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span>
+        </span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span>
+        </span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span>
+        </span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span>
+        </span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span>
+        </span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span>
+        </span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span>
+        </span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span>
+        </span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span>
+        </span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span>
+        </span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span>
+        </span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span>
+        </span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span>
+        </span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span>
+        </span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span>
+        </span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span>
+        </span></span></span></span></span></span></span></span></span></span>
+        <table>
+         <tr><td>some test</td></tr>
+        </table>
+        </body>
+        </html>
+        """
+
+        # If lxml doesn't support huge trees expect wrong results and a warning
+        if lxml_version < lxml_huge_tree_version:
+            with warnings.catch_warnings(record=True) as w:
+                sel = Selector(text=content)
+                self.assertIn("huge_tree", str(w[0].message))
+                self.assertLessEqual(len(sel.css("span")), 256)
+                self.assertEqual(len(sel.css("td")), 0)
+            return
+
+        # Same goes for explicitly disabling huge trees
+        with warnings.catch_warnings(record=True) as w:
+            sel = Selector(text=content, huge_tree=False)
+            self.assertIn("huge_tree", str(w[0].message))
+            self.assertLessEqual(len(sel.css("span")), 256)
+            self.assertEqual(len(sel.css("td")), 0)
+
+        # If huge trees are enabled, elements with a depth > 255 should be found
+        sel = Selector(text=content)
+        nest_level = 282
+        self.assertEqual(len(sel.css("span")), nest_level)
+        self.assertEqual(len(sel.css("td")), 1)
+
 
 
 class ExsltTestCase(unittest.TestCase):
@@ -1250,4 +1317,15 @@ class ExsltTestCase(unittest.TestCase):
                                     //*[@itemscope]/*/@itemprop)"""
             ).extract(),
             ["url", "name", "startDate", "location", "offers"],
+        )
+
+
+    def test_dont_remove_text_after_deleted_element(self) -> None:
+        sel = self.sscls(
+            text="""<html><body>Text before.<span>Text in.</span> Text after.</body></html>
+            """
+        )
+        sel.css("span").remove()
+        self.assertEqual(
+            sel.get(), "<html><body>Text before. Text after.</body></html>"
         )

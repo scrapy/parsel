@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-from setuptools import setup, __version__ as setuptools_version
+from setuptools import setup
 
 
 with open("README.rst", encoding="utf-8") as readme_file:
@@ -47,6 +47,7 @@ setup(
         "Programming Language :: Python :: 3.8",
         "Programming Language :: Python :: 3.9",
         "Programming Language :: Python :: 3.10",
+        "Programming Language :: Python :: 3.11",
         "Programming Language :: Python :: Implementation :: CPython",
         "Programming Language :: Python :: Implementation :: PyPy",
     ],

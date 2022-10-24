@@ -3,14 +3,20 @@ XPath selectors based on lxml
 """
 
 import typing
+import warnings
 from typing import Any, Dict, List, Optional, Mapping, Pattern, Union
 
 from lxml import etree, html
+from pkg_resources import parse_version
 
 from .utils import flatten, iflatten, extract_regex, shorten
 from .csstranslator import HTMLTranslator, GenericTranslator
 
 _SelectorType = typing.TypeVar("_SelectorType", bound="Selector")
+
+lxml_version = parse_version(etree.__version__)
+lxml_huge_tree_version = parse_version("4.2")
+LXML_SUPPORTS_HUGE_TREE = lxml_version >= lxml_huge_tree_version
 
 
 class CannotRemoveElementWithoutRoot(Exception):
@@ -50,11 +56,23 @@ def _st(st: Optional[str]) -> str:
         raise ValueError(f"Invalid type: {st}")
 
 
-def create_root_node(text, parser_cls, base_url=None):
+def create_root_node(
+    text, parser_cls, base_url=None, huge_tree=LXML_SUPPORTS_HUGE_TREE
+):
     """Create root node for text using given parser class."""
     body = text.strip().replace("\x00", "").encode("utf8") or b"<html/>"
-    parser = parser_cls(recover=True, encoding="utf8")
-    root = etree.fromstring(body, parser=parser, base_url=base_url)
+    if huge_tree and LXML_SUPPORTS_HUGE_TREE:
+        parser = parser_cls(recover=True, encoding="utf8", huge_tree=True)
+        root = etree.fromstring(body, parser=parser, base_url=base_url)
+    else:
+        parser = parser_cls(recover=True, encoding="utf8")
+        root = etree.fromstring(body, parser=parser, base_url=base_url)
+        for error in parser.error_log:
+            if "use XML_PARSE_HUGE option" in error.message:
+                warnings.warn(
+                    f"Input data is too big. Upgrade to lxml "
+                    f"{lxml_huge_tree_version} or later for huge_tree support."
+                )
     if root is None:
         root = etree.fromstring(b"<html/>", parser=parser, base_url=base_url)
     return root
@@ -270,6 +288,7 @@ class Selector:
         root: Optional[Any] = None,
         base_url: Optional[str] = None,
         _expr: Optional[str] = None,
+        huge_tree: bool = LXML_SUPPORTS_HUGE_TREE,
     ) -> None:
         self.type = st = _st(type or self._default_type)
         self._parser = _ctgroup[st]["_parser"]
@@ -280,7 +299,7 @@ class Selector:
             if not isinstance(text, str):
                 msg = f"text argument should be of type str, got {text.__class__}"
                 raise TypeError(msg)
-            root = self._get_root(text, base_url)
+            root = self._get_root(text, base_url, huge_tree)
         elif root is None:
             raise ValueError("Selector needs either text or root argument")
 
@@ -293,8 +312,15 @@ class Selector:
     def __getstate__(self) -> Any:
         raise TypeError("can't pickle Selector objects")
 
-    def _get_root(self, text: str, base_url: Optional[str] = None) -> Any:
-        return create_root_node(text, self._parser, base_url=base_url)
+    def _get_root(
+        self,
+        text: str,
+        base_url: Optional[str] = None,
+        huge_tree: bool = LXML_SUPPORTS_HUGE_TREE,
+    ) -> Any:
+        return create_root_node(
+            text, self._parser, base_url=base_url, huge_tree=huge_tree
+        )
 
     def xpath(
         self: _SelectorType,
