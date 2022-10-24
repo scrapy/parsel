@@ -56,19 +56,23 @@ def _st(st: Optional[str]) -> str:
         raise ValueError(f"Invalid type: {st}")
 
 
-def create_root_node(text, parser_cls, base_url=None, huge_tree=LXML_SUPPORTS_HUGE_TREE):
+def create_root_node(
+    text, parser_cls, base_url=None, huge_tree=LXML_SUPPORTS_HUGE_TREE
+):
     """Create root node for text using given parser class."""
-    body = text.strip().replace('\x00', '').encode('utf8') or b'<html/>'
+    body = text.strip().replace("\x00", "").encode("utf8") or b"<html/>"
     if huge_tree and LXML_SUPPORTS_HUGE_TREE:
-        parser = parser_cls(recover=True, encoding='utf8', huge_tree=True)
+        parser = parser_cls(recover=True, encoding="utf8", huge_tree=True)
         root = etree.fromstring(body, parser=parser, base_url=base_url)
     else:
-        parser = parser_cls(recover=True, encoding='utf8')
+        parser = parser_cls(recover=True, encoding="utf8")
         root = etree.fromstring(body, parser=parser, base_url=base_url)
         for error in parser.error_log:
-            if 'use XML_PARSE_HUGE option' in error.message:
-                warnings.warn("Input data is too big. Upgrade to lxml %s or later for huge_tree support." % (
-                    str(lxml_huge_tree_version)))
+            if "use XML_PARSE_HUGE option" in error.message:
+                warnings.warn(
+                    f"Input data is too big. Upgrade to lxml "
+                    f"{lxml_huge_tree_version} or later for huge_tree support."
+                )
     if root is None:
         root = etree.fromstring(b"<html/>", parser=parser, base_url=base_url)
     return root
@@ -312,9 +316,11 @@ class Selector:
         self,
         text: str,
         base_url: Optional[str] = None,
-        huge_tree: bool = LXML_SUPPORTS_HUGE_TREE
+        huge_tree: bool = LXML_SUPPORTS_HUGE_TREE,
     ) -> Any:
-        return create_root_node(text, self._parser, base_url=base_url, huge_tree=huge_tree)
+        return create_root_node(
+            text, self._parser, base_url=base_url, huge_tree=huge_tree
+        )
 
     def xpath(
         self: _SelectorType,
