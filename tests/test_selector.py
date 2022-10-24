@@ -1317,7 +1317,6 @@ class ExsltTestCase(unittest.TestCase):
             ["url", "name", "startDate", "location", "offers"],
         )
 
-
     def test_dont_remove_text_after_deleted_element(self) -> None:
         sel = self.sscls(
             text="""<html><body>Text before.<span>Text in.</span> Text after.</body></html>
