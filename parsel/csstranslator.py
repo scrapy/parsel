@@ -38,8 +38,8 @@ class XPathExpr(OriginalXPathExpr):
 
         return path
 
-    def join(self, combiner, other):
-        super().join(combiner, other)
+    def join(self, combiner, other, *args, **kwargs):
+        super().join(combiner, other, *args, **kwargs)
         self.textnode = other.textnode
         self.attribute = other.attribute
         return self

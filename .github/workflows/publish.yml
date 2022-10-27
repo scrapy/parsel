@@ -17,7 +17,7 @@ jobs:
     - name: Check Tag
       id: check-release-tag
       run: |
-        if [[ ${{ github.event.ref }} =~ ^refs/tags/[0-9]+[.][0-9]+[.][0-9]+(rc[0-9]+|[.]dev[0-9]+)?$ ]]; then
+        if [[ ${{ github.event.ref }} =~ ^refs/tags/v[0-9]+[.][0-9]+[.][0-9]+(rc[0-9]+|[.]dev[0-9]+)?$ ]]; then
           echo ::set-output name=release_tag::true
         fi
 

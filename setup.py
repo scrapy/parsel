@@ -27,6 +27,7 @@ setup(
     install_requires=[
         "cssselect>=0.9",
         "lxml",
+        "packaging",
         "w3lib>=1.19.0",
     ],
     python_requires=">=3.7",
