@@ -1322,7 +1322,7 @@ class ExsltTestCase(unittest.TestCase):
             text="""<html><body>Text before.<span>Text in.</span> Text after.</body></html>
             """
         )
-        sel.css("span").remove()
+        sel.css("span").drop()
         self.assertEqual(
             sel.get(), "<html><body>Text before. Text after.</body></html>"
         )
