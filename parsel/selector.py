@@ -27,6 +27,7 @@ class CannotRemoveElementWithoutRoot(Exception):
 class CannotRemoveElementWithoutParent(Exception):
     pass
 
+
 class CannotDropElementWithoutParent(Exception):
     pass
 
