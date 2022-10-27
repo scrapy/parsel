@@ -28,7 +28,7 @@ class CannotRemoveElementWithoutParent(Exception):
     pass
 
 
-class CannotDropElementWithoutParent(Exception):
+class CannotDropElementWithoutParent(CannotRemoveElementWithoutParent):
     pass
 
 
