@@ -2,6 +2,11 @@
 Selector tests for cssselect backend
 """
 import unittest
+
+import cssselect
+import pytest
+from pkg_resources import parse_version
+
 from parsel.csstranslator import GenericTranslator, HTMLTranslator
 from parsel import Selector
 from cssselect.parser import SelectorSyntaxError
@@ -196,3 +201,8 @@ class CSSSelectorTest(unittest.TestCase):
             self.sel.css("div").css("area:last-child").extract(),
             ['<area shape="default" id="area-nohref">'],
         )
+
+    @pytest.mark.xfail(parse_version(cssselect.__version__) < parse_version("1.2.0"),
+                       reason="Support added in cssselect 1.2.0")
+    def test_pseudoclass_has(self):
+        self.assertEqual(self.x("p:has(b)::text"), ["lorem ipsum text"])
