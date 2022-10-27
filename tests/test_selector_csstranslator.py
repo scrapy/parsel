@@ -5,7 +5,7 @@ import unittest
 
 import cssselect
 import pytest
-from pkg_resources import parse_version
+from packaging.version import Version
 
 from parsel.csstranslator import GenericTranslator, HTMLTranslator
 from parsel import Selector
@@ -203,7 +203,7 @@ class CSSSelectorTest(unittest.TestCase):
         )
 
     @pytest.mark.xfail(
-        parse_version(cssselect.__version__) < parse_version("1.2.0"),
+        Version(cssselect.__version__) < Version("1.2.0"),
         reason="Support added in cssselect 1.2.0",
     )
     def test_pseudoclass_has(self):
