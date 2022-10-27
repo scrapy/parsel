@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-from setuptools import setup, __version__ as setuptools_version
+from setuptools import setup
 
 
 with open("README.rst", encoding="utf-8") as readme_file:
@@ -28,9 +28,10 @@ setup(
         "cssselect>=0.9",
         "jmespath",
         "lxml",
+        "packaging",
         "w3lib>=1.19.0",
     ],
-    python_requires=">=3.6",
+    python_requires=">=3.7",
     license="BSD",
     zip_safe=False,
     keywords="parsel",
@@ -43,11 +44,11 @@ setup(
         "Topic :: Text Processing :: Markup :: HTML",
         "Topic :: Text Processing :: Markup :: XML",
         "Programming Language :: Python :: 3",
-        "Programming Language :: Python :: 3.6",
         "Programming Language :: Python :: 3.7",
         "Programming Language :: Python :: 3.8",
         "Programming Language :: Python :: 3.9",
         "Programming Language :: Python :: 3.10",
+        "Programming Language :: Python :: 3.11",
         "Programming Language :: Python :: Implementation :: CPython",
         "Programming Language :: Python :: Implementation :: PyPy",
     ],

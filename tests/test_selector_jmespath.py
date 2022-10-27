@@ -30,21 +30,20 @@ class JMESPathTestCase(unittest.TestCase):
                     "value": "<div>d</div>"
                 }
             ],
-            "html": "<div><a>AAA<br>Test</a>aaa</div><div><a>BBB</a>bbb<b>BbB</b></div>"
+            "html": "<div><a>a<br>b</a>c</div><div><a>d</a>e<b>f</b></div>"
         }
         """
         sel = Selector(text=data)
         self.assertEqual(
             sel.jmespath("html").get(),
-            "<div><a>AAA<br>Test</a>aaa</div>"
-            "<div><a>BBB</a>bbb<b>BbB</b></div>",
+            "<div><a>a<br>b</a>c</div><div><a>d</a>e<b>f</b></div>",
         )
         self.assertEqual(
             sel.jmespath("html").xpath("//div/a/text()").getall(),
-            ["AAA", "Test", "BBB"],
+            ["a", "b", "d"],
         )
         self.assertEqual(
-            sel.jmespath("html").css("div > b").getall(), ["<b>BbB</b>"]
+            sel.jmespath("html").css("div > b").getall(), ["<b>f</b>"]
         )
         self.assertEqual(
             sel.jmespath("content").jmespath("name.age").get(), 18

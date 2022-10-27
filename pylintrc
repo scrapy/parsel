@@ -3,8 +3,7 @@ ignore=typing
 persistent=no
 
 [MESSAGES CONTROL]
-disable=bad-continuation,
-        c-extension-no-member,
+disable=c-extension-no-member,
         fixme,
         import-error,
         import-outside-toplevel,
@@ -15,7 +14,6 @@ disable=bad-continuation,
         missing-module-docstring,
         no-else-return,
         no-member,
-        no-self-use,
         parse-error,
         raise-missing-from,
         redefined-builtin,

@@ -4,15 +4,21 @@ XPath and JMESPath selectors based on lxml and jmespath
 
 import json
 import typing
+import warnings
 from typing import Any, Dict, List, Optional, Mapping, Pattern, Union
 
 import jmespath
 from lxml import etree, html
+from pkg_resources import parse_version
 
 from .utils import flatten, iflatten, extract_regex, shorten
 from .csstranslator import HTMLTranslator, GenericTranslator
 
 _SelectorType = typing.TypeVar("_SelectorType", bound="Selector")
+
+lxml_version = parse_version(etree.__version__)
+lxml_huge_tree_version = parse_version("4.2")
+LXML_SUPPORTS_HUGE_TREE = lxml_version >= lxml_huge_tree_version
 
 
 class CannotRemoveElementWithoutRoot(Exception):
@@ -43,11 +49,23 @@ _ctgroup = {
 }
 
 
-def create_root_node(text, parser_cls, base_url=None):
+def create_root_node(
+    text, parser_cls, base_url=None, huge_tree=LXML_SUPPORTS_HUGE_TREE
+):
     """Create root node for text using given parser class."""
     body = text.strip().replace("\x00", "").encode("utf8") or b"<html/>"
-    parser = parser_cls(recover=True, encoding="utf8")
-    root = etree.fromstring(body, parser=parser, base_url=base_url)
+    if huge_tree and LXML_SUPPORTS_HUGE_TREE:
+        parser = parser_cls(recover=True, encoding="utf8", huge_tree=True)
+        root = etree.fromstring(body, parser=parser, base_url=base_url)
+    else:
+        parser = parser_cls(recover=True, encoding="utf8")
+        root = etree.fromstring(body, parser=parser, base_url=base_url)
+        for error in parser.error_log:
+            if "use XML_PARSE_HUGE option" in error.message:
+                warnings.warn(
+                    f"Input data is too big. Upgrade to lxml "
+                    f"{lxml_huge_tree_version} or later for huge_tree support."
+                )
     if root is None:
         root = etree.fromstring(b"<html/>", parser=parser, base_url=base_url)
     return root
@@ -261,6 +279,7 @@ class Selector:
         "namespaces",
         "type",
         "_expr",
+        "_huge_tree",
         "root",
         "_text",
         "__weakref__",
@@ -287,7 +306,9 @@ class Selector:
         root: Optional[Any] = _NOTSET,
         base_url: Optional[str] = None,
         _expr: Optional[str] = None,
+        huge_tree: bool = LXML_SUPPORTS_HUGE_TREE,
     ) -> None:
+        self.root: Any
         if type not in ("html", "json", "text", "xml", None):
             raise ValueError(f"Invalid type: {type}")
 
@@ -310,7 +331,10 @@ class Selector:
                 self.root = _load_json_or_none(text)
             elif type in ("html", "xml", None):
                 self._load_lxml_root(
-                    text, type=type or "html", base_url=base_url
+                    text,
+                    type=type or "html",
+                    base_url=base_url,
+                    huge_tree=huge_tree,
                 )
         else:
             self.root = root
@@ -327,10 +351,11 @@ class Selector:
         self.namespaces = dict(self._default_namespaces)
         if namespaces is not None:
             self.namespaces.update(namespaces)
+        self._huge_tree = huge_tree
 
-    def _load_lxml_root(self, text, type, base_url=None):
+    def _load_lxml_root(self, text, type, base_url=None, *, huge_tree):
         self.type = type
-        self.root = self._get_root(text, base_url)
+        self.root = self._get_root(text, base_url, huge_tree)
 
     def __getstate__(self) -> Any:
         raise TypeError("can't pickle Selector objects")
@@ -339,12 +364,14 @@ class Selector:
         self,
         text: str,
         base_url: Optional[str] = None,
+        huge_tree: bool = LXML_SUPPORTS_HUGE_TREE,
         type: Optional[str] = None,
     ) -> Any:
         return create_root_node(
             text,
             _ctgroup[type or self.type]["_parser"],
             base_url=base_url,
+            huge_tree=huge_tree,
         )
 
     def jmespath(
@@ -466,7 +493,9 @@ class Selector:
         .. _cssselect: https://pypi.python.org/pypi/cssselect/
         """
         if self.type == "text":
-            self._load_lxml_root(self.root, type="html")
+            self._load_lxml_root(
+                self.root, type="html", huge_tree=self._huge_tree
+            )
         elif self.type not in ("html", "xml"):
             raise ValueError(
                 f"Cannot use css on a Selector of type {self.type!r}"
