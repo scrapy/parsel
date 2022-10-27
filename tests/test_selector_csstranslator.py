@@ -202,7 +202,9 @@ class CSSSelectorTest(unittest.TestCase):
             ['<area shape="default" id="area-nohref">'],
         )
 
-    @pytest.mark.xfail(parse_version(cssselect.__version__) < parse_version("1.2.0"),
-                       reason="Support added in cssselect 1.2.0")
+    @pytest.mark.xfail(
+        parse_version(cssselect.__version__) < parse_version("1.2.0"),
+        reason="Support added in cssselect 1.2.0",
+    )
     def test_pseudoclass_has(self):
         self.assertEqual(self.x("p:has(b)::text"), ["lorem ipsum text"])
