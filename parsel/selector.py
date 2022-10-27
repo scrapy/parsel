@@ -562,7 +562,7 @@ class Selector:
         try:
             self.root.drop_tree()
         except (AttributeError, AssertionError):
-            # 'NoneType' object has no attribute 'remove'
+            # 'NoneType' object has no attribute 'drop'
             raise CannotDropElementWithoutParent(
                 "The node you're trying to remove has no parent, "
                 "are you trying to remove a root element?"
