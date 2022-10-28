@@ -1,6 +1,5 @@
-"""
-XPath and JMESPath selectors based on lxml and jmespath
-"""
+"""XPath and JMESPath selectors based on the lxml and jmespath Python
+packages."""
 
 import json
 import typing
@@ -262,11 +261,13 @@ def _load_json_or_none(text):
 
 
 class Selector:
-    """
-    :class:`Selector` allows you to select parts of an XML or HTML text using CSS
-    or XPath expressions and extract data from it.
+    """Wrapper for input data in HTML, JSON, or XML format, that allows
+    selecting parts of it using selection expressions.
 
-    ``text`` is a `str`` object
+    You can write selection expressions in CSS or XPath for HTML and XML
+    inputs, or in JMESPath for JSON inputs.
+
+    ``text`` is a `str`` object.
 
     ``type`` defines the selector type. It can be ``"html"`` (default),
     ``"json"``, or ``"xml"``.
