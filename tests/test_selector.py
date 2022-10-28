@@ -90,7 +90,7 @@ class SelectorTestCase(unittest.TestCase):
     def test_simple_selection_with_variables(self) -> None:
         """Using XPath variables"""
         body = "<p><input name='a' value='1'/><input name='b' value='2'/></p>"
-        sel = self.sscls(text=body)  # Selector doesnt have default field
+        sel = self.sscls(text=body)
 
         self.assertEqual(
             [
