@@ -252,7 +252,7 @@ class SelectorList(List[_SelectorType]):
             x.remove()
 
 
-_NOTSET = object()
+_NOT_SET = object()
 
 
 def _get_root_type(root, input_type):
@@ -330,7 +330,7 @@ class Selector:
         text: Optional[str] = None,
         type: Optional[str] = None,
         namespaces: Optional[Mapping[str, str]] = None,
-        root: Optional[Any] = _NOTSET,
+        root: Optional[Any] = _NOT_SET,
         base_url: Optional[str] = None,
         _expr: Optional[str] = None,
         huge_tree: bool = LXML_SUPPORTS_HUGE_TREE,
@@ -339,7 +339,7 @@ class Selector:
         if type not in ("html", "json", "text", "xml", None):
             raise ValueError(f"Invalid type: {type}")
 
-        if text is None and root is _NOTSET:
+        if text is None and root is _NOT_SET:
             raise ValueError("Selector needs either text or root argument")
 
         if text is not None and not isinstance(text, str):
@@ -347,7 +347,7 @@ class Selector:
             raise TypeError(msg)
 
         if text is not None:
-            if root is not _NOTSET:
+            if root is not _NOT_SET:
                 warnings.warn(
                     "Selector got both text and root, root is being ignored.",
                     stacklevel=2,
@@ -356,8 +356,11 @@ class Selector:
                 self.type = type
                 self.root = text
             else:
-                data = _load_json_or_none(text)
-                if (type == "json" or data) and not isinstance(data, str):
+                try:
+                    data = json.loads(text)
+                except ValueError:
+                    data = _NOT_SET
+                if type == "json" or data is not _NOT_SET:
                     self.type = "json"
                     self.root = data
                 elif type in ("html", "xml", None):

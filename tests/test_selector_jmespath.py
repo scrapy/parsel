@@ -3,6 +3,7 @@
 import unittest
 
 from parsel import Selector
+from parsel.selector import _NOT_SET
 
 
 class JMESPathTestCase(unittest.TestCase):
@@ -154,3 +155,26 @@ class JMESPathTestCase(unittest.TestCase):
             .re(r"(\d+)"),
             ["18", "32", "22", "25"],
         )
+
+    def test_json_types(self):
+        for text, root in (
+            ("{}", {}),
+            ('{"a": "b"}', {"a": "b"}),
+            ("[]", []),
+            ('["a"]', ["a"]),
+            ('""', ""),
+            ('0', 0),
+            ('1', 1),
+            ('true', True),
+            ('false', False),
+            ('null', None),
+        ):
+            selector = Selector(text=text, root=_NOT_SET)
+            self.assertEqual(selector.type, "json")
+            self.assertEqual(selector._text, text)
+            self.assertEqual(selector.root, root)
+
+            selector = Selector(text=None, root=root)
+            self.assertEqual(selector.type, "json")
+            self.assertEqual(selector._text, None)
+            self.assertEqual(selector.root, root)
