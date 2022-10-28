@@ -255,6 +255,28 @@ class SelectorList(List[_SelectorType]):
 _NOTSET = object()
 
 
+def _get_root_type(root, input_type):
+    if isinstance(root, etree._Element):  # pylint: disable=protected-access
+        if input_type in {"json", "text"}:
+            raise ValueError(
+                f"Selector got an lxml.etree._Element object as root, "
+                f"and {input_type!r} as type."
+            )
+        return _xml_or_html(input_type)
+    elif isinstance(root, (dict, list)) or _is_valid_json(root):
+        return "json"
+    return input_type or "json"
+
+
+def _is_valid_json(text):
+    try:
+        json.loads(text)
+    except (TypeError, ValueError):
+        return False
+    else:
+        return True
+
+
 def _load_json_or_none(text):
     if isinstance(text, (str, bytes, bytearray)):
         try:
@@ -343,19 +365,7 @@ class Selector:
                 self.root = self._get_root(text, base_url, huge_tree)
         else:
             self.root = root
-            if isinstance(self.root, etree._Element):
-                if type in {"json", "text"}:
-                    raise ValueError(
-                        f"Selector got an lxml.etree._Element object as root, "
-                        f"and {type!r} as type."
-                    )
-                type = _xml_or_html(type)
-            elif bool(_load_json_or_none(self.root)):
-                type = "json"
-            if isinstance(self.root, (dict, list)):
-                type = "json"
-
-            self.type = type or "json"
+            self.type = _get_root_type(root, type)
 
         self.namespaces = dict(self._default_namespaces)
         if namespaces is not None:
@@ -407,7 +417,7 @@ class Selector:
             else:
                 data = self.root
         else:
-            assert self.type in {"html", "xml"}
+            assert self.type in {"html", "xml"}  # nosec
             data = _load_json_or_none(self.root.text)
 
         result = jmespath.search(query, data, **kwargs)
