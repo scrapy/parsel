@@ -4,16 +4,34 @@ XPath selectors based on lxml
 
 import typing
 import warnings
-from typing import Any, Dict, List, Mapping, Optional, Pattern, Union
+from typing import (
+    Any,
+    Dict,
+    List,
+    Mapping,
+    Optional,
+    Pattern,
+    Type,
+    TypeVar,
+    Union,
+)
 from warnings import warn
 
+from cssselect import GenericTranslator as OriginalGenericTranslator
 from lxml import etree, html
 from pkg_resources import parse_version
 
 from .csstranslator import GenericTranslator, HTMLTranslator
 from .utils import extract_regex, flatten, iflatten, shorten
 
-_SelectorType = typing.TypeVar("_SelectorType", bound="Selector")
+
+if typing.TYPE_CHECKING:
+    # requires Python 3.8
+    from typing import SupportsIndex
+
+
+_SelectorType = TypeVar("_SelectorType", bound="Selector")
+_ParserType = Union[etree.XMLParser, etree.HTMLParser]
 
 lxml_version = parse_version(etree.__version__)
 lxml_huge_tree_version = parse_version("4.2")
@@ -62,16 +80,20 @@ def _st(st: Optional[str]) -> str:
 
 
 def create_root_node(
-    text, parser_cls, base_url=None, huge_tree=LXML_SUPPORTS_HUGE_TREE
-):
+    text: str,
+    parser_cls: Type[_ParserType],
+    base_url: Optional[str] = None,
+    huge_tree: bool = LXML_SUPPORTS_HUGE_TREE,
+) -> etree._Element:
     """Create root node for text using given parser class."""
     body = text.strip().replace("\x00", "").encode("utf8") or b"<html/>"
     if huge_tree and LXML_SUPPORTS_HUGE_TREE:
         parser = parser_cls(recover=True, encoding="utf8", huge_tree=True)
-        root = etree.fromstring(body, parser=parser, base_url=base_url)
+        # the stub wrongly thinks base_url can't be None
+        root = etree.fromstring(body, parser=parser, base_url=base_url)  # type: ignore[arg-type]
     else:
         parser = parser_cls(recover=True, encoding="utf8")
-        root = etree.fromstring(body, parser=parser, base_url=base_url)
+        root = etree.fromstring(body, parser=parser, base_url=base_url)  # type: ignore[arg-type]
         for error in parser.error_log:
             if "use XML_PARSE_HUGE option" in error.message:
                 warnings.warn(
@@ -90,7 +112,7 @@ class SelectorList(List[_SelectorType]):
     """
 
     @typing.overload
-    def __getitem__(self, pos: int) -> _SelectorType:
+    def __getitem__(self, pos: "SupportsIndex") -> _SelectorType:
         pass
 
     @typing.overload
@@ -98,10 +120,15 @@ class SelectorList(List[_SelectorType]):
         pass
 
     def __getitem__(
-        self, pos: Union[int, slice]
+        self, pos: Union["SupportsIndex", slice]
     ) -> Union[_SelectorType, "SelectorList[_SelectorType]"]:
         o = super().__getitem__(pos)
-        return self.__class__(o) if isinstance(pos, slice) else o
+        if isinstance(pos, slice):
+            return self.__class__(
+                typing.cast("SelectorList[_SelectorType]", o)
+            )
+        else:
+            return typing.cast(_SelectorType, o)
 
     def __getstate__(self) -> None:
         raise TypeError("can't pickle SelectorList objects")
@@ -237,7 +264,7 @@ class SelectorList(List[_SelectorType]):
             return x.attrib
         return {}
 
-    def remove(self) -> None:
+    def remove(self) -> None:  # type: ignore[override]
         """
         Remove matched nodes from the parent for each element in this list.
         """
@@ -302,15 +329,21 @@ class Selector:
         text: Optional[str] = None,
         type: Optional[str] = None,
         namespaces: Optional[Mapping[str, str]] = None,
-        root: Optional[Any] = None,
+        root: Optional[etree._Element] = None,
         base_url: Optional[str] = None,
         _expr: Optional[str] = None,
         huge_tree: bool = LXML_SUPPORTS_HUGE_TREE,
     ) -> None:
         self.type = st = _st(type or self._default_type)
-        self._parser = _ctgroup[st]["_parser"]
-        self._csstranslator = _ctgroup[st]["_csstranslator"]
-        self._tostring_method = _ctgroup[st]["_tostring_method"]
+        self._parser: Type[_ParserType] = typing.cast(
+            Type[_ParserType], _ctgroup[st]["_parser"]
+        )
+        self._csstranslator: OriginalGenericTranslator = typing.cast(
+            OriginalGenericTranslator, _ctgroup[st]["_csstranslator"]
+        )
+        self._tostring_method: str = typing.cast(
+            str, _ctgroup[st]["_tostring_method"]
+        )
 
         if text is not None:
             if not isinstance(text, str):
@@ -334,7 +367,7 @@ class Selector:
         text: str,
         base_url: Optional[str] = None,
         huge_tree: bool = LXML_SUPPORTS_HUGE_TREE,
-    ) -> Any:
+    ) -> etree._Element:
         return create_root_node(
             text, self._parser, base_url=base_url, huge_tree=huge_tree
         )
@@ -365,7 +398,9 @@ class Selector:
         try:
             xpathev = self.root.xpath
         except AttributeError:
-            return self.selectorlist_cls([])
+            return typing.cast(
+                SelectorList[_SelectorType], self.selectorlist_cls([])
+            )
 
         nsp = dict(self.namespaces)
         if namespaces is not None:
@@ -389,7 +424,9 @@ class Selector:
             )
             for x in result
         ]
-        return self.selectorlist_cls(result)
+        return typing.cast(
+            SelectorList[_SelectorType], self.selectorlist_cls(result)
+        )
 
     def css(self: _SelectorType, query: str) -> SelectorList[_SelectorType]:
         """
@@ -404,7 +441,7 @@ class Selector:
         """
         return self.xpath(self._css2xpath(query))
 
-    def _css2xpath(self, query: str) -> Any:
+    def _css2xpath(self, query: str) -> str:
         return self._csstranslator.css_to_xpath(query)
 
     def re(
@@ -471,11 +508,14 @@ class Selector:
         Percent encoded content is unquoted.
         """
         try:
-            return etree.tostring(
-                self.root,
-                method=self._tostring_method,
-                encoding="unicode",
-                with_tail=False,
+            return typing.cast(
+                str,
+                etree.tostring(
+                    self.root,
+                    method=self._tostring_method,
+                    encoding="unicode",
+                    with_tail=False,
+                ),
             )
         except (AttributeError, TypeError):
             if self.root is True:
@@ -512,7 +552,10 @@ class Selector:
             # loop on element attributes also
             for an in el.attrib:
                 if an.startswith("{"):
-                    el.attrib[an.split("}", 1)[1]] = el.attrib.pop(an)
+                    # this cast shouldn't be needed as pop never returns None
+                    el.attrib[an.split("}", 1)[1]] = typing.cast(
+                        str, el.attrib.pop(an)
+                    )
         # remove namespace declarations
         etree.cleanup_namespaces(self.root)
 
@@ -537,7 +580,7 @@ class Selector:
             )
 
         try:
-            parent.remove(self.root)
+            parent.remove(self.root)  # type: ignore[union-attr]
         except AttributeError:
             # 'NoneType' object has no attribute 'remove'
             raise CannotRemoveElementWithoutParent(

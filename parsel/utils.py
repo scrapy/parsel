@@ -1,5 +1,5 @@
 import re
-from typing import Any, List, Pattern, Union
+from typing import Any, List, Pattern, Union, cast, Match
 from w3lib.html import replace_entities as w3lib_replace_entities
 
 
@@ -69,7 +69,7 @@ def extract_regex(
     if "extract" in regex.groupindex:
         # named group
         try:
-            extracted = regex.search(text).group("extract")
+            extracted = cast(Match[str], regex.search(text)).group("extract")
         except AttributeError:
             strings = []
         else:
