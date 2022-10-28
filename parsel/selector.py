@@ -355,14 +355,14 @@ class Selector:
             if type == "text":
                 self.type = type
                 self.root = text
-            elif (
-                type == "json" or bool(_load_json_or_none(text))
-            ) and not isinstance(_load_json_or_none(text), str):
-                self.type = "json"
-                self.root = _load_json_or_none(text)
-            elif type in ("html", "xml", None):
-                self.type = _xml_or_html(type)
-                self.root = self._get_root(text, base_url, huge_tree)
+            else:
+                data = _load_json_or_none(text)
+                if (type == "json" or data) and not isinstance(data, str):
+                    self.type = "json"
+                    self.root = data
+                elif type in ("html", "xml", None):
+                    self.type = _xml_or_html(type)
+                    self.root = self._get_root(text, base_url, huge_tree)
         else:
             self.root = root
             self.type = _get_root_type(root, type)
