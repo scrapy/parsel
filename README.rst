@@ -19,7 +19,7 @@ Parsel
    :alt: Coverage report
 
 
-Parsel is a BSD-licensed Python_ library to extract data from HTML_, JSON, and
+Parsel is a BSD-licensed Python_ library to extract data from HTML_, JSON_, and
 XML_ documents.
 
 It supports:
