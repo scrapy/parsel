@@ -1050,7 +1050,7 @@ class SelectorTestCase(unittest.TestCase):
             text="<html><body><ul><li>1</li><li>2</li><li>3</li></ul></body></html>"
         )
         sel_list = sel.css("li")
-        sel_list.remove()
+        sel_list.drop()
         self.assertIsSelectorList(sel.css("li"))
         self.assertEqual(sel.css("li"), [])
 
@@ -1059,7 +1059,7 @@ class SelectorTestCase(unittest.TestCase):
             text="<html><body><ul><li>1</li><li>2</li><li>3</li></ul></body></html>"
         )
         sel_list = sel.css("li")
-        sel_list[0].remove()
+        sel_list[0].drop()
         self.assertIsSelectorList(sel.css("li"))
         self.assertEqual(sel.css("li::text").getall(), ["2", "3"])
 
@@ -1070,7 +1070,7 @@ class SelectorTestCase(unittest.TestCase):
         sel_list = sel.css("li::text")
         self.assertEqual(sel_list.getall(), ["1", "2", "3"])
         with self.assertRaises(CannotRemoveElementWithoutRoot):
-            sel_list.remove()
+            sel_list.drop()
 
         self.assertIsSelectorList(sel.css("li"))
         self.assertEqual(sel.css("li::text").getall(), ["1", "2", "3"])
@@ -1082,7 +1082,7 @@ class SelectorTestCase(unittest.TestCase):
         sel_list = sel.css("li::text")
         self.assertEqual(sel_list.getall(), ["1", "2", "3"])
         with self.assertRaises(CannotRemoveElementWithoutRoot):
-            sel_list[0].remove()
+            sel_list[0].drop()
 
         self.assertIsSelectorList(sel.css("li"))
         self.assertEqual(sel.css("li::text").getall(), ["1", "2", "3"])
@@ -1094,15 +1094,15 @@ class SelectorTestCase(unittest.TestCase):
         sel_list = sel.css("li::text")
         self.assertEqual(sel_list.getall(), ["1", "2", "3"])
         with self.assertRaises(CannotRemoveElementWithoutParent):
-            sel.remove()
+            sel.drop()
 
         with self.assertRaises(CannotRemoveElementWithoutParent):
-            sel.css("html").remove()
+            sel.css("html").drop()
 
         self.assertIsSelectorList(sel.css("li"))
         self.assertEqual(sel.css("li::text").getall(), ["1", "2", "3"])
 
-        sel.css("body").remove()
+        sel.css("body").drop()
         self.assertEqual(sel.get(), "<html></html>")
 
     def test_deep_nesting(self):
@@ -1315,4 +1315,14 @@ class ExsltTestCase(unittest.TestCase):
                                     //*[@itemscope]/*/@itemprop)"""
             ).extract(),
             ["url", "name", "startDate", "location", "offers"],
+        )
+
+    def test_dont_remove_text_after_deleted_element(self) -> None:
+        sel = self.sscls(
+            text="""<html><body>Text before.<span>Text in.</span> Text after.</body></html>
+            """
+        )
+        sel.css("span").drop()
+        self.assertEqual(
+            sel.get(), "<html><body>Text before. Text after.</body></html>"
         )

@@ -4,13 +4,14 @@ XPath selectors based on lxml
 
 import typing
 import warnings
-from typing import Any, Dict, List, Optional, Mapping, Pattern, Union
+from typing import Any, Dict, List, Mapping, Optional, Pattern, Union
+from warnings import warn
 
 from lxml import etree, html
 from pkg_resources import parse_version
 
-from .utils import flatten, iflatten, extract_regex, shorten
-from .csstranslator import HTMLTranslator, GenericTranslator
+from .csstranslator import GenericTranslator, HTMLTranslator
+from .utils import extract_regex, flatten, iflatten, shorten
 
 _SelectorType = typing.TypeVar("_SelectorType", bound="Selector")
 
@@ -24,6 +25,10 @@ class CannotRemoveElementWithoutRoot(Exception):
 
 
 class CannotRemoveElementWithoutParent(Exception):
+    pass
+
+
+class CannotDropElementWithoutParent(CannotRemoveElementWithoutParent):
     pass
 
 
@@ -236,8 +241,20 @@ class SelectorList(List[_SelectorType]):
         """
         Remove matched nodes from the parent for each element in this list.
         """
+        warn(
+            "Method parsel.selector.SelectorList.remove is deprecated, please use parsel.selector.SelectorList.drop method instead",
+            category=DeprecationWarning,
+            stacklevel=2,
+        )
         for x in self:
             x.remove()
+
+    def drop(self) -> None:
+        """
+        Drop matched nodes from the parent for each element in this list.
+        """
+        for x in self:
+            x.drop()
 
 
 class Selector:
@@ -503,6 +520,11 @@ class Selector:
         """
         Remove matched nodes from the parent element.
         """
+        warn(
+            "Method parsel.selector.Selector.remove is deprecated, please use parsel.selector.Selector.drop method instead",
+            category=DeprecationWarning,
+            stacklevel=2,
+        )
         try:
             parent = self.root.getparent()
         except AttributeError:
@@ -519,6 +541,30 @@ class Selector:
         except AttributeError:
             # 'NoneType' object has no attribute 'remove'
             raise CannotRemoveElementWithoutParent(
+                "The node you're trying to remove has no parent, "
+                "are you trying to remove a root element?"
+            )
+
+    def drop(self):
+        """
+        Drop matched nodes from the parent element.
+        """
+        try:
+            self.root.getparent()
+        except AttributeError:
+            # 'str' object has no attribute 'getparent'
+            raise CannotRemoveElementWithoutRoot(
+                "The node you're trying to drop has no root, "
+                "are you trying to drop a pseudo-element? "
+                "Try to use 'li' as a selector instead of 'li::text' or "
+                "'//li' instead of '//li/text()', for example."
+            )
+
+        try:
+            self.root.drop_tree()
+        except (AttributeError, AssertionError):
+            # 'NoneType' object has no attribute 'drop'
+            raise CannotDropElementWithoutParent(
                 "The node you're trying to remove has no parent, "
                 "are you trying to remove a root element?"
             )
