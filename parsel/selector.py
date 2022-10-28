@@ -550,7 +550,7 @@ class Selector:
         Drop matched nodes from the parent element.
         """
         try:
-            self.root.getparent()
+            parent = self.root.getparent()
         except AttributeError:
             # 'str' object has no attribute 'getparent'
             raise CannotRemoveElementWithoutRoot(
@@ -561,7 +561,10 @@ class Selector:
             )
 
         try:
-            self.root.drop_tree()
+            if self.type == "xml":
+                parent.remove(self.root)
+            else:
+                self.root.drop_tree()
         except (AttributeError, AssertionError):
             # 'NoneType' object has no attribute 'drop'
             raise CannotDropElementWithoutParent(

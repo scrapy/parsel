@@ -1326,3 +1326,10 @@ class ExsltTestCase(unittest.TestCase):
         self.assertEqual(
             sel.get(), "<html><body>Text before. Text after.</body></html>"
         )
+
+    def test_drop_with_xml_type(self) -> None:
+        sel = self.sscls(text="<a><b></b><c/></a>", type='xml')
+        el = sel.xpath('//b')[0]
+        assert el.root.getparent() is not None
+        el.drop()
+        assert sel.get() == "<a><c/></a>"
