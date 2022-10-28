@@ -1230,6 +1230,11 @@ class SelectorTestCase(unittest.TestCase):
             sel = Selector(text="a", root="b")
             self.assertIn("both text and root", str(w[0].message))
 
+    def test_etree_root_invalid_type(self):
+        selector = Selector("<html></html>")
+        self.assertRaisesRegex(ValueError, "object as root", Selector, root=selector.root, type="text")
+        self.assertRaisesRegex(ValueError, "object as root", Selector, root=selector.root, type="json")
+
 
 class ExsltTestCase(unittest.TestCase):
 

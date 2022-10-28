@@ -343,8 +343,13 @@ class Selector:
                 self.root = self._get_root(text, base_url, huge_tree)
         else:
             self.root = root
-            if type is None and isinstance(self.root, etree._Element):
-                type = "html"
+            if isinstance(self.root, etree._Element):
+                if type in {"json", "text"}:
+                    raise ValueError(
+                        f"Selector got an lxml.etree._Element object as root, "
+                        f"and {type!r} as type."
+                    )
+                type = _xml_or_html(type)
             elif bool(_load_json_or_none(self.root)):
                 type = "json"
             if isinstance(self.root, (dict, list)):
