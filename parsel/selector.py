@@ -255,7 +255,28 @@ class SelectorList(List[_SelectorType]):
 _NOT_SET = object()
 
 
-def _get_root_type(root, input_type):
+def _get_root_from_text(text, *, type, **lxml_kwargs):
+    return create_root_node(text, _ctgroup[type]["_parser"], **lxml_kwargs)
+
+
+def _get_root_and_type_from_text(text, *, input_type, **lxml_kwargs):
+    if input_type == "text":
+        return text, input_type
+    try:
+        data = json.loads(text)
+    except ValueError:
+        data = _NOT_SET
+    if data is not _NOT_SET:
+        return data, "json"
+    if input_type == "json":
+        return None, "json"
+    assert input_type in ("html", "xml", None)  # nosec
+    type = _xml_or_html(input_type)
+    root = _get_root_from_text(text, type=type, **lxml_kwargs)
+    return root, type
+
+
+def _get_root_type(root, *, input_type):
     if isinstance(root, etree._Element):  # pylint: disable=protected-access
         if input_type in {"json", "text"}:
             raise ValueError(
@@ -352,26 +373,17 @@ class Selector:
                     "Selector got both text and root, root is being ignored.",
                     stacklevel=2,
                 )
-            if type == "text":
-                self.type = type
-                self.root = text
-            else:
-                try:
-                    data = json.loads(text)
-                except ValueError:
-                    data = _NOT_SET
-                if data is not _NOT_SET:
-                    self.type = "json"
-                    self.root = data
-                elif type == "json":
-                    self.type = "json"
-                    self.root = None
-                elif type in ("html", "xml", None):
-                    self.type = _xml_or_html(type)
-                    self.root = self._get_root(text, base_url, huge_tree)
+            root, type = _get_root_and_type_from_text(
+                text,
+                input_type=type,
+                base_url=base_url,
+                huge_tree=huge_tree,
+            )
+            self.root = root
+            self.type = type
         else:
             self.root = root
-            self.type = _get_root_type(root, type)
+            self.type = _get_root_type(root, input_type=type)
 
         self.namespaces = dict(self._default_namespaces)
         if namespaces is not None:
@@ -391,9 +403,9 @@ class Selector:
         huge_tree: bool = LXML_SUPPORTS_HUGE_TREE,
         type: Optional[str] = None,
     ) -> Any:
-        return create_root_node(
+        return _get_root_from_text(
             text,
-            _ctgroup[type or self.type]["_parser"],
+            type=type or self.type,
             base_url=base_url,
             huge_tree=huge_tree,
         )

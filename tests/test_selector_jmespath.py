@@ -163,18 +163,22 @@ class JMESPathTestCase(unittest.TestCase):
             ("[]", []),
             ('["a"]', ["a"]),
             ('""', ""),
-            ('0', 0),
-            ('1', 1),
-            ('true', True),
-            ('false', False),
-            ('null', None),
+            ("0", 0),
+            ("1", 1),
+            ("true", True),
+            ("false", False),
+            ("null", None),
         ):
             selector = Selector(text=text, root=_NOT_SET)
             self.assertEqual(selector.type, "json")
-            self.assertEqual(selector._text, text)
+            self.assertEqual(
+                selector._text, text  # pylint: disable=protected-access
+            )
             self.assertEqual(selector.root, root)
 
             selector = Selector(text=None, root=root)
             self.assertEqual(selector.type, "json")
-            self.assertEqual(selector._text, None)
+            self.assertEqual(
+                selector._text, None  # pylint: disable=protected-access
+            )
             self.assertEqual(selector.root, root)
