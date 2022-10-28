@@ -400,13 +400,14 @@ class Selector:
 
             selector.jmespath('author.name', options=jmespath.Options(dict_cls=collections.OrderedDict))
         """
-        if isinstance(self.root, str):
-            data = _load_json_or_none(self.root)
-        elif self.type == "json":
-            data = self.root
-        elif self.root.text is None:
-            data = _load_json_or_none(self._text)
+        if self.type == "json":
+            if isinstance(self.root, str):
+                # Selector received a JSON string as root.
+                data = _load_json_or_none(self.root)
+            else:
+                data = self.root
         else:
+            assert self.type in {"html", "xml"}
             data = _load_json_or_none(self.root.text)
 
         result = jmespath.search(query, data, **kwargs)
