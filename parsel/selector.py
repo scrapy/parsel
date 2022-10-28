@@ -324,7 +324,6 @@ class Selector:
             msg = f"text argument should be of type str, got {text.__class__}"
             raise TypeError(msg)
 
-        self._text = text
         if text is not None:
             if root is not _NOTSET:
                 warnings.warn(
@@ -353,11 +352,13 @@ class Selector:
 
             self.type = type or "json"
 
-        self._expr = _expr
         self.namespaces = dict(self._default_namespaces)
         if namespaces is not None:
             self.namespaces.update(namespaces)
+
+        self._expr = _expr
         self._huge_tree = huge_tree
+        self._text = text
 
     def __getstate__(self) -> Any:
         raise TypeError("can't pickle Selector objects")
