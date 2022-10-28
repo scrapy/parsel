@@ -200,7 +200,7 @@ class SelectorList(List[_SelectorType]):
             return el
         return default
 
-    def getall(self, strip: bool = False) -> List[str]:
+    def getall(self, *, strip: bool = False) -> List[str]:
         """
         Call the ``.get()`` method for each element is this list and return
         their results flattened, as a list of strings.
