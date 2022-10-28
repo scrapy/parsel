@@ -45,6 +45,11 @@ learn CSS_ selectors include:
 
 -   `XPath/CSS Equivalents in Wikibooks`_
 
+Parsel support for CSS selectors comes from cssselect, so read about `CSS
+selectors supported by cssselect`_.
+
+.. _CSS selectors supported by cssselect: https://cssselect.readthedocs.io/en/latest/#supported-selectors
+
 `XPath`_ is a language for selecting nodes in XML documents, which can also be
 used with HTML. Resources to learn XPath_ include:
 
