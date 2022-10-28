@@ -360,9 +360,12 @@ class Selector:
                     data = json.loads(text)
                 except ValueError:
                     data = _NOT_SET
-                if type == "json" or data is not _NOT_SET:
+                if data is not _NOT_SET:
                     self.type = "json"
                     self.root = data
+                elif type == "json":
+                    self.type = "json"
+                    self.root = None
                 elif type in ("html", "xml", None):
                     self.type = _xml_or_html(type)
                     self.root = self._get_root(text, base_url, huge_tree)
