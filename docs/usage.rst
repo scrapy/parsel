@@ -60,9 +60,8 @@ used with HTML. Resources to learn XPath_ include:
 For HTML and XML input, you can use either CSS_ or XPath_. CSS_ is usually
 more readable, but some things can only be done with XPath_.
 
-`JMESPath`_ allows you to declaratively specify how to extract elements from
-a JSON document.
-Resources to learn JMESPATH_ include:
+JMESPath_ allows you to declaratively specify how to extract elements from
+a JSON document. Resources to learn JMESPath_ include:
 
 -   `JMESPath Tutorial`_
 
