@@ -326,6 +326,11 @@ class Selector:
 
         self._text = text
         if text is not None:
+            if root is not _NOTSET:
+                warnings.warn(
+                    "Selector got both text and root, root is being ignored.",
+                    stacklevel=2,
+                )
             if type == "text":
                 self.type = type
                 self.root = text

@@ -1225,6 +1225,11 @@ class SelectorTestCase(unittest.TestCase):
         self.assertEqual(selector.root, None)
         self.assertEqual(selector.type, "json")
 
+    def test_text_and_root_warning(self):
+        with warnings.catch_warnings(record=True) as w:
+            sel = Selector(text="a", root="b")
+            self.assertIn("both text and root", str(w[0].message))
+
 
 class ExsltTestCase(unittest.TestCase):
 
