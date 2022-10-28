@@ -48,6 +48,10 @@ _ctgroup = {
 }
 
 
+def _xml_or_html(type):
+    return "xml" if type == "xml" else "html"
+
+
 def create_root_node(
     text, parser_cls, base_url=None, huge_tree=LXML_SUPPORTS_HUGE_TREE
 ):
@@ -331,12 +335,8 @@ class Selector:
                 self.type = "json"
                 self.root = _load_json_or_none(text)
             elif type in ("html", "xml", None):
-                self._load_lxml_root(
-                    text,
-                    type=type or "html",
-                    base_url=base_url,
-                    huge_tree=huge_tree,
-                )
+                self.type = _xml_or_html(type)
+                self.root = self._get_root(text, base_url, huge_tree)
         else:
             self.root = root
             if type is None and isinstance(self.root, etree._Element):
@@ -353,10 +353,6 @@ class Selector:
         if namespaces is not None:
             self.namespaces.update(namespaces)
         self._huge_tree = huge_tree
-
-    def _load_lxml_root(self, text, type, base_url=None, *, huge_tree):
-        self.type = type
-        self.root = self._get_root(text, base_url, huge_tree)
 
     def __getstate__(self) -> Any:
         raise TypeError("can't pickle Selector objects")
@@ -476,7 +472,7 @@ class Selector:
                 root=x,
                 _expr=query,
                 namespaces=self.namespaces,
-                type=self.type,
+                type=_xml_or_html(self.type),
             )
             for x in result
         ]
@@ -493,18 +489,15 @@ class Selector:
 
         .. _cssselect: https://pypi.python.org/pypi/cssselect/
         """
-        if self.type == "text":
-            self._load_lxml_root(
-                self.root, type="html", huge_tree=self._huge_tree
-            )
-        elif self.type not in ("html", "xml"):
+        if self.type not in ("html", "xml", "text"):
             raise ValueError(
                 f"Cannot use css on a Selector of type {self.type!r}"
             )
         return self.xpath(self._css2xpath(query))
 
     def _css2xpath(self, query: str) -> Any:
-        return _ctgroup[self.type]["_csstranslator"].css_to_xpath(query)
+        type = _xml_or_html(self.type)
+        return _ctgroup[type]["_csstranslator"].css_to_xpath(query)
 
     def re(
         self, regex: Union[str, Pattern[str]], replace_entities: bool = True
