@@ -65,6 +65,7 @@ class XPathExpr(OriginalXPathExpr):
 if TYPE_CHECKING:
     # requires Python 3.8
     from typing import Protocol
+
     # e.g. cssselect.GenericTranslator, cssselect.HTMLTranslator
     class TranslatorProtocol(Protocol):
         def xpath_element(self, selector: Element) -> OriginalXPathExpr:

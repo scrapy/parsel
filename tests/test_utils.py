@@ -68,5 +68,10 @@ def test_shorten(width: int, expected: Union[str, Type[Exception]]) -> None:
         ],
     ),
 )
-def test_extract_regex(regex: Union[str, Pattern[str]], text: str, replace_entities: bool, expected: List[str]) -> None:
+def test_extract_regex(
+    regex: Union[str, Pattern[str]],
+    text: str,
+    replace_entities: bool,
+    expected: List[str],
+) -> None:
     assert extract_regex(regex, text, replace_entities) == expected

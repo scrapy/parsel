@@ -68,7 +68,8 @@ if TYPE_CHECKING:
 
         def assertRaises(
             self,
-            expected_exception: type[BaseException] | tuple[type[BaseException], ...],
+            expected_exception: type[BaseException]
+            | tuple[type[BaseException], ...],
             callable: Callable[..., object],
             *args: Any,
             **kwargs: Any,
@@ -76,7 +77,7 @@ if TYPE_CHECKING:
             ...
 
 
-class TranslatorTestMixin():
+class TranslatorTestMixin:
     def setUp(self: "TranslatorTestProtocol") -> None:
         self.tr = self.tr_cls()
         self.c2x = self.tr.css_to_xpath
