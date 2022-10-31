@@ -1,5 +1,5 @@
 from functools import lru_cache
-from typing import Any, Optional, Protocol, Type, TypeVar
+from typing import TYPE_CHECKING, Any, Optional, Type, TypeVar
 
 from cssselect import GenericTranslator as OriginalGenericTranslator
 from cssselect import HTMLTranslator as OriginalHTMLTranslator
@@ -62,10 +62,13 @@ class XPathExpr(OriginalXPathExpr):
         return self
 
 
-# e.g. cssselect.GenericTranslator, cssselect.HTMLTranslator
-class TranslatorProtocol(Protocol):
-    def xpath_element(self, selector: Element) -> OriginalXPathExpr:
-        ...
+if TYPE_CHECKING:
+    # requires Python 3.8
+    from typing import Protocol
+    # e.g. cssselect.GenericTranslator, cssselect.HTMLTranslator
+    class TranslatorProtocol(Protocol):
+        def xpath_element(self, selector: Element) -> OriginalXPathExpr:
+            ...
 
 
 class TranslatorMixin:
@@ -75,7 +78,7 @@ class TranslatorMixin:
     """
 
     def xpath_element(
-        self: TranslatorProtocol, selector: Element
+        self: "TranslatorProtocol", selector: Element
     ) -> XPathExpr:
         # https://github.com/python/mypy/issues/12344
         xpath = super().xpath_element(selector)  # type: ignore[misc]
