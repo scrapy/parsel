@@ -217,11 +217,7 @@ class SelectorList(List[_SelectorType]):
         pass
 
     @typing.overload
-    def get(self, default: str, strip: bool) -> str:
-        pass
-
-    @typing.overload
-    def get(self, strip: bool) -> Optional[str]:
+    def get(self, default: str, strip: bool = ...) -> str:
         pass
 
     def get(
