@@ -213,7 +213,7 @@ class SelectorList(List[_SelectorType]):
     extract = getall
 
     @typing.overload
-    def get(self, default: None, strip: bool = ...) -> Optional[str]:
+    def get(self, default: None = None, strip: bool = ...) -> Optional[str]:
         pass
 
     @typing.overload
