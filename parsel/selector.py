@@ -129,7 +129,9 @@ class SelectorList(List[_SelectorType]):
             selector.xpath('//a[href=$url]', url="http://www.example.com")
         """
         return self.__class__(
-            flatten([x.xpath(xpath, namespaces=namespaces, **kwargs) for x in self])
+            flatten(
+                [x.xpath(xpath, namespaces=namespaces, **kwargs) for x in self]
+            )
         )
 
     def css(self, query: str) -> "SelectorList[_SelectorType]":
@@ -153,7 +155,9 @@ class SelectorList(List[_SelectorType]):
         Passing ``replace_entities`` as ``False`` switches off these
         replacements.
         """
-        return flatten([x.re(regex, replace_entities=replace_entities) for x in self])
+        return flatten(
+            [x.re(regex, replace_entities=replace_entities) for x in self]
+        )
 
     @typing.overload
     def re_first(
@@ -220,7 +224,9 @@ class SelectorList(List[_SelectorType]):
     def get(self, strip: bool) -> str:
         pass
 
-    def get(self, default: Optional[str] = None, strip: bool = False) -> Optional[str]:
+    def get(
+        self, default: Optional[str] = None, strip: bool = False
+    ) -> Optional[str]:
         """
         Return the result of ``.get()`` for the first element in this list.
         If the list is empty, return the default value.
@@ -426,7 +432,9 @@ class Selector:
         Passing ``replace_entities`` as ``False`` switches off these
         replacements.
         """
-        return extract_regex(regex, self.get(), replace_entities=replace_entities)
+        return extract_regex(
+            regex, self.get(), replace_entities=replace_entities
+        )
 
     @typing.overload
     def re_first(
