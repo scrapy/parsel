@@ -220,6 +220,10 @@ class SelectorList(List[_SelectorType]):
     def get(self, default: str, strip: bool) -> str:
         pass
 
+    @typing.overload
+    def get(self, strip: bool) -> Optional[str]:
+        pass
+
     def get(
         self, default: Optional[str] = None, strip: bool = False
     ) -> Optional[str]:
