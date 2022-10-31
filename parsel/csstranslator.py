@@ -70,6 +70,9 @@ if TYPE_CHECKING:
         def xpath_element(self, selector: Element) -> OriginalXPathExpr:
             ...
 
+        def css_to_xpath(self, css: str, prefix: str = ...) -> str:
+            ...
+
 
 class TranslatorMixin:
     """This mixin adds support to CSS pseudo elements via dynamic dispatch.
