@@ -56,8 +56,8 @@ class CannotDropElementWithoutParent(CannotRemoveElementWithoutParent):
     pass
 
 
-class SafeXMLParser(etree.XMLParser):
-    def __init__(self, *args, **kwargs) -> None:
+class SafeXMLParser(etree.XMLParser):  # type: ignore[type-arg]
+    def __init__(self, *args: Any, **kwargs: Any) -> None:
         kwargs.setdefault("resolve_entities", False)
         super().__init__(*args, **kwargs)
 
@@ -143,7 +143,7 @@ class SelectorList(List[_SelectorType]):
         self,
         xpath: str,
         namespaces: Optional[Mapping[str, str]] = None,
-        **kwargs,
+        **kwargs: Any,
     ) -> "SelectorList[_SelectorType]":
         """
         Call the ``.xpath()`` method for each element in this list and return
@@ -230,7 +230,7 @@ class SelectorList(List[_SelectorType]):
         for el in iflatten(
             x.re(regex, replace_entities=replace_entities) for x in self
         ):
-            return el
+            return typing.cast(str, el)
         return default
 
     def getall(self) -> List[str]:
@@ -382,7 +382,7 @@ class Selector:
         self: _SelectorType,
         query: str,
         namespaces: Optional[Mapping[str, str]] = None,
-        **kwargs,
+        **kwargs: Any,
     ) -> SelectorList[_SelectorType]:
         """
         Find nodes matching the xpath ``query`` and return the result as a
@@ -591,7 +591,7 @@ class Selector:
                 "are you trying to remove a root element?"
             )
 
-    def drop(self):
+    def drop(self) -> None:
         """
         Drop matched nodes from the parent element.
         """
@@ -608,9 +608,10 @@ class Selector:
 
         try:
             if self.type == "xml":
+                assert parent is not None
                 parent.remove(self.root)
             else:
-                self.root.drop_tree()
+                typing.cast(html.HtmlElement, self.root).drop_tree()
         except (AttributeError, AssertionError):
             # 'NoneType' object has no attribute 'drop'
             raise CannotDropElementWithoutParent(
