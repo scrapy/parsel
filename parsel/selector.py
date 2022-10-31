@@ -329,7 +329,7 @@ class Selector:
         text: Optional[str] = None,
         type: Optional[str] = None,
         namespaces: Optional[Mapping[str, str]] = None,
-        root: Optional[etree._Element] = None,
+        root: Optional[Any] = None,
         base_url: Optional[str] = None,
         _expr: Optional[str] = None,
         huge_tree: bool = LXML_SUPPORTS_HUGE_TREE,
