@@ -8,7 +8,6 @@ from typing import (
     Any,
     Dict,
     List,
-    Literal,
     Mapping,
     Optional,
     Pattern,
@@ -27,16 +26,18 @@ from .utils import extract_regex, flatten, iflatten, shorten
 
 
 if typing.TYPE_CHECKING:
-    # requires Python 3.8
-    from typing import SupportsIndex
+    # both require Python 3.8
+    from typing import Literal, SupportsIndex
+
+    # simplified _OutputMethodArg from types-lxml
+    _TostringMethodType = Literal[
+        "html",
+        "xml",
+    ]
 
 
 _SelectorType = TypeVar("_SelectorType", bound="Selector")
 _ParserType = Union[etree.XMLParser, etree.HTMLParser]
-_TostringMethodType = Literal[  # simplified _OutputMethodArg from types-lxml
-    "html",
-    "xml",
-]
 
 lxml_version = parse_version(etree.__version__)
 lxml_huge_tree_version = parse_version("4.2")
@@ -346,8 +347,8 @@ class Selector:
         self._csstranslator: OriginalGenericTranslator = typing.cast(
             OriginalGenericTranslator, _ctgroup[st]["_csstranslator"]
         )
-        self._tostring_method: _TostringMethodType = typing.cast(
-            _TostringMethodType, _ctgroup[st]["_tostring_method"]
+        self._tostring_method: "_TostringMethodType" = typing.cast(
+            "_TostringMethodType", _ctgroup[st]["_tostring_method"]
         )
 
         if text is not None:
