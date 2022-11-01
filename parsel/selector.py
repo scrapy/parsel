@@ -301,7 +301,15 @@ class Selector:
     If ``type`` is ``None``, the selector defaults to ``"html"``.
 
     ``base_url`` allows setting a URL for the document. This is needed when looking up external entities with relative paths.
-    See [`lxml` documentation](https://lxml.de/api/index.html) ``lxml.etree.fromstring`` for more information.
+    See the documentation for :func:`lxml.etree.fromstring` for more information.
+
+    ``huge_tree`` controls the lxml/libxml2 feature that forbids parsing
+    certain large documents to protect from possible memory exhaustion. The
+    argument is ``True`` by default if the installed lxml version supports it,
+    which disables the protection to allow parsing such documents. Set it to
+    ``False`` if you want to enable the protection.
+    See `this lxml FAQ entry <https://lxml.de/FAQ.html#is-lxml-vulnerable-to-xml-bombs>`_
+    for more information.
     """
 
     __slots__ = [

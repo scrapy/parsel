@@ -3,7 +3,21 @@
 History
 -------
 
+1.7.0 (Not released yet)
+~~~~~~~~~~~~~~~~~~~~~~~~
+
 * Add PEP 561-style type information
+* Support for Python 2.7, 3.5 and 3.6 is removed
+* Support for Python 3.9-3.11 is added
+* Very large documents (with deep nesting or long tag content) can now be
+  parsed, and ``Selector`` now takes a new argument ``huge_tree`` to disable
+  this
+* Support for new features of cssselect 1.2.0 is added
+* The ``Selector.remove()`` and ``SelectorList.remove()`` methods are
+  deprecated and replaced with the new ``Selector.drop()`` and
+  ``SelectorList.drop()`` methods which don't delete text after the dropped
+  elements when used in the HTML mode.
+
 
 1.6.0 (2020-05-07)
 ~~~~~~~~~~~~~~~~~~
