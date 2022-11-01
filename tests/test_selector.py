@@ -3,9 +3,12 @@ import warnings
 import weakref
 import unittest
 import pickle
+
+import typing
 from typing import Any
 
 from lxml import etree
+from lxml.html import HtmlElement
 from pkg_resources import parse_version
 
 from parsel import Selector, SelectorList
@@ -718,7 +721,7 @@ class SelectorTestCase(unittest.TestCase):
     def test_make_links_absolute(self) -> None:
         text = '<a href="file.html">link to file</a>'
         sel = Selector(text=text, base_url="http://example.com")
-        sel.root.make_links_absolute()
+        typing.cast(HtmlElement, sel.root).make_links_absolute()
         self.assertEqual(
             "http://example.com/file.html",
             sel.xpath("//a/@href").extract_first(),
