@@ -268,7 +268,7 @@ class Selector:
     If ``type`` is ``None``, the selector defaults to ``"html"``.
 
     ``base_url`` allows setting a URL for the document. This is needed when looking up external entities with relative paths.
-    See [`lxml` documentation](https://lxml.de/api/index.html) ``lxml.etree.fromstring`` for more information.
+    See the documentation for :func:`lxml.etree.fromstring` for more information.
     """
 
     __slots__ = [
