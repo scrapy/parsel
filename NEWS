@@ -3,8 +3,8 @@
 History
 -------
 
-1.7.0 (Not released yet)
-~~~~~~~~~~~~~~~~~~~~~~~~
+1.7.0 (2022-11-01)
+~~~~~~~~~~~~~~~~~~
 
 * Add PEP 561-style type information
 * Support for Python 2.7, 3.5 and 3.6 is removed
