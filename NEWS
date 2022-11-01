@@ -13,7 +13,7 @@ History
   parsed
 * Support for new features of cssselect 1.2.0 is added
 * The ``Selector.remove()`` and ``SelectorList.remove()`` methods are
-  deprecated and replaced with new ``Selector.drop()`` and
+  deprecated and replaced with the new ``Selector.drop()`` and
   ``SelectorList.drop()`` methods which don't delete text after the dropped
   elements when used in the HTML mode.
 
