@@ -19,7 +19,7 @@ from warnings import warn
 
 from cssselect import GenericTranslator as OriginalGenericTranslator
 from lxml import etree, html
-from pkg_resources import parse_version
+from packaging.version import Version
 
 from .csstranslator import GenericTranslator, HTMLTranslator
 from .utils import extract_regex, flatten, iflatten, shorten
@@ -39,8 +39,8 @@ if typing.TYPE_CHECKING:
 _SelectorType = TypeVar("_SelectorType", bound="Selector")
 _ParserType = Union[etree.XMLParser, etree.HTMLParser]
 
-lxml_version = parse_version(etree.__version__)
-lxml_huge_tree_version = parse_version("4.2")
+lxml_version = Version(etree.__version__)
+lxml_huge_tree_version = Version("4.2")
 LXML_SUPPORTS_HUGE_TREE = lxml_version >= lxml_huge_tree_version
 
 
