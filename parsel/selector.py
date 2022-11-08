@@ -95,11 +95,10 @@ def create_root_node(
     body = text.strip().replace("\x00", "").encode("utf8") or b"<html/>"
     if huge_tree and LXML_SUPPORTS_HUGE_TREE:
         parser = parser_cls(recover=True, encoding="utf8", huge_tree=True)
-        # the stub wrongly thinks base_url can't be None
-        root = etree.fromstring(body, parser=parser, base_url=base_url)  # type: ignore[arg-type]
+        root = etree.fromstring(body, parser=parser, base_url=base_url)
     else:
         parser = parser_cls(recover=True, encoding="utf8")
-        root = etree.fromstring(body, parser=parser, base_url=base_url)  # type: ignore[arg-type]
+        root = etree.fromstring(body, parser=parser, base_url=base_url)
         for error in parser.error_log:
             if "use XML_PARSE_HUGE option" in error.message:
                 warnings.warn(
@@ -555,10 +554,7 @@ class Selector:
             # loop on element attributes also
             for an in el.attrib:
                 if an.startswith("{"):
-                    # this cast shouldn't be needed as pop never returns None
-                    el.attrib[an.split("}", 1)[1]] = typing.cast(
-                        str, el.attrib.pop(an)
-                    )
+                    el.attrib[an.split("}", 1)[1]] = el.attrib.pop(an)
         # remove namespace declarations
         etree.cleanup_namespaces(self.root)
 
