@@ -1,8 +1,13 @@
 import re
+import warnings
 import weakref
 import unittest
 import pickle
-from typing import Any
+from typing import Any, cast
+
+from lxml import etree
+from lxml.html import HtmlElement
+from pkg_resources import parse_version
 
 from parsel import Selector, SelectorList
 from parsel.selector import (
@@ -714,7 +719,7 @@ class SelectorTestCase(unittest.TestCase):
     def test_make_links_absolute(self) -> None:
         text = '<a href="file.html">link to file</a>'
         sel = Selector(text=text, base_url="http://example.com")
-        sel.root.make_links_absolute()
+        cast(HtmlElement, sel.root).make_links_absolute()
         self.assertEqual(
             "http://example.com/file.html",
             sel.xpath("//a/@href").extract_first(),
@@ -1046,7 +1051,7 @@ class SelectorTestCase(unittest.TestCase):
             text="<html><body><ul><li>1</li><li>2</li><li>3</li></ul></body></html>"
         )
         sel_list = sel.css("li")
-        sel_list.remove()
+        sel_list.drop()
         self.assertIsSelectorList(sel.css("li"))
         self.assertEqual(sel.css("li"), [])
 
@@ -1055,7 +1060,7 @@ class SelectorTestCase(unittest.TestCase):
             text="<html><body><ul><li>1</li><li>2</li><li>3</li></ul></body></html>"
         )
         sel_list = sel.css("li")
-        sel_list[0].remove()
+        sel_list[0].drop()
         self.assertIsSelectorList(sel.css("li"))
         self.assertEqual(sel.css("li::text").getall(), ["2", "3"])
 
@@ -1066,7 +1071,7 @@ class SelectorTestCase(unittest.TestCase):
         sel_list = sel.css("li::text")
         self.assertEqual(sel_list.getall(), ["1", "2", "3"])
         with self.assertRaises(CannotRemoveElementWithoutRoot):
-            sel_list.remove()
+            sel_list.drop()
 
         self.assertIsSelectorList(sel.css("li"))
         self.assertEqual(sel.css("li::text").getall(), ["1", "2", "3"])
@@ -1078,7 +1083,7 @@ class SelectorTestCase(unittest.TestCase):
         sel_list = sel.css("li::text")
         self.assertEqual(sel_list.getall(), ["1", "2", "3"])
         with self.assertRaises(CannotRemoveElementWithoutRoot):
-            sel_list[0].remove()
+            sel_list[0].drop()
 
         self.assertIsSelectorList(sel.css("li"))
         self.assertEqual(sel.css("li::text").getall(), ["1", "2", "3"])
@@ -1090,16 +1095,104 @@ class SelectorTestCase(unittest.TestCase):
         sel_list = sel.css("li::text")
         self.assertEqual(sel_list.getall(), ["1", "2", "3"])
         with self.assertRaises(CannotRemoveElementWithoutParent):
-            sel.remove()
+            sel.drop()
 
         with self.assertRaises(CannotRemoveElementWithoutParent):
-            sel.css("html").remove()
+            sel.css("html").drop()
 
         self.assertIsSelectorList(sel.css("li"))
         self.assertEqual(sel.css("li::text").getall(), ["1", "2", "3"])
 
-        sel.css("body").remove()
+        sel.css("body").drop()
         self.assertEqual(sel.get(), "<html></html>")
+
+    def test_dont_remove_text_after_deleted_element(self) -> None:
+        sel = self.sscls(
+            text="""<html><body>Text before.<span>Text in.</span> Text after.</body></html>
+            """
+        )
+        sel.css("span").drop()
+        self.assertEqual(
+            sel.get(), "<html><body>Text before. Text after.</body></html>"
+        )
+
+    def test_drop_with_xml_type(self) -> None:
+        sel = self.sscls(text="<a><b></b><c/></a>", type="xml")
+        el = sel.xpath("//b")[0]
+        assert el.root.getparent() is not None
+        el.drop()
+        assert sel.get() == "<a><c/></a>"
+
+    def test_deep_nesting(self):
+        lxml_version = parse_version(etree.__version__)
+        lxml_huge_tree_version = parse_version("4.2")
+
+        content = """
+        <html>
+        <body>
+        <span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span>
+        <span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span>
+        <span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span>
+        <span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span>
+        <span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span>
+        <span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span>
+        <span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span>
+        <span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span>
+        <span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span>
+        <span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span>
+        <span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span>
+        <span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span>
+        <span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span>
+        <span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span>
+        <span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span><span>
+        <span><span><span><span><span><span><span><span><span><span><span><span>
+        hello world
+        </span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span>
+        </span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span>
+        </span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span>
+        </span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span>
+        </span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span>
+        </span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span>
+        </span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span>
+        </span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span>
+        </span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span>
+        </span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span>
+        </span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span>
+        </span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span>
+        </span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span>
+        </span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span>
+        </span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span>
+        </span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span>
+        </span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span>
+        </span></span></span></span></span></span></span></span></span></span>
+        <table>
+         <tr><td>some test</td></tr>
+        </table>
+        </body>
+        </html>
+        """
+
+        # If lxml doesn't support huge trees expect wrong results and a warning
+        if lxml_version < lxml_huge_tree_version:
+            with warnings.catch_warnings(record=True) as w:
+                sel = Selector(text=content)
+                self.assertIn("huge_tree", str(w[0].message))
+                self.assertLessEqual(len(sel.css("span")), 256)
+                self.assertEqual(len(sel.css("td")), 0)
+            return
+
+        # Same goes for explicitly disabling huge trees
+        with warnings.catch_warnings(record=True) as w:
+            sel = Selector(text=content, huge_tree=False)
+            self.assertIn("huge_tree", str(w[0].message))
+            self.assertLessEqual(len(sel.css("span")), 256)
+            self.assertEqual(len(sel.css("td")), 0)
+
+        # If huge trees are enabled, elements with a depth > 255 should be found
+        sel = Selector(text=content)
+        nest_level = 282
+        self.assertEqual(len(sel.css("span")), nest_level)
+        self.assertEqual(len(sel.css("td")), 1)
 
 
 class ExsltTestCase(unittest.TestCase):

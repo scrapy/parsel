@@ -3,7 +3,7 @@ from functools import lru_cache
 from cssselect import GenericTranslator as OriginalGenericTranslator
 from cssselect import HTMLTranslator as OriginalHTMLTranslator
 from cssselect.xpath import XPathExpr as OriginalXPathExpr
-from cssselect.xpath import _unicode_safe_getattr, ExpressionError
+from cssselect.xpath import ExpressionError
 from cssselect.parser import FunctionalPseudoElement
 
 
@@ -38,8 +38,8 @@ class XPathExpr(OriginalXPathExpr):
 
         return path
 
-    def join(self, combiner, other):
-        super().join(combiner, other)
+    def join(self, combiner, other, *args, **kwargs):
+        super().join(combiner, other, *args, **kwargs)
         self.textnode = other.textnode
         self.attribute = other.attribute
         return self
@@ -61,7 +61,7 @@ class TranslatorMixin:
         """
         if isinstance(pseudo_element, FunctionalPseudoElement):
             method = f"xpath_{pseudo_element.name.replace('-', '_')}_functional_pseudo_element"
-            method = _unicode_safe_getattr(self, method, None)
+            method = getattr(self, method, None)
             if not method:
                 raise ExpressionError(
                     f"The functional pseudo-element ::{pseudo_element.name}() is unknown"
@@ -69,7 +69,7 @@ class TranslatorMixin:
             xpath = method(xpath, pseudo_element)
         else:
             method = f"xpath_{pseudo_element.replace('-', '_')}_simple_pseudo_element"
-            method = _unicode_safe_getattr(self, method, None)
+            method = getattr(self, method, None)
             if not method:
                 raise ExpressionError(
                     f"The pseudo-element ::{pseudo_element} is unknown"
