@@ -120,12 +120,17 @@ pseudo-elements::
     >>> selector.css('title::text').get()
     'Example website'
 
-You can extract inner text without specifying ``::text`` in your selector instead
-an optional paramter text=True in the ``get()`` or ``getall()`` methods. 
+To extract all text of one or more element and all their child elements, 
+formatted as plain text taking into account HTML tags (e.g. ``<br/>`` is 
+translated as a line break), set ``text=True`` in your call to 
+:meth:`~Selector.get` or :meth:`~Selector.getall` instead of including 
+``::text`` (CSS) or ``/text()`` (XPath) in your query: 
 
-    >>> selector.css('#images').get(text=True)
+>>> selector.css('#images').get(text=True)
+'Name: My image 1\nName: My image 2\nName: My image 3\nName: My image 4\nName: My image 5'
 
-You can pass additional paramter ``guess_punct_space``, ``guess_layout`` and ``guess_layout``
+See :meth:`Selector.get` for additional parameters that you can use to change 
+how the extracted plain text is formatted.
 
 As you can see, ``.xpath()`` and ``.css()`` methods return a
 :class:`~parsel.selector.SelectorList` instance, which is a list of new
