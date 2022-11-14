@@ -3,9 +3,7 @@ import warnings
 import weakref
 import unittest
 import pickle
-
-import typing
-from typing import Any
+from typing import Any, cast
 
 from lxml import etree
 from lxml.html import HtmlElement
@@ -721,7 +719,7 @@ class SelectorTestCase(unittest.TestCase):
     def test_make_links_absolute(self) -> None:
         text = '<a href="file.html">link to file</a>'
         sel = Selector(text=text, base_url="http://example.com")
-        typing.cast(HtmlElement, sel.root).make_links_absolute()
+        cast(HtmlElement, sel.root).make_links_absolute()
         self.assertEqual(
             "http://example.com/file.html",
             sel.xpath("//a/@href").extract_first(),
@@ -1108,6 +1106,23 @@ class SelectorTestCase(unittest.TestCase):
         sel.css("body").drop()
         self.assertEqual(sel.get(), "<html></html>")
 
+    def test_dont_remove_text_after_deleted_element(self) -> None:
+        sel = self.sscls(
+            text="""<html><body>Text before.<span>Text in.</span> Text after.</body></html>
+            """
+        )
+        sel.css("span").drop()
+        self.assertEqual(
+            sel.get(), "<html><body>Text before. Text after.</body></html>"
+        )
+
+    def test_drop_with_xml_type(self) -> None:
+        sel = self.sscls(text="<a><b></b><c/></a>", type="xml")
+        el = sel.xpath("//b")[0]
+        assert el.root.getparent() is not None
+        el.drop()
+        assert sel.get() == "<a><c/></a>"
+
     def test_deep_nesting(self):
         lxml_version = parse_version(etree.__version__)
         lxml_huge_tree_version = parse_version("4.2")
@@ -1320,19 +1335,67 @@ class ExsltTestCase(unittest.TestCase):
             ["url", "name", "startDate", "location", "offers"],
         )
 
-    def test_dont_remove_text_after_deleted_element(self) -> None:
-        sel = self.sscls(
-            text="""<html><body>Text before.<span>Text in.</span> Text after.</body></html>
-            """
-        )
-        sel.css("span").drop()
-        self.assertEqual(
-            sel.get(), "<html><body>Text before. Text after.</body></html>"
-        )
 
-    def test_drop_with_xml_type(self) -> None:
-        sel = self.sscls(text="<a><b></b><c/></a>", type="xml")
-        el = sel.xpath("//b")[0]
-        assert el.root.getparent() is not None
-        el.drop()
-        assert sel.get() == "<a><c/></a>"
+class SelectorTextTestCase(unittest.TestCase):
+
+    sscls = Selector
+
+    html_body = """
+            <body>
+                <div class="product">
+                    <div class="name">Product1</div>
+                    <span class="price"><b>Price:</b>100</span>
+                </div>
+                <div class="product">
+                    <div class="name">Product2</div>
+                    <span class="price"><b>Price:</b>200</span>
+                </div>
+            </body>
+            """
+
+    def test_text_get(self):
+        sel = self.sscls(text="<p>title:<h1>some text</h1></p>")
+        txt = sel.get(text=True)
+        self.assertEqual(txt, "title:\n\nsome text")
+
+    def test_text_getall(self):
+        sel = self.sscls(
+            text="<ul><li>option1</li><li>option2</li></ul>"
+        ).getall(text=True)
+        self.assertEqual(1, len(sel))
+        self.assertEqual("option1\noption2", sel[0])
+
+    def test_text_cleaned_get(self):
+        sel = (
+            self.sscls(text="<p>paragraph</p><style>.items</style>")
+            .cleaned("html")
+            .get(text=True)
+        )
+        self.assertEqual("paragraph", sel)
+
+    def test_text_get_guess_punct_space_false(self):
+        sel = self.sscls(text='<p>hello<b>"Folks"</b></p>')
+        txt = sel.get(text=True, guess_punct_space=False)
+        self.assertEqual(txt, 'hello "Folks"')
+
+    def test_text_get_guess_layout_false(self):
+        sel = self.sscls(text="<ul><li>option1</li><li>option2</li></ul>")
+        txt = sel.get(text=True, guess_layout=False)
+        self.assertEqual(txt, "option1 option2")
+
+    def test_text_get_guess_layout_true(self):
+        sel = self.sscls(text="<ul><li>option1</li><li>option2</li></ul>")
+        txt = sel.get(text=True, guess_layout=True)
+        self.assertEqual(txt, "option1\noption2")
+
+    def test_text_css_multiple(self):
+        html = self.sscls(text=self.html_body)
+        items = html.css(".product .price").getall(text=True)
+        self.assertEqual(items, ["Price: 100", "Price: 200"])
+
+    def test_text_xpath_get(self):
+        html = self.sscls(text=self.html_body)
+        self.assertEqual(
+            html.xpath('//div[@class="product"]/span').getall(text=True),
+            ["Price: 100", "Price: 200"],
+        )

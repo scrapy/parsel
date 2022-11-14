@@ -29,6 +29,7 @@ setup(
         "lxml",
         "packaging",
         "w3lib>=1.19.0",
+        "html-text>=0.5.2",
     ],
     python_requires=">=3.7",
     license="BSD",
