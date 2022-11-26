@@ -1,5 +1,5 @@
 from functools import lru_cache
-from typing import TYPE_CHECKING, Any, Optional, Type, TypeVar
+from typing import TYPE_CHECKING, Any, Optional
 
 from cssselect import GenericTranslator as OriginalGenericTranslator
 from cssselect import HTMLTranslator as OriginalHTMLTranslator
@@ -8,8 +8,9 @@ from cssselect.xpath import ExpressionError
 from cssselect.parser import Element, FunctionalPseudoElement, PseudoElement
 
 
-# mypy doesn't support typing.Self yet
-_XPathExprType = TypeVar("_XPathExprType", bound="XPathExpr")
+if TYPE_CHECKING:
+    # typing.Self requires Python 3.11
+    from typing_extensions import Self
 
 
 class XPathExpr(OriginalXPathExpr):
@@ -19,11 +20,11 @@ class XPathExpr(OriginalXPathExpr):
 
     @classmethod
     def from_xpath(
-        cls: Type[_XPathExprType],
+        cls,
         xpath: OriginalXPathExpr,
         textnode: bool = False,
         attribute: Optional[str] = None,
-    ) -> _XPathExprType:
+    ) -> "Self":
         x = cls(
             path=xpath.path, element=xpath.element, condition=xpath.condition
         )
@@ -49,12 +50,12 @@ class XPathExpr(OriginalXPathExpr):
         return path
 
     def join(
-        self: _XPathExprType,
+        self: "Self",
         combiner: str,
         other: OriginalXPathExpr,
         *args: Any,
         **kwargs: Any,
-    ) -> _XPathExprType:
+    ) -> "Self":
         assert isinstance(other, XPathExpr)
         super().join(combiner, other, *args, **kwargs)
         self.textnode = other.textnode
