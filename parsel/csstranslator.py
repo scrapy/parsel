@@ -56,7 +56,11 @@ class XPathExpr(OriginalXPathExpr):
         *args: Any,
         **kwargs: Any,
     ) -> "Self":
-        assert isinstance(other, XPathExpr)
+        if not isinstance(other, XPathExpr):
+            raise ValueError(
+                f"Expressions of type {__name__}.XPathExpr can ony join expressions"
+                f" of the same type (or its descendants), got {type(other)}"
+            )
         super().join(combiner, other, *args, **kwargs)
         self.textnode = other.textnode
         self.attribute = other.attribute
