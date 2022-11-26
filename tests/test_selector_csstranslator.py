@@ -61,10 +61,10 @@ if TYPE_CHECKING:
         tr: TranslatorProtocol
 
         def c2x(self, css: str, prefix: str = ...) -> str:
-            ...
+            pass
 
         def assertEqual(self, first: Any, second: Any, msg: Any = ...) -> None:
-            ...
+            pass
 
         def assertRaises(
             self,
@@ -74,7 +74,7 @@ if TYPE_CHECKING:
             *args: Any,
             **kwargs: Any,
         ) -> None:
-            ...
+            pass
 
 
 class TranslatorTestMixin:

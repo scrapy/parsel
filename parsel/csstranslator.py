@@ -74,10 +74,10 @@ if TYPE_CHECKING:
     # e.g. cssselect.GenericTranslator, cssselect.HTMLTranslator
     class TranslatorProtocol(Protocol):
         def xpath_element(self, selector: Element) -> OriginalXPathExpr:
-            ...
+            pass
 
         def css_to_xpath(self, css: str, prefix: str = ...) -> str:
-            ...
+            pass
 
 
 class TranslatorMixin:
