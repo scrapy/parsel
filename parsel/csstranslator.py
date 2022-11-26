@@ -86,7 +86,7 @@ class TranslatorMixin:
         self: "TranslatorProtocol", selector: Element
     ) -> XPathExpr:
         # https://github.com/python/mypy/issues/12344
-        xpath = super().xpath_element(selector)  # type: ignore[misc]
+        xpath = super().xpath_element(selector)  # type: ignore[safe-super]
         return XPathExpr.from_xpath(xpath)
 
     def xpath_pseudo_element(
