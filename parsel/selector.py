@@ -604,7 +604,8 @@ class Selector:
 
         try:
             if self.type == "xml":
-                assert parent is not None
+                if parent is None:
+                    raise ValueError("This node has no parent")
                 parent.remove(self.root)
             else:
                 typing.cast(html.HtmlElement, self.root).drop_tree()
