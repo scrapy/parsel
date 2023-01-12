@@ -378,7 +378,7 @@ class Selector:
             if not isinstance(bytes_input, bytes):
                 msg = f"text argument should be of type bytes, got {bytes_input.__class__}"
                 raise TypeError(msg)
-            root = self._get_root(None, base_url, huge_tree, bytes_input)
+            root = self._get_root(None, base_url, huge_tree, bytes_input, encoding)
         elif root is None:
             raise ValueError("Selector needs either text or root argument")
 
