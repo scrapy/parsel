@@ -325,7 +325,6 @@ class Selector:
         "_expr",
         "root",
         "bytes_input",
-        "encoding"
         "__weakref__",
         "_parser",
         "_csstranslator",
