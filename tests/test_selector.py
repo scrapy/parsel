@@ -5,7 +5,7 @@ import unittest
 import pickle
 
 import typing
-from typing import Any
+from typing import Any, Optional, Mapping
 
 from lxml import etree
 from lxml.html import HtmlElement
@@ -15,6 +15,7 @@ from parsel import Selector, SelectorList
 from parsel.selector import (
     CannotRemoveElementWithoutRoot,
     CannotRemoveElementWithoutParent,
+    LXML_SUPPORTS_HUGE_TREE
 )
 
 
@@ -1336,3 +1337,50 @@ class ExsltTestCase(unittest.TestCase):
         assert el.root.getparent() is not None
         el.drop()
         assert sel.get() == "<a><c/></a>"
+
+
+
+class SelectorBytesInput(Selector):
+    def __init__(
+        self,
+        text: Optional[str] = None,
+        type: Optional[str] = None,
+        bytes_input: Optional[bytes] = None,
+        encoding: Optional[str] = "utf8",
+        namespaces: Optional[Mapping[str, str]] = None,
+        root: Optional[Any] = None,
+        base_url: Optional[str] = None,
+        _expr: Optional[str] = None,
+        huge_tree: bool = LXML_SUPPORTS_HUGE_TREE,
+    ) -> None:
+        if isinstance(text, str):
+            bytes_input = bytes(text, encoding=encoding)
+            text = None
+        super().__init__(
+            text=text,
+            type=type,
+            bytes_input=bytes_input,
+            encoding=encoding,
+            namespaces=namespaces,
+            root=root,
+            base_url=base_url,
+            _expr=_expr,
+            huge_tree=huge_tree
+        )
+
+
+class SelectorTestCaseBytes(SelectorTestCase):
+    sscls = SelectorBytesInput
+
+    def test_representation_slice(self) -> None:
+        pass
+
+    def test_representation_unicode_query(self) -> None:
+        pass
+
+    def test_weakref_slots(self) -> None:
+        pass
+
+
+class ExsltTestCaseBytes(ExsltTestCase):
+    sscls = SelectorBytesInput

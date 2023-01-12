@@ -208,3 +208,9 @@ class CSSSelectorTest(unittest.TestCase):
     )
     def test_pseudoclass_has(self):
         self.assertEqual(self.x("p:has(b)::text"), ["lorem ipsum text"])
+
+
+
+class CSSSelectorTestBytes(CSSSelectorTest):
+    def setUp(self):
+        self.sel = self.sscls(bytes_input=bytes(HTMLBODY, encoding="utf8"))

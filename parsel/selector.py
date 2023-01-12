@@ -90,9 +90,15 @@ def create_root_node(
     parser_cls: Type[_ParserType],
     base_url: Optional[str] = None,
     huge_tree: bool = LXML_SUPPORTS_HUGE_TREE,
+    bytes_input: Optional[bytes] = "",
+    encoding: Optional[str] = "utf8",
 ) -> etree._Element:
     """Create root node for text using given parser class."""
-    body = text.strip().replace("\x00", "").encode("utf8") or b"<html/>"
+    if bytes_input is not None and not text:
+        body = bytes_input.replace(b"\x00", b"").strip()
+    else:
+        body = text.strip().replace("\x00", "").encode("utf8") or b"<html/>"
+
     if huge_tree and LXML_SUPPORTS_HUGE_TREE:
         parser = parser_cls(recover=True, encoding="utf8", huge_tree=True)
         # the stub wrongly thinks base_url can't be None
@@ -318,6 +324,8 @@ class Selector:
         "type",
         "_expr",
         "root",
+        "bytes_input",
+        "encoding"
         "__weakref__",
         "_parser",
         "_csstranslator",
@@ -342,6 +350,8 @@ class Selector:
         self,
         text: Optional[str] = None,
         type: Optional[str] = None,
+        bytes_input: Optional[bytes] = None,
+        encoding: Optional[str] = "utf8",
         namespaces: Optional[Mapping[str, str]] = None,
         root: Optional[Any] = None,
         base_url: Optional[str] = None,
@@ -359,11 +369,16 @@ class Selector:
             "_TostringMethodType", _ctgroup[st]["_tostring_method"]
         )
 
-        if text is not None:
+        if text is not None and not bytes_input:
             if not isinstance(text, str):
                 msg = f"text argument should be of type str, got {text.__class__}"
                 raise TypeError(msg)
             root = self._get_root(text, base_url, huge_tree)
+        elif bytes_input is not None and not text:
+            if not isinstance(bytes_input, bytes):
+                msg = f"text argument should be of type bytes, got {bytes_input.__class__}"
+                raise TypeError(msg)
+            root = self._get_root(None, base_url, huge_tree, bytes_input)
         elif root is None:
             raise ValueError("Selector needs either text or root argument")
 
@@ -378,12 +393,14 @@ class Selector:
 
     def _get_root(
         self,
-        text: str,
+        text: Optional[str] = None,
         base_url: Optional[str] = None,
         huge_tree: bool = LXML_SUPPORTS_HUGE_TREE,
+        bytes_input: Optional[bytes] = None,
+        encoding: Optional[str] = "utf8",
     ) -> etree._Element:
         return create_root_node(
-            text, self._parser, base_url=base_url, huge_tree=huge_tree
+            text, self._parser, base_url=base_url, huge_tree=huge_tree, bytes_input=bytes_input, encoding=encoding
         )
 
     def xpath(
