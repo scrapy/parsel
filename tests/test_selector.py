@@ -1345,7 +1345,7 @@ class SelectorBytesInput(Selector):
         self,
         text: Optional[str] = None,
         type: Optional[str] = None,
-        bytes_input: Optional[bytes] = None,
+        body: Optional[bytes] = None,
         encoding: Optional[str] = "utf8",
         namespaces: Optional[Mapping[str, str]] = None,
         root: Optional[Any] = None,
@@ -1354,12 +1354,12 @@ class SelectorBytesInput(Selector):
         huge_tree: bool = LXML_SUPPORTS_HUGE_TREE,
     ) -> None:
         if isinstance(text, str):
-            bytes_input = bytes(text, encoding=encoding)
+            body = bytes(text, encoding=encoding)
             text = None
         super().__init__(
             text=text,
             type=type,
-            bytes_input=bytes_input,
+            body=body,
             encoding=encoding,
             namespaces=namespaces,
             root=root,
