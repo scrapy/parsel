@@ -90,21 +90,21 @@ def create_root_node(
     parser_cls: Type[_ParserType],
     base_url: Optional[str] = None,
     huge_tree: bool = LXML_SUPPORTS_HUGE_TREE,
-    body: Optional[bytes] = "",
-    encoding: Optional[str] = "utf8",
+    body: bytes = "",
+    encoding: str = "utf8",
 ) -> etree._Element:
     """Create root node for text using given parser class."""
     if body is not None and not text:
         body = body.replace(b"\x00", b"").strip()
     else:
-        body = text.strip().replace("\x00", "").encode("utf8") or b"<html/>"
+        body = text.strip().replace("\x00", "").encode(encoding) or b"<html/>"
 
     if huge_tree and LXML_SUPPORTS_HUGE_TREE:
-        parser = parser_cls(recover=True, encoding="utf8", huge_tree=True)
+        parser = parser_cls(recover=True, encoding=encoding, huge_tree=True)
         # the stub wrongly thinks base_url can't be None
         root = etree.fromstring(body, parser=parser, base_url=base_url)  # type: ignore[arg-type]
     else:
-        parser = parser_cls(recover=True, encoding="utf8")
+        parser = parser_cls(recover=True, encoding=encoding)
         root = etree.fromstring(body, parser=parser, base_url=base_url)  # type: ignore[arg-type]
         for error in parser.error_log:
             if "use XML_PARSE_HUGE option" in error.message:
