@@ -2,6 +2,7 @@
 Selector tests for cssselect backend
 """
 import unittest
+from typing import TYPE_CHECKING, Any, Callable, List, Type
 
 import cssselect
 import pytest
@@ -49,12 +50,39 @@ HTMLBODY = """
 """
 
 
+if TYPE_CHECKING:
+    # requires Python 3.8
+    from typing import Protocol
+
+    from parsel.csstranslator import TranslatorProtocol
+
+    class TranslatorTestProtocol(Protocol):
+        tr_cls: Type[TranslatorProtocol]
+        tr: TranslatorProtocol
+
+        def c2x(self, css: str, prefix: str = ...) -> str:
+            pass
+
+        def assertEqual(self, first: Any, second: Any, msg: Any = ...) -> None:
+            pass
+
+        def assertRaises(
+            self,
+            expected_exception: type[BaseException]
+            | tuple[type[BaseException], ...],
+            callable: Callable[..., object],
+            *args: Any,
+            **kwargs: Any,
+        ) -> None:
+            pass
+
+
 class TranslatorTestMixin:
-    def setUp(self):
+    def setUp(self: "TranslatorTestProtocol") -> None:
         self.tr = self.tr_cls()
         self.c2x = self.tr.css_to_xpath
 
-    def test_attr_function(self):
+    def test_attr_function(self: "TranslatorTestProtocol") -> None:
         cases = [
             ("::attr(name)", "descendant-or-self::*/@name"),
             ("a::attr(href)", "descendant-or-self::a/@href"),
@@ -67,7 +95,7 @@ class TranslatorTestMixin:
         for css, xpath in cases:
             self.assertEqual(self.c2x(css), xpath, css)
 
-    def test_attr_function_exception(self):
+    def test_attr_function_exception(self: "TranslatorTestProtocol") -> None:
         cases = [
             ("::attr(12)", ExpressionError),
             ("::attr(34test)", ExpressionError),
@@ -76,7 +104,7 @@ class TranslatorTestMixin:
         for css, exc in cases:
             self.assertRaises(exc, self.c2x, css)
 
-    def test_text_pseudo_element(self):
+    def test_text_pseudo_element(self: "TranslatorTestProtocol") -> None:
         cases = [
             ("::text", "descendant-or-self::text()"),
             ("p::text", "descendant-or-self::p/text()"),
@@ -105,7 +133,7 @@ class TranslatorTestMixin:
         for css, xpath in cases:
             self.assertEqual(self.c2x(css), xpath, css)
 
-    def test_pseudo_function_exception(self):
+    def test_pseudo_function_exception(self: "TranslatorTestProtocol") -> None:
         cases = [
             ("::attribute(12)", ExpressionError),
             ("::text()", ExpressionError),
@@ -114,14 +142,14 @@ class TranslatorTestMixin:
         for css, exc in cases:
             self.assertRaises(exc, self.c2x, css)
 
-    def test_unknown_pseudo_element(self):
+    def test_unknown_pseudo_element(self: "TranslatorTestProtocol") -> None:
         cases = [
             ("::text-node", ExpressionError),
         ]
         for css, exc in cases:
             self.assertRaises(exc, self.c2x, css)
 
-    def test_unknown_pseudo_class(self):
+    def test_unknown_pseudo_class(self: "TranslatorTestProtocol") -> None:
         cases = [
             (":text", ExpressionError),
             (":attribute(name)", ExpressionError),
@@ -139,7 +167,7 @@ class GenericTranslatorTest(TranslatorTestMixin, unittest.TestCase):
 
 
 class UtilCss2XPathTest(unittest.TestCase):
-    def test_css2xpath(self):
+    def test_css2xpath(self) -> None:
         from parsel import css2xpath
 
         expected_xpath = (
@@ -153,15 +181,15 @@ class CSSSelectorTest(unittest.TestCase):
 
     sscls = Selector
 
-    def setUp(self):
+    def setUp(self) -> None:
         self.sel = self.sscls(text=HTMLBODY)
 
-    def x(self, *a, **kw):
+    def x(self, *a: Any, **kw: Any) -> List[str]:
         return [
             v.strip() for v in self.sel.css(*a, **kw).extract() if v.strip()
         ]
 
-    def test_selector_simple(self):
+    def test_selector_simple(self) -> None:
         for x in self.sel.css("input"):
             self.assertTrue(isinstance(x, self.sel.__class__), x)
         self.assertEqual(
@@ -169,7 +197,7 @@ class CSSSelectorTest(unittest.TestCase):
             [x.extract() for x in self.sel.css("input")],
         )
 
-    def test_text_pseudo_element(self):
+    def test_text_pseudo_element(self) -> None:
         self.assertEqual(self.x("#p-b2"), ['<b id="p-b2">guy</b>'])
         self.assertEqual(self.x("#p-b2::text"), ["guy"])
         self.assertEqual(self.x("#p-b2 ::text"), ["guy"])
@@ -183,7 +211,7 @@ class CSSSelectorTest(unittest.TestCase):
             self.x("p ::text"), ["lorem ipsum text", "hi", "there", "guy"]
         )
 
-    def test_attribute_function(self):
+    def test_attribute_function(self) -> None:
         self.assertEqual(self.x("#p-b2::attr(id)"), ["p-b2"])
         self.assertEqual(self.x(".cool-footer::attr(class)"), ["cool-footer"])
         self.assertEqual(
@@ -193,7 +221,7 @@ class CSSSelectorTest(unittest.TestCase):
             self.x('map[name="dummymap"] ::attr(shape)'), ["circle", "default"]
         )
 
-    def test_nested_selector(self):
+    def test_nested_selector(self) -> None:
         self.assertEqual(
             self.sel.css("p").css("b::text").extract(), ["hi", "guy"]
         )
@@ -206,5 +234,5 @@ class CSSSelectorTest(unittest.TestCase):
         Version(cssselect.__version__) < Version("1.2.0"),
         reason="Support added in cssselect 1.2.0",
     )
-    def test_pseudoclass_has(self):
+    def test_pseudoclass_has(self) -> None:
         self.assertEqual(self.x("p:has(b)::text"), ["lorem ipsum text"])

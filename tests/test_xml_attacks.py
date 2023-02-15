@@ -11,7 +11,7 @@ from parsel import Selector
 MiB_1 = 1024**2
 
 
-def _load(attack):
+def _load(attack: str) -> str:
     folder_path = path.dirname(__file__)
     file_path = path.join(folder_path, "xml_attacks", f"{attack}.xml")
     with open(file_path, "rb") as attack_file:
@@ -21,7 +21,7 @@ def _load(attack):
 # List of known attacks:
 # https://github.com/tiran/defusedxml#python-xml-libraries
 class XMLAttackTestCase(TestCase):
-    def test_billion_laughs(self):
+    def test_billion_laughs(self) -> None:
         process = Process()
         memory_usage_before = process.memory_info().rss
         selector = Selector(text=_load("billion_laughs"))
