@@ -90,7 +90,7 @@ def create_root_node(
     parser_cls: Type[_ParserType],
     base_url: Optional[str] = None,
     huge_tree: bool = LXML_SUPPORTS_HUGE_TREE,
-    body: bytes = "",
+    body: bytes = b"",
     encoding: str = "utf8",
 ) -> etree._Element:
     """Create root node for text using given parser class."""
