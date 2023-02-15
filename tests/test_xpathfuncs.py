@@ -1,10 +1,12 @@
+from typing import Any
+import unittest
+
 from parsel import Selector
 from parsel.xpathfuncs import set_xpathfunc
-import unittest
 
 
 class XPathFuncsTestCase(unittest.TestCase):
-    def test_has_class_simple(self):
+    def test_has_class_simple(self) -> None:
         body = """
         <p class="foo bar-baz">First</p>
         <p class="foo">Second</p>
@@ -35,7 +37,7 @@ class XPathFuncsTestCase(unittest.TestCase):
             ["First"],
         )
 
-    def test_has_class_error_no_args(self):
+    def test_has_class_error_no_args(self) -> None:
         body = """
         <p CLASS="foo">First</p>
         """
@@ -47,7 +49,7 @@ class XPathFuncsTestCase(unittest.TestCase):
             "has-class()",
         )
 
-    def test_has_class_error_invalid_arg_type(self):
+    def test_has_class_error_invalid_arg_type(self) -> None:
         body = """
         <p CLASS="foo">First</p>
         """
@@ -59,7 +61,7 @@ class XPathFuncsTestCase(unittest.TestCase):
             "has-class(.)",
         )
 
-    def test_has_class_error_invalid_unicode(self):
+    def test_has_class_error_invalid_unicode(self) -> None:
         body = """
         <p CLASS="foo">First</p>
         """
@@ -71,7 +73,7 @@ class XPathFuncsTestCase(unittest.TestCase):
             'has-class("héllö")'.encode(),
         )
 
-    def test_has_class_unicode(self):
+    def test_has_class_unicode(self) -> None:
         body = """
         <p CLASS="fóó">First</p>
         """
@@ -81,7 +83,7 @@ class XPathFuncsTestCase(unittest.TestCase):
             ["First"],
         )
 
-    def test_has_class_uppercase(self):
+    def test_has_class_uppercase(self) -> None:
         body = """
         <p CLASS="foo">First</p>
         """
@@ -91,7 +93,7 @@ class XPathFuncsTestCase(unittest.TestCase):
             ["First"],
         )
 
-    def test_has_class_newline(self):
+    def test_has_class_newline(self) -> None:
         body = """
         <p CLASS="foo
         bar">First</p>
@@ -102,7 +104,7 @@ class XPathFuncsTestCase(unittest.TestCase):
             ["First"],
         )
 
-    def test_has_class_tab(self):
+    def test_has_class_tab(self) -> None:
         body = """
         <p CLASS="foo\tbar">First</p>
         """
@@ -112,11 +114,11 @@ class XPathFuncsTestCase(unittest.TestCase):
             ["First"],
         )
 
-    def test_set_xpathfunc(self):
-        def myfunc(ctx):
-            myfunc.call_count += 1
+    def test_set_xpathfunc(self) -> None:
+        def myfunc(ctx: Any) -> None:
+            myfunc.call_count += 1  # type: ignore[attr-defined]
 
-        myfunc.call_count = 0
+        myfunc.call_count = 0  # type: ignore[attr-defined]
 
         body = """
         <p CLASS="foo">First</p>
@@ -131,7 +133,7 @@ class XPathFuncsTestCase(unittest.TestCase):
 
         set_xpathfunc("myfunc", myfunc)
         sel.xpath("myfunc()")
-        self.assertEqual(myfunc.call_count, 1)
+        self.assertEqual(myfunc.call_count, 1)  # type: ignore[attr-defined]
 
         set_xpathfunc("myfunc", None)
         self.assertRaisesRegex(

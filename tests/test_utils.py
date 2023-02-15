@@ -1,3 +1,5 @@
+from typing import Pattern, List, Type, Union
+
 from parsel.utils import shorten, extract_regex
 
 from pytest import mark, raises
@@ -17,7 +19,7 @@ from pytest import mark, raises
         (7, "foobar"),
     ),
 )
-def test_shorten(width, expected):
+def test_shorten(width: int, expected: Union[str, Type[Exception]]) -> None:
     if isinstance(expected, str):
         assert shorten("foobar", width) == expected
     else:
@@ -66,5 +68,10 @@ def test_shorten(width, expected):
         ],
     ),
 )
-def test_extract_regex(regex, text, replace_entities, expected):
+def test_extract_regex(
+    regex: Union[str, Pattern[str]],
+    text: str,
+    replace_entities: bool,
+    expected: List[str],
+) -> None:
     assert extract_regex(regex, text, replace_entities) == expected

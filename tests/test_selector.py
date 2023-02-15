@@ -1109,7 +1109,7 @@ class SelectorTestCase(unittest.TestCase):
         sel.css("body").drop()
         self.assertEqual(sel.get(), "<html></html>")
 
-    def test_deep_nesting(self):
+    def test_deep_nesting(self) -> None:
         lxml_version = parse_version(etree.__version__)
         lxml_huge_tree_version = parse_version("4.2")
 

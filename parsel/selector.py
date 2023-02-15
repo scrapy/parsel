@@ -56,8 +56,8 @@ class CannotDropElementWithoutParent(CannotRemoveElementWithoutParent):
     pass
 
 
-class SafeXMLParser(etree.XMLParser):
-    def __init__(self, *args, **kwargs) -> None:
+class SafeXMLParser(etree.XMLParser):  # type: ignore[type-arg]
+    def __init__(self, *args: Any, **kwargs: Any) -> None:
         kwargs.setdefault("resolve_entities", False)
         super().__init__(*args, **kwargs)
 
@@ -101,11 +101,10 @@ def create_root_node(
 
     if huge_tree and LXML_SUPPORTS_HUGE_TREE:
         parser = parser_cls(recover=True, encoding=encoding, huge_tree=True)
-        # the stub wrongly thinks base_url can't be None
-        root = etree.fromstring(body, parser=parser, base_url=base_url)  # type: ignore[arg-type]
+        root = etree.fromstring(body, parser=parser, base_url=base_url)
     else:
         parser = parser_cls(recover=True, encoding=encoding)
-        root = etree.fromstring(body, parser=parser, base_url=base_url)  # type: ignore[arg-type]
+        root = etree.fromstring(body, parser=parser, base_url=base_url)
         for error in parser.error_log:
             if "use XML_PARSE_HUGE option" in error.message:
                 warnings.warn(
@@ -149,7 +148,7 @@ class SelectorList(List[_SelectorType]):
         self,
         xpath: str,
         namespaces: Optional[Mapping[str, str]] = None,
-        **kwargs,
+        **kwargs: Any,
     ) -> "SelectorList[_SelectorType]":
         """
         Call the ``.xpath()`` method for each element in this list and return
@@ -236,7 +235,7 @@ class SelectorList(List[_SelectorType]):
         for el in iflatten(
             x.re(regex, replace_entities=replace_entities) for x in self
         ):
-            return el
+            return typing.cast(str, el)
         return default
 
     def getall(self) -> List[str]:
@@ -406,7 +405,7 @@ class Selector:
         self: _SelectorType,
         query: str,
         namespaces: Optional[Mapping[str, str]] = None,
-        **kwargs,
+        **kwargs: Any,
     ) -> SelectorList[_SelectorType]:
         """
         Find nodes matching the xpath ``query`` and return the result as a
@@ -579,10 +578,7 @@ class Selector:
             # loop on element attributes also
             for an in el.attrib:
                 if an.startswith("{"):
-                    # this cast shouldn't be needed as pop never returns None
-                    el.attrib[an.split("}", 1)[1]] = typing.cast(
-                        str, el.attrib.pop(an)
-                    )
+                    el.attrib[an.split("}", 1)[1]] = el.attrib.pop(an)
         # remove namespace declarations
         etree.cleanup_namespaces(self.root)
 
@@ -615,7 +611,7 @@ class Selector:
                 "are you trying to remove a root element?"
             )
 
-    def drop(self):
+    def drop(self) -> None:
         """
         Drop matched nodes from the parent element.
         """
@@ -632,9 +628,11 @@ class Selector:
 
         try:
             if self.type == "xml":
+                if parent is None:
+                    raise ValueError("This node has no parent")
                 parent.remove(self.root)
             else:
-                self.root.drop_tree()
+                typing.cast(html.HtmlElement, self.root).drop_tree()
         except (AttributeError, AssertionError):
             # 'NoneType' object has no attribute 'drop'
             raise CannotDropElementWithoutParent(
