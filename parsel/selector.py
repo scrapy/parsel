@@ -94,7 +94,7 @@ def create_root_node(
     encoding: str = "utf8",
 ) -> etree._Element:
     """Create root node for text using given parser class."""
-    if body is not None and not text:
+    if not text:
         body = body.replace(b"\x00", b"").strip()
     else:
         body = text.strip().replace("\x00", "").encode(encoding) or b"<html/>"
@@ -395,7 +395,7 @@ class Selector:
         text: Optional[str] = None,
         base_url: Optional[str] = None,
         huge_tree: bool = LXML_SUPPORTS_HUGE_TREE,
-        body: Optional[bytes] = None,
+        body: Optional[bytes] = b"",
         encoding: Optional[str] = "utf8",
     ) -> etree._Element:
         return create_root_node(
