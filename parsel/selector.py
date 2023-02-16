@@ -374,7 +374,7 @@ class Selector:
             root = self._get_root(text, base_url, huge_tree)
         elif body:
             if not isinstance(body, bytes):
-                msg = f"text argument should be of type bytes, got {body.__class__}"
+                msg = f"body argument should be of type bytes, got {body.__class__}"
                 raise TypeError(msg)
             root = self._get_root(
                 base_url=base_url,
@@ -383,7 +383,7 @@ class Selector:
                 encoding=encoding,
             )
         elif root is None:
-            raise ValueError("Selector needs either text or root argument")
+            raise ValueError("Selector needs text, body, or root arguments")
 
         self.namespaces = dict(self._default_namespaces)
         if namespaces is not None:

@@ -422,7 +422,7 @@ class SelectorTestCase(unittest.TestCase):
     def test_text_or_root_is_required(self) -> None:
         self.assertRaisesRegex(
             ValueError,
-            "Selector needs either text or root argument",
+            "Selector needs text, body, or root arguments",
             self.sscls,
         )
 
@@ -1352,7 +1352,7 @@ class SelectorBytesInput(Selector):
         _expr: Optional[str] = None,
         huge_tree: bool = LXML_SUPPORTS_HUGE_TREE,
     ) -> None:
-        if isinstance(text, str):
+        if text:
             body = bytes(text, encoding=encoding)
             text = None
         super().__init__(
@@ -1379,6 +1379,14 @@ class SelectorTestCaseBytes(SelectorTestCase):
 
     def test_weakref_slots(self) -> None:
         pass
+
+    def test_check_text_argument_type(self) -> None:
+        self.assertRaisesRegex(
+            TypeError,
+            "body argument should be of type",
+            self.sscls,
+            body="<html/>",
+        )
 
 
 class ExsltTestCaseBytes(ExsltTestCase):
