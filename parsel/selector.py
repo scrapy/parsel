@@ -348,8 +348,8 @@ class Selector:
         self,
         text: Optional[str] = None,
         type: Optional[str] = None,
-        body: Optional[bytes] = None,
-        encoding: Optional[str] = "utf8",
+        body: bytes = b"",
+        encoding: str = "utf8",
         namespaces: Optional[Mapping[str, str]] = None,
         root: Optional[Any] = None,
         base_url: Optional[str] = None,
@@ -367,16 +367,21 @@ class Selector:
             "_TostringMethodType", _ctgroup[st]["_tostring_method"]
         )
 
-        if text is not None and not body:
+        if text is not None:
             if not isinstance(text, str):
                 msg = f"text argument should be of type str, got {text.__class__}"
                 raise TypeError(msg)
             root = self._get_root(text, base_url, huge_tree)
-        elif body is not None and not text:
+        elif body:
             if not isinstance(body, bytes):
                 msg = f"text argument should be of type bytes, got {body.__class__}"
                 raise TypeError(msg)
-            root = self._get_root(None, base_url, huge_tree, body, encoding)
+            root = self._get_root(
+                base_url=base_url,
+                huge_tree=huge_tree,
+                body=body,
+                encoding=encoding,
+            )
         elif root is None:
             raise ValueError("Selector needs either text or root argument")
 
@@ -391,11 +396,11 @@ class Selector:
 
     def _get_root(
         self,
-        text: Optional[str] = None,
+        text: str = "",
         base_url: Optional[str] = None,
         huge_tree: bool = LXML_SUPPORTS_HUGE_TREE,
-        body: Optional[bytes] = b"",
-        encoding: Optional[str] = "utf8",
+        body: bytes = b"",
+        encoding: str = "utf8",
     ) -> etree._Element:
         return create_root_node(
             text,
