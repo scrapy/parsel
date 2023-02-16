@@ -15,7 +15,7 @@ from parsel import Selector, SelectorList
 from parsel.selector import (
     CannotRemoveElementWithoutRoot,
     CannotRemoveElementWithoutParent,
-    LXML_SUPPORTS_HUGE_TREE
+    LXML_SUPPORTS_HUGE_TREE,
 )
 
 
@@ -1339,7 +1339,6 @@ class ExsltTestCase(unittest.TestCase):
         assert sel.get() == "<a><c/></a>"
 
 
-
 class SelectorBytesInput(Selector):
     def __init__(
         self,
@@ -1365,7 +1364,7 @@ class SelectorBytesInput(Selector):
             root=root,
             base_url=base_url,
             _expr=_expr,
-            huge_tree=huge_tree
+            huge_tree=huge_tree,
         )
 
 

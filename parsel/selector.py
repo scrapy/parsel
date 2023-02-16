@@ -398,7 +398,12 @@ class Selector:
         encoding: Optional[str] = "utf8",
     ) -> etree._Element:
         return create_root_node(
-            text, self._parser, base_url=base_url, huge_tree=huge_tree, body=body, encoding=encoding
+            text,
+            self._parser,
+            base_url=base_url,
+            huge_tree=huge_tree,
+            body=body,
+            encoding=encoding,
         )
 
     def xpath(
