@@ -90,14 +90,20 @@ def create_root_node(
     parser_cls: Type[_ParserType],
     base_url: Optional[str] = None,
     huge_tree: bool = LXML_SUPPORTS_HUGE_TREE,
+    body: bytes = b"",
+    encoding: str = "utf8",
 ) -> etree._Element:
     """Create root node for text using given parser class."""
-    body = text.strip().replace("\x00", "").encode("utf8") or b"<html/>"
+    if not text:
+        body = body.replace(b"\x00", b"").strip()
+    else:
+        body = text.strip().replace("\x00", "").encode(encoding) or b"<html/>"
+
     if huge_tree and LXML_SUPPORTS_HUGE_TREE:
-        parser = parser_cls(recover=True, encoding="utf8", huge_tree=True)
+        parser = parser_cls(recover=True, encoding=encoding, huge_tree=True)
         root = etree.fromstring(body, parser=parser, base_url=base_url)
     else:
-        parser = parser_cls(recover=True, encoding="utf8")
+        parser = parser_cls(recover=True, encoding=encoding)
         root = etree.fromstring(body, parser=parser, base_url=base_url)
         for error in parser.error_log:
             if "use XML_PARSE_HUGE option" in error.message:
@@ -317,6 +323,7 @@ class Selector:
         "type",
         "_expr",
         "root",
+        "body",
         "__weakref__",
         "_parser",
         "_csstranslator",
@@ -341,6 +348,8 @@ class Selector:
         self,
         text: Optional[str] = None,
         type: Optional[str] = None,
+        body: bytes = b"",
+        encoding: str = "utf8",
         namespaces: Optional[Mapping[str, str]] = None,
         root: Optional[Any] = None,
         base_url: Optional[str] = None,
@@ -363,8 +372,18 @@ class Selector:
                 msg = f"text argument should be of type str, got {text.__class__}"
                 raise TypeError(msg)
             root = self._get_root(text, base_url, huge_tree)
+        elif body:
+            if not isinstance(body, bytes):
+                msg = f"body argument should be of type bytes, got {body.__class__}"
+                raise TypeError(msg)
+            root = self._get_root(
+                base_url=base_url,
+                huge_tree=huge_tree,
+                body=body,
+                encoding=encoding,
+            )
         elif root is None:
-            raise ValueError("Selector needs either text or root argument")
+            raise ValueError("Selector needs text, body, or root arguments")
 
         self.namespaces = dict(self._default_namespaces)
         if namespaces is not None:
@@ -377,12 +396,19 @@ class Selector:
 
     def _get_root(
         self,
-        text: str,
+        text: str = "",
         base_url: Optional[str] = None,
         huge_tree: bool = LXML_SUPPORTS_HUGE_TREE,
+        body: bytes = b"",
+        encoding: str = "utf8",
     ) -> etree._Element:
         return create_root_node(
-            text, self._parser, base_url=base_url, huge_tree=huge_tree
+            text,
+            self._parser,
+            base_url=base_url,
+            huge_tree=huge_tree,
+            body=body,
+            encoding=encoding,
         )
 
     def xpath(
