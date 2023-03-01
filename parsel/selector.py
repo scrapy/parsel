@@ -238,30 +238,36 @@ class SelectorList(List[_SelectorType]):
             return typing.cast(str, el)
         return default
 
-    def getall(self) -> List[str]:
+    def getall(self, *, strip: bool = False) -> List[str]:
         """
         Call the ``.get()`` method for each element is this list and return
         their results flattened, as a list of strings.
         """
-        return [x.get() for x in self]
+        data = [x.get() for x in self]
+        if strip:
+            return [x.strip() if x else x for x in data]
+        return data
 
     extract = getall
 
     @typing.overload
-    def get(self, default: None = None) -> Optional[str]:
+    def get(self, default: None = None, strip: bool = ...) -> Optional[str]:
         pass
 
     @typing.overload
-    def get(self, default: str) -> str:
+    def get(self, default: str, strip: bool = ...) -> str:
         pass
 
-    def get(self, default: Optional[str] = None) -> Optional[str]:
+    def get(
+        self, default: Optional[str] = None, strip: bool = False
+    ) -> Optional[str]:
         """
         Return the result of ``.get()`` for the first element in this list.
         If the list is empty, return the default value.
         """
         for x in self:
-            return x.get()
+            value = x.get()
+            return value.strip() if strip and value else value
         return default
 
     extract_first = get

@@ -327,6 +327,53 @@ class SelectorTestCase(unittest.TestCase):
         self.assertEqual(sel.xpath("//ul/li").get(), '<li id="1">1</li>')
         self.assertEqual(sel.xpath("//ul/li/text()").get(), "1")
 
+    def test_selector_get_strip(self) -> None:
+        body = '<ul><li id="1">1</li><li id="2"> 2 </li><li id="3">3</li></ul>'
+        sel = self.sscls(text=body)
+
+        self.assertEqual(
+            sel.xpath("//ul/li[position()>1]").get(), '<li id="2"> 2 </li>'
+        )
+        self.assertEqual(
+            sel.xpath("//ul/li[position()>1]").get(strip=True),
+            '<li id="2"> 2 </li>',
+        )
+        self.assertEqual(
+            sel.xpath("//ul/li[position()>1]/text()").get(), " 2 "
+        )
+        self.assertEqual(
+            sel.xpath("//ul/li[position()>1]/text()").get(strip=True), "2"
+        )
+
+    def test_selector_getall_strip(self) -> None:
+        body = (
+            '<ul><li id="1">1</li><li id="2"> 2 </li><li id="3">   3</li></ul>'
+        )
+        sel = self.sscls(text=body)
+
+        self.assertEqual(
+            sel.xpath("//ul/li").getall(),
+            [
+                '<li id="1">1</li>',
+                '<li id="2"> 2 </li>',
+                '<li id="3">   3</li>',
+            ],
+        )
+        self.assertEqual(
+            sel.xpath("//ul/li").getall(strip=True),
+            [
+                '<li id="1">1</li>',
+                '<li id="2"> 2 </li>',
+                '<li id="3">   3</li>',
+            ],
+        )
+        self.assertEqual(
+            sel.xpath("//ul/li/text()").getall(), ["1", " 2 ", "   3"]
+        )
+        self.assertEqual(
+            sel.xpath("//ul/li/text()").getall(strip=True), ["1", "2", "3"]
+        )
+
     def test_re_first(self) -> None:
         """Test if re_first() returns first matched element"""
         body = '<ul><li id="1">1</li><li id="2">2</li></ul>'
