@@ -3,9 +3,12 @@ import warnings
 import weakref
 import unittest
 import pickle
-from typing import Any
+
+import typing
+from typing import cast, Any
 
 from lxml import etree
+from lxml.html import HtmlElement
 from pkg_resources import parse_version
 
 from parsel import Selector, SelectorList
@@ -721,7 +724,7 @@ class SelectorTestCase(unittest.TestCase):
     def test_make_links_absolute(self) -> None:
         text = '<a href="file.html">link to file</a>'
         sel = Selector(text=text, base_url="http://example.com")
-        sel.root.make_links_absolute()
+        typing.cast(HtmlElement, sel.root).make_links_absolute()
         self.assertEqual(
             "http://example.com/file.html",
             sel.xpath("//a/@href").extract_first(),
@@ -1032,7 +1035,7 @@ class SelectorTestCase(unittest.TestCase):
             selectorlist_cls = MySelectorList
 
             def extra_method(self) -> str:
-                return "extra" + self.get()
+                return "extra" + cast(str, self.get())
 
         sel = MySelector(text="<html><div>foo</div></html>")
         self.assertIsInstance(sel.xpath("//div"), MySelectorList)
@@ -1054,7 +1057,7 @@ class SelectorTestCase(unittest.TestCase):
             text="<html><body><ul><li>1</li><li>2</li><li>3</li></ul></body></html>"
         )
         sel_list = sel.css("li")
-        sel_list.remove()
+        sel_list.drop()
         self.assertIsSelectorList(sel.css("li"))
         self.assertEqual(sel.css("li"), [])
 
@@ -1063,7 +1066,7 @@ class SelectorTestCase(unittest.TestCase):
             text="<html><body><ul><li>1</li><li>2</li><li>3</li></ul></body></html>"
         )
         sel_list = sel.css("li")
-        sel_list[0].remove()
+        sel_list[0].drop()
         self.assertIsSelectorList(sel.css("li"))
         self.assertEqual(sel.css("li::text").getall(), ["2", "3"])
 
@@ -1074,7 +1077,7 @@ class SelectorTestCase(unittest.TestCase):
         sel_list = sel.css("li::text")
         self.assertEqual(sel_list.getall(), ["1", "2", "3"])
         with self.assertRaises(CannotRemoveElementWithoutRoot):
-            sel_list.remove()
+            sel_list.drop()
 
         self.assertIsSelectorList(sel.css("li"))
         self.assertEqual(sel.css("li::text").getall(), ["1", "2", "3"])
@@ -1086,7 +1089,7 @@ class SelectorTestCase(unittest.TestCase):
         sel_list = sel.css("li::text")
         self.assertEqual(sel_list.getall(), ["1", "2", "3"])
         with self.assertRaises(CannotRemoveElementWithoutRoot):
-            sel_list[0].remove()
+            sel_list[0].drop()
 
         self.assertIsSelectorList(sel.css("li"))
         self.assertEqual(sel.css("li::text").getall(), ["1", "2", "3"])
@@ -1098,18 +1101,18 @@ class SelectorTestCase(unittest.TestCase):
         sel_list = sel.css("li::text")
         self.assertEqual(sel_list.getall(), ["1", "2", "3"])
         with self.assertRaises(CannotRemoveElementWithoutParent):
-            sel.remove()
+            sel.drop()
 
         with self.assertRaises(CannotRemoveElementWithoutParent):
-            sel.css("html").remove()
+            sel.css("html").drop()
 
         self.assertIsSelectorList(sel.css("li"))
         self.assertEqual(sel.css("li::text").getall(), ["1", "2", "3"])
 
-        sel.css("body").remove()
+        sel.css("body").drop()
         self.assertEqual(sel.get(), "<html></html>")
 
-    def test_deep_nesting(self):
+    def test_deep_nesting(self) -> None:
         lxml_version = parse_version(etree.__version__)
         lxml_huge_tree_version = parse_version("4.2")
 
@@ -1180,57 +1183,57 @@ class SelectorTestCase(unittest.TestCase):
         self.assertEqual(len(sel.css("span")), nest_level)
         self.assertEqual(len(sel.css("td")), 1)
 
-    def test_invalid_type(self):
+    def test_invalid_type(self) -> None:
         with self.assertRaises(ValueError):
             self.sscls("", type="xhtml")
 
-    def test_default_type(self):
+    def test_default_type(self) -> None:
         text = "foo"
         selector = self.sscls(text)
         self.assertEqual(selector.type, "html")
 
-    def test_json_type(self):
+    def test_json_type(self) -> None:
         obj = 1
         selector = self.sscls(str(obj), type="json")
         self.assertEqual(selector.root, obj)
         self.assertEqual(selector.type, "json")
 
-    def test_html_root(self):
+    def test_html_root(self) -> None:
         root = etree.fromstring("<html/>")
         selector = self.sscls(root=root)
         self.assertEqual(selector.root, root)
         self.assertEqual(selector.type, "html")
 
-    def test_json_root(self):
+    def test_json_root(self) -> None:
         obj = 1
         selector = self.sscls(root=obj)
         self.assertEqual(selector.root, obj)
         self.assertEqual(selector.type, "json")
 
-    def test_json_xpath(self):
+    def test_json_xpath(self) -> None:
         obj = 1
         selector = self.sscls(root=obj)
         with self.assertRaises(ValueError):
             selector.xpath("//*")
 
-    def test_json_css(self):
+    def test_json_css(self) -> None:
         obj = 1
         selector = self.sscls(root=obj)
         with self.assertRaises(ValueError):
             selector.css("*")
 
-    def test_invalid_json(self):
+    def test_invalid_json(self) -> None:
         text = "<html/>"
         selector = self.sscls(text, type="json")
         self.assertEqual(selector.root, None)
         self.assertEqual(selector.type, "json")
 
-    def test_text_and_root_warning(self):
+    def test_text_and_root_warning(self) -> None:
         with warnings.catch_warnings(record=True) as w:
             Selector(text="a", root="b")
             self.assertIn("both text and root", str(w[0].message))
 
-    def test_etree_root_invalid_type(self):
+    def test_etree_root_invalid_type(self) -> None:
         selector = Selector("<html></html>")
         self.assertRaisesRegex(
             ValueError,
@@ -1387,3 +1390,20 @@ class ExsltTestCase(unittest.TestCase):
             ).extract(),
             ["url", "name", "startDate", "location", "offers"],
         )
+
+    def test_dont_remove_text_after_deleted_element(self) -> None:
+        sel = self.sscls(
+            text="""<html><body>Text before.<span>Text in.</span> Text after.</body></html>
+            """
+        )
+        sel.css("span").drop()
+        self.assertEqual(
+            sel.get(), "<html><body>Text before. Text after.</body></html>"
+        )
+
+    def test_drop_with_xml_type(self) -> None:
+        sel = self.sscls(text="<a><b></b><c/></a>", type="xml")
+        el = sel.xpath("//b")[0]
+        assert el.root.getparent() is not None
+        el.drop()
+        assert sel.get() == "<a><c/></a>"

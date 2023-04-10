@@ -420,7 +420,7 @@ Removing elements
 -----------------
 
 If for any reason you need to remove elements based on a Selector or
-a SelectorList, you can do it with the ``remove()`` method, available for both
+a SelectorList, you can do it with the ``drop()`` method, available for both
 classes.
 
 .. warning:: this is a destructive action and cannot be undone. The original
@@ -445,7 +445,7 @@ Example removing an ad from a blog post:
     >>> sel = Selector(text=doc)
     >>> sel.xpath('//div/text()').getall()
     ['Content paragraph...', '\n        ', '\n            Ad content...\n            ', '\n        ', '\n    ', 'More content...']
-    >>> sel.xpath('//div[@class="ad"]').remove()
+    >>> sel.xpath('//div[@class="ad"]').drop()
     >>> sel.xpath('//div//text()').getall()
     ['Content paragraph...', 'More content...']
 

@@ -7,7 +7,7 @@ from parsel.selector import _NOT_SET
 
 
 class JMESPathTestCase(unittest.TestCase):
-    def test_json_has_html(self):
+    def test_json_has_html(self) -> None:
         """Sometimes the information is returned in a json wrapper"""
         data = """
         {
@@ -50,7 +50,7 @@ class JMESPathTestCase(unittest.TestCase):
             sel.jmespath("content").jmespath("name.age").get(), 18
         )
 
-    def test_html_has_json(self):
+    def test_html_has_json(self) -> None:
         html_text = """
         <div>
             <h1>Information</h1>
@@ -93,7 +93,7 @@ class JMESPathTestCase(unittest.TestCase):
         )
         self.assertEqual(sel.xpath("//div/content").jmespath("total").get(), 4)
 
-    def test_jmestpath_with_re(self):
+    def test_jmestpath_with_re(self) -> None:
         html_text = """
             <div>
                 <h1>Information</h1>
@@ -156,7 +156,7 @@ class JMESPathTestCase(unittest.TestCase):
             ["18", "32", "22", "25"],
         )
 
-    def test_json_types(self):
+    def test_json_types(self) -> None:
         for text, root in (
             ("{}", {}),
             ('{"a": "b"}', {"a": "b"}),
