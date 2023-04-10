@@ -4,6 +4,7 @@ packages."""
 import json
 import typing
 import warnings
+from io import BytesIO
 from typing import (
     Any,
     Dict,
@@ -96,14 +97,20 @@ def create_root_node(
     parser_cls: Type[_ParserType],
     base_url: Optional[str] = None,
     huge_tree: bool = LXML_SUPPORTS_HUGE_TREE,
+    body: bytes = b"",
+    encoding: str = "utf8",
 ) -> etree._Element:
     """Create root node for text using given parser class."""
-    body = text.strip().replace("\x00", "").encode("utf8") or b"<html/>"
+    if not text:
+        body = body.replace(b"\x00", b"").strip()
+    else:
+        body = text.strip().replace("\x00", "").encode(encoding) or b"<html/>"
+
     if huge_tree and LXML_SUPPORTS_HUGE_TREE:
-        parser = parser_cls(recover=True, encoding="utf8", huge_tree=True)
+        parser = parser_cls(recover=True, encoding=encoding, huge_tree=True)
         root = etree.fromstring(body, parser=parser, base_url=base_url)
     else:
-        parser = parser_cls(recover=True, encoding="utf8")
+        parser = parser_cls(recover=True, encoding=encoding)
         root = etree.fromstring(body, parser=parser, base_url=base_url)
         for error in parser.error_log:
             if "use XML_PARSE_HUGE option" in error.message:
@@ -322,6 +329,36 @@ def _get_root_from_text(
     return create_root_node(text, _ctgroup[type]["_parser"], **lxml_kwargs)
 
 
+def _get_root_and_type_from_bytes(
+    body: bytes,
+    encoding: str,
+    *,
+    input_type: Optional[str],
+    **lxml_kwargs: Any,
+) -> Tuple[Any, str]:
+    if input_type == "text":
+        return body.decode(encoding), input_type
+    if encoding == "utf8":
+        try:
+            data = json.load(BytesIO(body))
+        except ValueError:
+            data = _NOT_SET
+        if data is not _NOT_SET:
+            return data, "json"
+    if input_type == "json":
+        return None, "json"
+    assert input_type in ("html", "xml", None)  # nosec
+    type = _xml_or_html(input_type)
+    root = create_root_node(
+        text="",
+        body=body,
+        encoding=encoding,
+        parser_cls=_ctgroup[type]["_parser"],
+        **lxml_kwargs,
+    )
+    return root, type
+
+
 def _get_root_and_type_from_text(
     text: str, *, input_type: Optional[str], **lxml_kwargs: Any
 ) -> Tuple[Any, str]:
@@ -403,6 +440,7 @@ class Selector:
         "_huge_tree",
         "root",
         "_text",
+        "body",
         "__weakref__",
     ]
 
@@ -423,6 +461,8 @@ class Selector:
         self,
         text: Optional[str] = None,
         type: Optional[str] = None,
+        body: bytes = b"",
+        encoding: str = "utf8",
         namespaces: Optional[Mapping[str, str]] = None,
         root: Optional[Any] = _NOT_SET,
         base_url: Optional[str] = None,
@@ -433,8 +473,8 @@ class Selector:
         if type not in ("html", "json", "text", "xml", None):
             raise ValueError(f"Invalid type: {type}")
 
-        if text is None and root is _NOT_SET:
-            raise ValueError("Selector needs either text or root argument")
+        if text is None and not body and root is _NOT_SET:
+            raise ValueError("Selector needs text, body, or root arguments")
 
         if text is not None and not isinstance(text, str):
             msg = f"text argument should be of type str, got {text.__class__}"
@@ -446,6 +486,10 @@ class Selector:
                     "Selector got both text and root, root is being ignored.",
                     stacklevel=2,
                 )
+            if not isinstance(text, str):
+                msg = f"text argument should be of type str, got {text.__class__}"
+                raise TypeError(msg)
+
             root, type = _get_root_and_type_from_text(
                 text,
                 input_type=type,
@@ -454,6 +498,21 @@ class Selector:
             )
             self.root = root
             self.type = type
+        elif body:
+            if not isinstance(body, bytes):
+                msg = f"body argument should be of type bytes, got {body.__class__}"
+                raise TypeError(msg)
+            root, type = _get_root_and_type_from_bytes(
+                body=body,
+                encoding=encoding,
+                input_type=type,
+                base_url=base_url,
+                huge_tree=huge_tree,
+            )
+            self.root = root
+            self.type = type
+        elif root is _NOT_SET:
+            raise ValueError("Selector needs text, body, or root arguments")
         else:
             self.root = root
             self.type = _get_root_type(root, input_type=type)
@@ -471,14 +530,18 @@ class Selector:
 
     def _get_root(
         self,
-        text: str,
+        text: str = "",
         base_url: Optional[str] = None,
         huge_tree: bool = LXML_SUPPORTS_HUGE_TREE,
         type: Optional[str] = None,
+        body: bytes = b"",
+        encoding: str = "utf8",
     ) -> etree._Element:
-        return _get_root_from_text(
+        return create_root_node(
             text,
-            type=type or self.type,
+            body=body,
+            encoding=encoding,
+            parser_cls=_ctgroup[type or self.type]["_parser"],
             base_url=base_url,
             huge_tree=huge_tree,
         )

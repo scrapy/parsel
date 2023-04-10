@@ -5,7 +5,7 @@ import unittest
 import pickle
 
 import typing
-from typing import cast, Any
+from typing import cast, Any, Optional, Mapping
 
 from lxml import etree
 from lxml.html import HtmlElement
@@ -15,6 +15,8 @@ from parsel import Selector, SelectorList
 from parsel.selector import (
     CannotRemoveElementWithoutRoot,
     CannotRemoveElementWithoutParent,
+    LXML_SUPPORTS_HUGE_TREE,
+    _NOT_SET,
 )
 
 
@@ -422,7 +424,7 @@ class SelectorTestCase(unittest.TestCase):
     def test_text_or_root_is_required(self) -> None:
         self.assertRaisesRegex(
             ValueError,
-            "Selector needs either text or root argument",
+            "Selector needs text, body, or root arguments",
             self.sscls,
         )
 
@@ -1407,3 +1409,57 @@ class ExsltTestCase(unittest.TestCase):
         assert el.root.getparent() is not None
         el.drop()
         assert sel.get() == "<a><c/></a>"
+
+
+class SelectorBytesInput(Selector):
+    def __init__(
+        self,
+        text: Optional[str] = None,
+        type: Optional[str] = None,
+        body: bytes = b"",
+        encoding: str = "utf8",
+        namespaces: Optional[Mapping[str, str]] = None,
+        root: Optional[Any] = _NOT_SET,
+        base_url: Optional[str] = None,
+        _expr: Optional[str] = None,
+        huge_tree: bool = LXML_SUPPORTS_HUGE_TREE,
+    ) -> None:
+        if text:
+            body = bytes(text, encoding=encoding)
+            text = None
+        super().__init__(
+            text=text,
+            type=type,
+            body=body,
+            encoding=encoding,
+            namespaces=namespaces,
+            root=root,
+            base_url=base_url,
+            _expr=_expr,
+            huge_tree=huge_tree,
+        )
+
+
+class SelectorTestCaseBytes(SelectorTestCase):
+    sscls = SelectorBytesInput
+
+    def test_representation_slice(self) -> None:
+        pass
+
+    def test_representation_unicode_query(self) -> None:
+        pass
+
+    def test_weakref_slots(self) -> None:
+        pass
+
+    def test_check_text_argument_type(self) -> None:
+        self.assertRaisesRegex(
+            TypeError,
+            "body argument should be of type",
+            self.sscls,
+            body="<html/>",
+        )
+
+
+class ExsltTestCaseBytes(ExsltTestCase):
+    sscls = SelectorBytesInput
