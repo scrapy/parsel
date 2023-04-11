@@ -5,7 +5,7 @@ import unittest
 import pickle
 
 import typing
-from typing import Any, Optional, Mapping
+from typing import cast, Any, Optional, Mapping
 
 from lxml import etree
 from lxml.html import HtmlElement
@@ -16,6 +16,7 @@ from parsel.selector import (
     CannotRemoveElementWithoutRoot,
     CannotRemoveElementWithoutParent,
     LXML_SUPPORTS_HUGE_TREE,
+    _NOT_SET,
 )
 
 
@@ -66,7 +67,8 @@ class SelectorTestCase(unittest.TestCase):
         )
 
         self.assertEqual(
-            [x.extract() for x in sel.xpath("//input[@name='a']/@name")], ["a"]
+            [x.extract() for x in sel.xpath("//input[@name='a']/@name")],
+            ["a"],
         )
         self.assertEqual(
             [
@@ -231,7 +233,7 @@ class SelectorTestCase(unittest.TestCase):
         sel = self.sscls(text=body)
 
         representation = (
-            f"<Selector xpath='//input/@name' data='{37 * 'b'}...'>"
+            f"<Selector query='//input/@name' data='{37 * 'b'}...'>"
         )
 
         self.assertEqual(
@@ -242,7 +244,7 @@ class SelectorTestCase(unittest.TestCase):
         body = f"<p><input name='{50 * 'b'}' value='\xa9'/></p>"
 
         representation = (
-            "<Selector xpath='//input[@value=\"©\"]/@value' data='©'>"
+            "<Selector query='//input[@value=\"©\"]/@value' data='©'>"
         )
 
         sel = self.sscls(text=body)
@@ -561,7 +563,8 @@ class SelectorTestCase(unittest.TestCase):
 
         self.assertEqual(
             x.xpath(
-                "//somens:a/text()", namespaces={"somens": "http://scrapy.org"}
+                "//somens:a/text()",
+                namespaces={"somens": "http://scrapy.org"},
             ).extract(),
             ["take this"],
         )
@@ -655,7 +658,8 @@ class SelectorTestCase(unittest.TestCase):
         # "xmlns" is still defined
         self.assertEqual(
             x.xpath(
-                "//xmlns:TestTag/@b:att", namespaces={"b": "http://somens.com"}
+                "//xmlns:TestTag/@b:att",
+                namespaces={"b": "http://somens.com"},
             ).extract()[0],
             "value",
         )
@@ -937,7 +941,8 @@ class SelectorTestCase(unittest.TestCase):
         self.assertEqual(
             len(
                 sel.xpath(
-                    "//f:link", namespaces={"f": "http://www.w3.org/2005/Atom"}
+                    "//f:link",
+                    namespaces={"f": "http://www.w3.org/2005/Atom"},
                 )
             ),
             2,
@@ -1032,7 +1037,7 @@ class SelectorTestCase(unittest.TestCase):
             selectorlist_cls = MySelectorList
 
             def extra_method(self) -> str:
-                return "extra" + self.get()
+                return "extra" + cast(str, self.get())
 
         sel = MySelector(text="<html><div>foo</div></html>")
         self.assertIsInstance(sel.xpath("//div"), MySelectorList)
@@ -1179,6 +1184,73 @@ class SelectorTestCase(unittest.TestCase):
         nest_level = 282
         self.assertEqual(len(sel.css("span")), nest_level)
         self.assertEqual(len(sel.css("td")), 1)
+
+    def test_invalid_type(self) -> None:
+        with self.assertRaises(ValueError):
+            self.sscls("", type="xhtml")
+
+    def test_default_type(self) -> None:
+        text = "foo"
+        selector = self.sscls(text)
+        self.assertEqual(selector.type, "html")
+
+    def test_json_type(self) -> None:
+        obj = 1
+        selector = self.sscls(str(obj), type="json")
+        self.assertEqual(selector.root, obj)
+        self.assertEqual(selector.type, "json")
+
+    def test_html_root(self) -> None:
+        root = etree.fromstring("<html/>")
+        selector = self.sscls(root=root)
+        self.assertEqual(selector.root, root)
+        self.assertEqual(selector.type, "html")
+
+    def test_json_root(self) -> None:
+        obj = 1
+        selector = self.sscls(root=obj)
+        self.assertEqual(selector.root, obj)
+        self.assertEqual(selector.type, "json")
+
+    def test_json_xpath(self) -> None:
+        obj = 1
+        selector = self.sscls(root=obj)
+        with self.assertRaises(ValueError):
+            selector.xpath("//*")
+
+    def test_json_css(self) -> None:
+        obj = 1
+        selector = self.sscls(root=obj)
+        with self.assertRaises(ValueError):
+            selector.css("*")
+
+    def test_invalid_json(self) -> None:
+        text = "<html/>"
+        selector = self.sscls(text, type="json")
+        self.assertEqual(selector.root, None)
+        self.assertEqual(selector.type, "json")
+
+    def test_text_and_root_warning(self) -> None:
+        with warnings.catch_warnings(record=True) as w:
+            Selector(text="a", root="b")
+            self.assertIn("both text and root", str(w[0].message))
+
+    def test_etree_root_invalid_type(self) -> None:
+        selector = Selector("<html></html>")
+        self.assertRaisesRegex(
+            ValueError,
+            "object as root",
+            Selector,
+            root=selector.root,
+            type="text",
+        )
+        self.assertRaisesRegex(
+            ValueError,
+            "object as root",
+            Selector,
+            root=selector.root,
+            type="json",
+        )
 
 
 class ExsltTestCase(unittest.TestCase):
@@ -1347,7 +1419,7 @@ class SelectorBytesInput(Selector):
         body: bytes = b"",
         encoding: str = "utf8",
         namespaces: Optional[Mapping[str, str]] = None,
-        root: Optional[Any] = None,
+        root: Optional[Any] = _NOT_SET,
         base_url: Optional[str] = None,
         _expr: Optional[str] = None,
         huge_tree: bool = LXML_SUPPORTS_HUGE_TREE,

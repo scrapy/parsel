@@ -4,7 +4,6 @@ persistent=no
 
 [MESSAGES CONTROL]
 disable=c-extension-no-member,
-        deprecated-method,
         fixme,
         import-error,
         import-outside-toplevel,
@@ -26,4 +25,4 @@ disable=c-extension-no-member,
         unused-argument,
         use-a-generator,
         wrong-import-order,
-        wrong-import-position
+        wrong-import-position,

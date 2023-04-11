@@ -26,8 +26,10 @@ setup(
     include_package_data=True,
     install_requires=[
         "cssselect>=0.9",
+        "jmespath",
         "lxml",
         "packaging",
+        "typing_extensions",
         "w3lib>=1.19.0",
     ],
     python_requires=">=3.7",

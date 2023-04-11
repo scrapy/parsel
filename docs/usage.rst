@@ -4,32 +4,38 @@
 Usage
 =====
 
-Create a :class:`~parsel.selector.Selector` object for the HTML or XML text
-that you want to parse::
+Create a :class:`~parsel.selector.Selector` object for your input text.
+
+For HTML or XML, use `CSS`_ or `XPath`_ expressions to select data::
 
     >>> from parsel import Selector
-    >>> text = "<html><body><h1>Hello, Parsel!</h1></body></html>"
-    >>> selector = Selector(text=text)
+    >>> html_text = "<html><body><h1>Hello, Parsel!</h1></body></html>"
+    >>> html_selector = Selector(text=html_text)
+    >>> html_selector.css('h1')
+    [<Selector query='descendant-or-self::h1' data='<h1>Hello, Parsel!</h1>'>]
+    >>> html_selector.xpath('//h1')  # the same, but now with XPath
+    [<Selector query='//h1' data='<h1>Hello, Parsel!</h1>'>]
 
-Then use `CSS`_ or `XPath`_ expressions to select elements::
+For JSON, use `JMESPath`_ expressions to select data::
 
-    >>> selector.css('h1')
-    [<Selector xpath='descendant-or-self::h1' data='<h1>Hello, Parsel!</h1>'>]
-    >>> selector.xpath('//h1')  # the same, but now with XPath
-    [<Selector xpath='//h1' data='<h1>Hello, Parsel!</h1>'>]
+    >>> json_text = '{"title":"Hello, Parsel!"}'
+    >>> json_selector = Selector(text=json_text)
+    >>> json_selector.jmespath('title')
+    [<Selector query='title' data='Hello, Parsel!'>]
 
 And extract data from those elements::
 
-    >>> selector.css('h1::text').get()
+    >>> html_selector.xpath('//h1/text()').get()
     'Hello, Parsel!'
-    >>> selector.xpath('//h1/text()').getall()
+    >>> json_selector.jmespath('title').getall()
     ['Hello, Parsel!']
 
 .. _CSS: https://www.w3.org/TR/selectors
 .. _XPath: https://www.w3.org/TR/xpath
+.. _JMESPath: https://jmespath.org/
 
-Learning CSS and XPath
-======================
+Learning expression languages
+=============================
 
 `CSS`_ is a language for applying styles to HTML documents. It defines
 selectors to associate those styles with specific HTML elements. Resources to
@@ -39,6 +45,11 @@ learn CSS_ selectors include:
 
 -   `XPath/CSS Equivalents in Wikibooks`_
 
+Parsel support for CSS selectors comes from cssselect, so read about `CSS
+selectors supported by cssselect`_.
+
+.. _CSS selectors supported by cssselect: https://cssselect.readthedocs.io/en/latest/#supported-selectors
+
 `XPath`_ is a language for selecting nodes in XML documents, which can also be
 used with HTML. Resources to learn XPath_ include:
 
@@ -46,13 +57,22 @@ used with HTML. Resources to learn XPath_ include:
 
 -   `XPath cheatsheet`_
 
-You can use either CSS_ or XPath_. CSS_ is usually more readable, but some
-things can only be done with XPath_.
+For HTML and XML input, you can use either CSS_ or XPath_. CSS_ is usually
+more readable, but some things can only be done with XPath_.
+
+JMESPath_ allows you to declaratively specify how to extract elements from
+a JSON document. Resources to learn JMESPath_ include:
+
+-   `JMESPath Tutorial`_
+
+-   `JMESPath Specification`_
 
 .. _CSS selectors in the MDN: https://developer.mozilla.org/en-US/docs/Learn/CSS/Building_blocks/Selectors
 .. _XPath cheatsheet: https://devhints.io/xpath
 .. _XPath Tutorial in W3Schools: https://www.w3schools.com/xml/xpath_intro.asp
 .. _XPath/CSS Equivalents in Wikibooks: https://en.wikibooks.org/wiki/XPath/CSS_Equivalents
+.. _JMESPath Tutorial: https://jmespath.org/tutorial.html
+.. _JMESPath Specification: https://jmespath.org/specification.html
 
 
 Using selectors
@@ -95,12 +115,12 @@ So, by looking at the :ref:`HTML code <topics-selectors-htmlcode>` of that
 page, let's construct an XPath for selecting the text inside the title tag::
 
     >>> selector.xpath('//title/text()')
-    [<Selector xpath='//title/text()' data='Example website'>]
+    [<Selector query='//title/text()' data='Example website'>]
 
 You can also ask the same thing using CSS instead::
 
     >>> selector.css('title::text')
-    [<Selector xpath='descendant-or-self::title/text()' data='Example website'>]
+    [<Selector query='descendant-or-self::title/text()' data='Example website'>]
 
 To actually extract the textual data, you must call the selector ``.get()``
 or ``.getall()`` methods, as follows::
@@ -597,10 +617,10 @@ returns ``True`` for nodes that have all of the specified HTML classes::
     ... """)
     ...
     >>> sel.xpath('//p[has-class("foo")]')
-    [<Selector xpath='//p[has-class("foo")]' data='<p class="foo bar-baz">First</p>'>,
-     <Selector xpath='//p[has-class("foo")]' data='<p class="foo">Second</p>'>]
+    [<Selector query='//p[has-class("foo")]' data='<p class="foo bar-baz">First</p>'>,
+     <Selector query='//p[has-class("foo")]' data='<p class="foo">Second</p>'>]
     >>> sel.xpath('//p[has-class("foo", "bar-baz")]')
-    [<Selector xpath='//p[has-class("foo", "bar-baz")]' data='<p class="foo bar-baz">First</p>'>]
+    [<Selector query='//p[has-class("foo", "bar-baz")]' data='<p class="foo bar-baz">First</p>'>]
     >>> sel.xpath('//p[has-class("foo", "bar")]')
     []
 
@@ -1011,8 +1031,8 @@ directly by their names::
 
     >>> sel.remove_namespaces()
     >>> sel.xpath("//link")
-    [<Selector xpath='//link' data='<link rel="alternate" type="text/html...'>,
-     <Selector xpath='//link' data='<link rel="next" type="application/at...'>,
+    [<Selector query='//link' data='<link rel="alternate" type="text/html...'>,
+     <Selector query='//link' data='<link rel="next" type="application/at...'>,
      ...]
 
 If you wonder why the namespace removal procedure isn't called always by default
@@ -1057,8 +1077,8 @@ And try to select the links again, now using an "atom:" prefix
 for the "link" node test::
 
     >>> sel.xpath("//atom:link", namespaces={"atom": "http://www.w3.org/2005/Atom"})
-    [<Selector xpath='//atom:link' data='<link xmlns="http://www.w3.org/2005/A...'>,
-     <Selector xpath='//atom:link' data='<link xmlns="http://www.w3.org/2005/A...'>,
+    [<Selector query='//atom:link' data='<link xmlns="http://www.w3.org/2005/A...'>,
+     <Selector query='//atom:link' data='<link xmlns="http://www.w3.org/2005/A...'>,
      ...]
 
 You can pass several namespaces (here we're using shorter 1-letter prefixes)::
