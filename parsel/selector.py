@@ -158,7 +158,7 @@ class SelectorList(List[_SelectorType]):
         Call the ``.jmespath()`` method for each element in this list and return
         their results flattened as another :class:`SelectorList`.
 
-        ``query`` is the same argument as the one in :meth:`Selector.jmespath`
+        ``query`` is the same argument as the one in :meth:`Selector.jmespath`.
 
         Any additional named arguments are passed to the underlying
         ``jmespath.search`` call, e.g.::
