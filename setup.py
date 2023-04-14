@@ -29,7 +29,7 @@ setup(
         "jmespath",
         "lxml",
         "packaging",
-        "typing_extensions",
+        "typing_extensions; python_version < '3.8'",
         "w3lib>=1.19.0",
     ],
     python_requires=">=3.7",
