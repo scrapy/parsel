@@ -416,7 +416,10 @@ class Selector:
     You can write selection expressions in CSS or XPath for HTML and XML
     inputs, or in JMESPath for JSON inputs.
 
-    ``text`` is a `str`` object.
+    ``text`` is an ``str`` object.
+
+    ``body`` is a ``bytes`` object. It can be used together with the
+    ``encoding`` argument instead of the ``text`` argument.
 
     ``type`` defines the selector type. It can be ``"html"`` (default),
     ``"json"``, or ``"xml"``.
