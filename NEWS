@@ -3,6 +3,25 @@
 History
 -------
 
+1.8.0 (YYYY-MM-DD)
+~~~~~~~~~~~~~~~~~~
+
+* Add support for JMESPath: you can now create a selector for a JSON document
+  and call ``Selector.jmespath()``. See :ref:`the documentation
+  <topics-selectors>` for more information and examples.
+* Selectors can now be constructed from ``bytes`` (using the ``body`` and
+  ``encoding`` arguments) instead of ``str`` (using the ``text`` argument), so
+  that there is no internal conversion from ``str`` to ``bytes`` and the memory
+  usage is lower.
+* Typing improvements
+* The ``pkg_resources`` module (which was absent from the requirements) is no
+  longer used
+* Documentation build fixes
+* New requirements:
+
+  * ``jmespath``
+  * ``typing_extensions`` (on Python 3.7)
+
 1.7.0 (2022-11-01)
 ~~~~~~~~~~~~~~~~~~
 
