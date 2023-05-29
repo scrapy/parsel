@@ -25,7 +25,7 @@ setup(
     },
     include_package_data=True,
     install_requires=[
-        "cssselect>=0.9",
+        "cssselect>=1.2.0",
         "jmespath",
         "lxml",
         "packaging",
