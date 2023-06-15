@@ -1252,6 +1252,12 @@ class SelectorTestCase(unittest.TestCase):
             type="json",
         )
 
+    def test_json_selector_representation(self) -> None:
+        selector = Selector(text="true")
+        assert str(selector) == "<Selector query=None data='True'>"
+        selector = Selector(text="1")
+        assert str(selector) == "<Selector query=None data='1'>"
+
 
 class ExsltTestCase(unittest.TestCase):
 

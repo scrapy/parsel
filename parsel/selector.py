@@ -745,7 +745,7 @@ class Selector:
 
     def get(self) -> Any:
         """
-        Serialize and return the matched nodes in a single string.
+        Serialize and return the matched nodes.
         Percent encoded content is unquoted.
         """
         if self.type in ("text", "json"):
@@ -873,7 +873,7 @@ class Selector:
     __nonzero__ = __bool__
 
     def __str__(self) -> str:
-        data = repr(shorten(self.get(), width=40))
+        data = repr(shorten(str(self.get()), width=40))
         return f"<{type(self).__name__} query={self._expr!r} data={data}>"
 
     __repr__ = __str__
