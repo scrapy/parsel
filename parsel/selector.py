@@ -875,6 +875,6 @@ class Selector:
     def __str__(self) -> str:
         return str(self.get())
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         data = repr(shorten(str(self.get()), width=40))
         return f"<{type(self).__name__} query={self._expr!r} data={data}>"
