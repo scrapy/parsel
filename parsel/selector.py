@@ -745,8 +745,10 @@ class Selector:
 
     def get(self) -> Any:
         """
-        Serialize and return the matched nodes in a single string.
-        Percent encoded content is unquoted.
+        Serialize and return the matched nodes.
+
+        For HTML and XML, the result is always a string, and percent-encoded
+        content is unquoted.
         """
         if self.type in ("text", "json"):
             return self.root
@@ -873,7 +875,8 @@ class Selector:
     __nonzero__ = __bool__
 
     def __str__(self) -> str:
-        data = repr(shorten(self.get(), width=40))
-        return f"<{type(self).__name__} query={self._expr!r} data={data}>"
+        return str(self.get())
 
-    __repr__ = __str__
+    def __repr__(self) -> str:
+        data = repr(shorten(str(self.get()), width=40))
+        return f"<{type(self).__name__} query={self._expr!r} data={data}>"
