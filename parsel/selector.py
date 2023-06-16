@@ -746,7 +746,9 @@ class Selector:
     def get(self) -> Any:
         """
         Serialize and return the matched nodes.
-        Percent encoded content is unquoted.
+        
+        For HTML and XML, the result is always a string, and percent-encoded 
+        content is unquoted.
         """
         if self.type in ("text", "json"):
             return self.root
