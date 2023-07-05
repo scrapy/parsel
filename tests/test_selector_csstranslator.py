@@ -2,13 +2,17 @@
 Selector tests for cssselect backend
 """
 import unittest
-from typing import TYPE_CHECKING, Any, Callable, List, Type
+from typing import Any, Callable, List, Type, Protocol
 
 import cssselect
 import pytest
 from packaging.version import Version
 
-from parsel.csstranslator import GenericTranslator, HTMLTranslator
+from parsel.csstranslator import (
+    GenericTranslator,
+    HTMLTranslator,
+    TranslatorProtocol,
+)
 from parsel import Selector
 from cssselect.parser import SelectorSyntaxError
 from cssselect.xpath import ExpressionError
@@ -50,39 +54,33 @@ HTMLBODY = """
 """
 
 
-if TYPE_CHECKING:
-    # requires Python 3.8
-    from typing import Protocol
+class TranslatorTestProtocol(Protocol):
+    tr_cls: Type[TranslatorProtocol]
+    tr: TranslatorProtocol
 
-    from parsel.csstranslator import TranslatorProtocol
+    def c2x(self, css: str, prefix: str = ...) -> str:
+        pass
 
-    class TranslatorTestProtocol(Protocol):
-        tr_cls: Type[TranslatorProtocol]
-        tr: TranslatorProtocol
+    def assertEqual(self, first: Any, second: Any, msg: Any = ...) -> None:
+        pass
 
-        def c2x(self, css: str, prefix: str = ...) -> str:
-            pass
-
-        def assertEqual(self, first: Any, second: Any, msg: Any = ...) -> None:
-            pass
-
-        def assertRaises(
-            self,
-            expected_exception: type[BaseException]
-            | tuple[type[BaseException], ...],
-            callable: Callable[..., object],
-            *args: Any,
-            **kwargs: Any,
-        ) -> None:
-            pass
+    def assertRaises(
+        self,
+        expected_exception: type[BaseException]
+        | tuple[type[BaseException], ...],
+        callable: Callable[..., object],
+        *args: Any,
+        **kwargs: Any,
+    ) -> None:
+        pass
 
 
 class TranslatorTestMixin:
-    def setUp(self: "TranslatorTestProtocol") -> None:
+    def setUp(self: TranslatorTestProtocol) -> None:
         self.tr = self.tr_cls()
         self.c2x = self.tr.css_to_xpath
 
-    def test_attr_function(self: "TranslatorTestProtocol") -> None:
+    def test_attr_function(self: TranslatorTestProtocol) -> None:
         cases = [
             ("::attr(name)", "descendant-or-self::*/@name"),
             ("a::attr(href)", "descendant-or-self::a/@href"),
@@ -95,7 +93,7 @@ class TranslatorTestMixin:
         for css, xpath in cases:
             self.assertEqual(self.c2x(css), xpath, css)
 
-    def test_attr_function_exception(self: "TranslatorTestProtocol") -> None:
+    def test_attr_function_exception(self: TranslatorTestProtocol) -> None:
         cases = [
             ("::attr(12)", ExpressionError),
             ("::attr(34test)", ExpressionError),
@@ -104,7 +102,7 @@ class TranslatorTestMixin:
         for css, exc in cases:
             self.assertRaises(exc, self.c2x, css)
 
-    def test_text_pseudo_element(self: "TranslatorTestProtocol") -> None:
+    def test_text_pseudo_element(self: TranslatorTestProtocol) -> None:
         cases = [
             ("::text", "descendant-or-self::text()"),
             ("p::text", "descendant-or-self::p/text()"),
@@ -133,7 +131,7 @@ class TranslatorTestMixin:
         for css, xpath in cases:
             self.assertEqual(self.c2x(css), xpath, css)
 
-    def test_pseudo_function_exception(self: "TranslatorTestProtocol") -> None:
+    def test_pseudo_function_exception(self: TranslatorTestProtocol) -> None:
         cases = [
             ("::attribute(12)", ExpressionError),
             ("::text()", ExpressionError),
@@ -142,14 +140,14 @@ class TranslatorTestMixin:
         for css, exc in cases:
             self.assertRaises(exc, self.c2x, css)
 
-    def test_unknown_pseudo_element(self: "TranslatorTestProtocol") -> None:
+    def test_unknown_pseudo_element(self: TranslatorTestProtocol) -> None:
         cases = [
             ("::text-node", ExpressionError),
         ]
         for css, exc in cases:
             self.assertRaises(exc, self.c2x, css)
 
-    def test_unknown_pseudo_class(self: "TranslatorTestProtocol") -> None:
+    def test_unknown_pseudo_class(self: TranslatorTestProtocol) -> None:
         cases = [
             (":text", ExpressionError),
             (":attribute(name)", ExpressionError),

@@ -9,20 +9,18 @@ from typing import (
     Any,
     Dict,
     List,
+    Literal,
     Mapping,
     Optional,
     Pattern,
+    SupportsIndex,
     Tuple,
     Type,
+    TypedDict,
     TypeVar,
     Union,
 )
 from warnings import warn
-
-try:
-    from typing import TypedDict  # pylint: disable=ungrouped-imports
-except ImportError:  # Python 3.7
-    from typing_extensions import TypedDict
 
 import jmespath
 from lxml import etree, html
@@ -31,19 +29,14 @@ from packaging.version import Version
 from .csstranslator import GenericTranslator, HTMLTranslator
 from .utils import extract_regex, flatten, iflatten, shorten
 
-if typing.TYPE_CHECKING:
-    # both require Python 3.8
-    from typing import Literal, SupportsIndex
-
-    # simplified _OutputMethodArg from types-lxml
-    _TostringMethodType = Literal[
-        "html",
-        "xml",
-    ]
-
 
 _SelectorType = TypeVar("_SelectorType", bound="Selector")
 _ParserType = Union[etree.XMLParser, etree.HTMLParser]
+# simplified _OutputMethodArg from types-lxml
+_TostringMethodType = Literal[
+    "html",
+    "xml",
+]
 
 lxml_version = Version(etree.__version__)
 lxml_huge_tree_version = Version("4.2")
