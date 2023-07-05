@@ -2,7 +2,7 @@
 Selector tests for cssselect backend
 """
 import unittest
-from typing import Any, Callable, List, Type, Protocol
+from typing import Any, Callable, List, Type, Protocol, Tuple, Union
 
 import cssselect
 import pytest
@@ -66,8 +66,9 @@ class TranslatorTestProtocol(Protocol):
 
     def assertRaises(
         self,
-        expected_exception: type[BaseException]
-        | tuple[type[BaseException], ...],
+        expected_exception: Union[
+            Type[BaseException], Tuple[Type[BaseException], ...]
+        ],
         callable: Callable[..., object],
         *args: Any,
         **kwargs: Any,
