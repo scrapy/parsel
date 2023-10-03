@@ -25,7 +25,7 @@ jobs:
             TOXENV: pypy3
 
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
 
     - name: Install system libraries
       if: contains(matrix.python-version, 'pypy3.9')
