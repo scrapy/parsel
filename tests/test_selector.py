@@ -9,7 +9,7 @@ from typing import cast, Any, Optional, Mapping
 
 from lxml import etree
 from lxml.html import HtmlElement
-from pkg_resources import parse_version
+from packaging.version import Version
 
 from parsel import Selector, SelectorList
 from parsel.selector import (
@@ -1115,8 +1115,8 @@ class SelectorTestCase(unittest.TestCase):
         self.assertEqual(sel.get(), "<html></html>")
 
     def test_deep_nesting(self) -> None:
-        lxml_version = parse_version(etree.__version__)
-        lxml_huge_tree_version = parse_version("4.2")
+        lxml_version = Version(etree.__version__)
+        lxml_huge_tree_version = Version("4.2")
 
         content = """
         <html>
