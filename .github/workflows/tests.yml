@@ -20,7 +20,10 @@ jobs:
         - python-version: "3.11"
           env:
             TOXENV: py
-        - python-version: pypy3.9
+        - python-version: "3.12"
+          env:
+            TOXENV: py
+        - python-version: pypy3.10
           env:
             TOXENV: pypy3
 
@@ -28,7 +31,7 @@ jobs:
     - uses: actions/checkout@v4
 
     - name: Install system libraries
-      if: contains(matrix.python-version, 'pypy3.9')
+      if: contains(matrix.python-version, 'pypy')
       run: |
         sudo apt-get update
         sudo apt-get install libxml2-dev libxslt-dev
