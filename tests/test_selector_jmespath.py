@@ -43,12 +43,8 @@ class JMESPathTestCase(unittest.TestCase):
             sel.jmespath("html").xpath("//div/a/text()").getall(),
             ["a", "b", "d"],
         )
-        self.assertEqual(
-            sel.jmespath("html").css("div > b").getall(), ["<b>f</b>"]
-        )
-        self.assertEqual(
-            sel.jmespath("content").jmespath("name.age").get(), 18
-        )
+        self.assertEqual(sel.jmespath("html").css("div > b").getall(), ["<b>f</b>"])
+        self.assertEqual(sel.jmespath("content").jmespath("name.age").get(), 18)
 
     def test_html_has_json(self) -> None:
         html_text = """
@@ -82,9 +78,7 @@ class JMESPathTestCase(unittest.TestCase):
         """
         sel = Selector(text=html_text)
         self.assertEqual(
-            sel.xpath("//div/content/text()")
-            .jmespath("user[*].name")
-            .getall(),
+            sel.xpath("//div/content/text()").jmespath("user[*].name").getall(),
             ["A", "B", "C", "D"],
         )
         self.assertEqual(
@@ -125,9 +119,7 @@ class JMESPathTestCase(unittest.TestCase):
             """
         sel = Selector(text=html_text)
         self.assertEqual(
-            sel.xpath("//div/content/text()")
-            .jmespath("user[*].name")
-            .re(r"(\w+)"),
+            sel.xpath("//div/content/text()").jmespath("user[*].name").re(r"(\w+)"),
             ["A", "B", "C", "D"],
         )
         self.assertEqual(
@@ -143,9 +135,7 @@ class JMESPathTestCase(unittest.TestCase):
         )
 
         self.assertEqual(
-            sel.xpath("//div/content")
-            .jmespath("unavailable")
-            .re_first(r"(\d+)"),
+            sel.xpath("//div/content").jmespath("unavailable").re_first(r"(\d+)"),
             None,
         )
 
@@ -171,14 +161,10 @@ class JMESPathTestCase(unittest.TestCase):
         ):
             selector = Selector(text=text, root=_NOT_SET)
             self.assertEqual(selector.type, "json")
-            self.assertEqual(
-                selector._text, text  # pylint: disable=protected-access
-            )
+            self.assertEqual(selector._text, text)  # pylint: disable=protected-access
             self.assertEqual(selector.root, root)
 
             selector = Selector(text=None, root=root)
             self.assertEqual(selector.type, "json")
-            self.assertEqual(
-                selector._text, None  # pylint: disable=protected-access
-            )
+            self.assertEqual(selector._text, None)  # pylint: disable=protected-access
             self.assertEqual(selector.root, root)

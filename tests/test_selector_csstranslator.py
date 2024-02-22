@@ -1,22 +1,18 @@
 """
 Selector tests for cssselect backend
 """
+
 import unittest
-from typing import Any, Callable, List, Type, Protocol, Tuple, Union
+from typing import Any, Callable, List, Protocol, Tuple, Type, Union
 
 import cssselect
 import pytest
-from packaging.version import Version
-
-from parsel.csstranslator import (
-    GenericTranslator,
-    HTMLTranslator,
-    TranslatorProtocol,
-)
-from parsel import Selector
 from cssselect.parser import SelectorSyntaxError
 from cssselect.xpath import ExpressionError
+from packaging.version import Version
 
+from parsel import Selector
+from parsel.csstranslator import GenericTranslator, HTMLTranslator, TranslatorProtocol
 
 HTMLBODY = """
 <html>
@@ -66,9 +62,7 @@ class TranslatorTestProtocol(Protocol):
 
     def assertRaises(
         self,
-        expected_exception: Union[
-            Type[BaseException], Tuple[Type[BaseException], ...]
-        ],
+        expected_exception: Union[Type[BaseException], Tuple[Type[BaseException], ...]],
         callable: Callable[..., object],
         *args: Any,
         **kwargs: Any,
@@ -184,9 +178,7 @@ class CSSSelectorTest(unittest.TestCase):
         self.sel = self.sscls(text=HTMLBODY)
 
     def x(self, *a: Any, **kw: Any) -> List[str]:
-        return [
-            v.strip() for v in self.sel.css(*a, **kw).extract() if v.strip()
-        ]
+        return [v.strip() for v in self.sel.css(*a, **kw).extract() if v.strip()]
 
     def test_selector_simple(self) -> None:
         for x in self.sel.css("input"):
@@ -206,9 +198,7 @@ class CSSSelectorTest(unittest.TestCase):
             ["lorem ipsum text", "hi", "there", "guy"],
         )
         self.assertEqual(self.x("p::text"), ["lorem ipsum text"])
-        self.assertEqual(
-            self.x("p ::text"), ["lorem ipsum text", "hi", "there", "guy"]
-        )
+        self.assertEqual(self.x("p ::text"), ["lorem ipsum text", "hi", "there", "guy"])
 
     def test_attribute_function(self) -> None:
         self.assertEqual(self.x("#p-b2::attr(id)"), ["p-b2"])
@@ -221,9 +211,7 @@ class CSSSelectorTest(unittest.TestCase):
         )
 
     def test_nested_selector(self) -> None:
-        self.assertEqual(
-            self.sel.css("p").css("b::text").extract(), ["hi", "guy"]
-        )
+        self.assertEqual(self.sel.css("p").css("b::text").extract(), ["hi", "guy"])
         self.assertEqual(
             self.sel.css("div").css("area:last-child").extract(),
             ['<area shape="default" id="area-nohref">'],
