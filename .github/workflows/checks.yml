@@ -10,10 +10,7 @@ jobs:
         include:
         - python-version: "3.12"
           env:
-            TOXENV: security
-        - python-version: "3.12"
-          env:
-            TOXENV: flake8
+            TOXENV: pre-commit
         - python-version: "3.12"
           env:
             TOXENV: pylint
@@ -23,9 +20,6 @@ jobs:
         - python-version: "3.12"
           env:
             TOXENV: typing
-        - python-version: "3.12"
-          env:
-            TOXENV: black
         - python-version: "3.12"
           env:
             TOXENV: twinecheck
