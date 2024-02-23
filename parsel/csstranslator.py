@@ -3,10 +3,9 @@ from typing import TYPE_CHECKING, Any, Optional, Protocol
 
 from cssselect import GenericTranslator as OriginalGenericTranslator
 from cssselect import HTMLTranslator as OriginalHTMLTranslator
-from cssselect.xpath import XPathExpr as OriginalXPathExpr
-from cssselect.xpath import ExpressionError
 from cssselect.parser import Element, FunctionalPseudoElement, PseudoElement
-
+from cssselect.xpath import ExpressionError
+from cssselect.xpath import XPathExpr as OriginalXPathExpr
 
 if TYPE_CHECKING:
     # typing.Self requires Python 3.11
@@ -25,9 +24,7 @@ class XPathExpr(OriginalXPathExpr):
         textnode: bool = False,
         attribute: Optional[str] = None,
     ) -> "Self":
-        x = cls(
-            path=xpath.path, element=xpath.element, condition=xpath.condition
-        )
+        x = cls(path=xpath.path, element=xpath.element, condition=xpath.condition)
         x.textnode = textnode
         x.attribute = attribute
         return x
@@ -82,9 +79,7 @@ class TranslatorMixin:
     Currently supported pseudo-elements are ``::text`` and ``::attr(ATTR_NAME)``.
     """
 
-    def xpath_element(
-        self: TranslatorProtocol, selector: Element
-    ) -> XPathExpr:
+    def xpath_element(self: TranslatorProtocol, selector: Element) -> XPathExpr:
         # https://github.com/python/mypy/issues/12344
         xpath = super().xpath_element(selector)  # type: ignore[safe-super]
         return XPathExpr.from_xpath(xpath)
@@ -104,7 +99,9 @@ class TranslatorMixin:
                 )
             xpath = method(xpath, pseudo_element)
         else:
-            method_name = f"xpath_{pseudo_element.replace('-', '_')}_simple_pseudo_element"
+            method_name = (
+                f"xpath_{pseudo_element.replace('-', '_')}_simple_pseudo_element"
+            )
             method = getattr(self, method_name, None)
             if not method:
                 raise ExpressionError(
@@ -121,30 +118,22 @@ class TranslatorMixin:
             raise ExpressionError(
                 f"Expected a single string or ident for ::attr(), got {function.arguments!r}"  # noqa: E231
             )
-        return XPathExpr.from_xpath(
-            xpath, attribute=function.arguments[0].value
-        )
+        return XPathExpr.from_xpath(xpath, attribute=function.arguments[0].value)
 
-    def xpath_text_simple_pseudo_element(
-        self, xpath: OriginalXPathExpr
-    ) -> XPathExpr:
+    def xpath_text_simple_pseudo_element(self, xpath: OriginalXPathExpr) -> XPathExpr:
         """Support selecting text nodes using ::text pseudo-element"""
         return XPathExpr.from_xpath(xpath, textnode=True)
 
 
 class GenericTranslator(TranslatorMixin, OriginalGenericTranslator):
     @lru_cache(maxsize=256)
-    def css_to_xpath(
-        self, css: str, prefix: str = "descendant-or-self::"
-    ) -> str:
+    def css_to_xpath(self, css: str, prefix: str = "descendant-or-self::") -> str:
         return super().css_to_xpath(css, prefix)
 
 
 class HTMLTranslator(TranslatorMixin, OriginalHTMLTranslator):
     @lru_cache(maxsize=256)
-    def css_to_xpath(
-        self, css: str, prefix: str = "descendant-or-self::"
-    ) -> str:
+    def css_to_xpath(self, css: str, prefix: str = "descendant-or-self::") -> str:
         return super().css_to_xpath(css, prefix)
 
 

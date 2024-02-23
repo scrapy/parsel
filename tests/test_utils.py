@@ -1,8 +1,8 @@
-from typing import Pattern, List, Type, Union
-
-from parsel.utils import shorten, extract_regex
+from typing import List, Pattern, Type, Union
 
 from pytest import mark, raises
+
+from parsel.utils import extract_regex, shorten
 
 
 @mark.parametrize(

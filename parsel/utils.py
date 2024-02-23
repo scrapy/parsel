@@ -1,5 +1,6 @@
 import re
 from typing import Any, Iterable, Iterator, List, Match, Pattern, Union, cast
+
 from w3lib.html import replace_entities as w3lib_replace_entities
 
 

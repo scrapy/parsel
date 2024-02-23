@@ -29,7 +29,6 @@ from packaging.version import Version
 from .csstranslator import GenericTranslator, HTMLTranslator
 from .utils import extract_regex, flatten, iflatten, shorten
 
-
 _SelectorType = TypeVar("_SelectorType", bound="Selector")
 _ParserType = Union[etree.XMLParser, etree.HTMLParser]
 # simplified _OutputMethodArg from types-lxml
@@ -135,18 +134,14 @@ class SelectorList(List[_SelectorType]):
     ) -> Union[_SelectorType, "SelectorList[_SelectorType]"]:
         o = super().__getitem__(pos)
         if isinstance(pos, slice):
-            return self.__class__(
-                typing.cast("SelectorList[_SelectorType]", o)
-            )
+            return self.__class__(typing.cast("SelectorList[_SelectorType]", o))
         else:
             return typing.cast(_SelectorType, o)
 
     def __getstate__(self) -> None:
         raise TypeError("can't pickle SelectorList objects")
 
-    def jmespath(
-        self, query: str, **kwargs: Any
-    ) -> "SelectorList[_SelectorType]":
+    def jmespath(self, query: str, **kwargs: Any) -> "SelectorList[_SelectorType]":
         """
         Call the ``.jmespath()`` method for each element in this list and return
         their results flattened as another :class:`SelectorList`.
@@ -158,9 +153,7 @@ class SelectorList(List[_SelectorType]):
 
             selector.jmespath('author.name', options=jmespath.Options(dict_cls=collections.OrderedDict))
         """
-        return self.__class__(
-            flatten([x.jmespath(query, **kwargs) for x in self])
-        )
+        return self.__class__(flatten([x.jmespath(query, **kwargs) for x in self]))
 
     def xpath(
         self,
@@ -185,9 +178,7 @@ class SelectorList(List[_SelectorType]):
             selector.xpath('//a[href=$url]', url="http://www.example.com")
         """
         return self.__class__(
-            flatten(
-                [x.xpath(xpath, namespaces=namespaces, **kwargs) for x in self]
-            )
+            flatten([x.xpath(xpath, namespaces=namespaces, **kwargs) for x in self])
         )
 
     def css(self, query: str) -> "SelectorList[_SelectorType]":
@@ -211,9 +202,7 @@ class SelectorList(List[_SelectorType]):
         Passing ``replace_entities`` as ``False`` switches off these
         replacements.
         """
-        return flatten(
-            [x.re(regex, replace_entities=replace_entities) for x in self]
-        )
+        return flatten([x.re(regex, replace_entities=replace_entities) for x in self])
 
     @typing.overload
     def re_first(
@@ -316,9 +305,7 @@ class SelectorList(List[_SelectorType]):
 _NOT_SET = object()
 
 
-def _get_root_from_text(
-    text: str, *, type: str, **lxml_kwargs: Any
-) -> etree._Element:
+def _get_root_from_text(text: str, *, type: str, **lxml_kwargs: Any) -> etree._Element:
     return create_root_node(text, _ctgroup[type]["_parser"], **lxml_kwargs)
 
 
@@ -583,9 +570,7 @@ class Selector:
                 return self.__class__(root=x, _expr=query)
 
         result = [make_selector(x) for x in result]
-        return typing.cast(
-            SelectorList[_SelectorType], self.selectorlist_cls(result)
-        )
+        return typing.cast(SelectorList[_SelectorType], self.selectorlist_cls(result))
 
     def xpath(
         self: _SelectorType,
@@ -611,9 +596,7 @@ class Selector:
             selector.xpath('//a[href=$url]', url="http://www.example.com")
         """
         if self.type not in ("html", "xml", "text"):
-            raise ValueError(
-                f"Cannot use xpath on a Selector of type {self.type!r}"
-            )
+            raise ValueError(f"Cannot use xpath on a Selector of type {self.type!r}")
         if self.type in ("html", "xml"):
             try:
                 xpathev = self.root.xpath
@@ -654,9 +637,7 @@ class Selector:
             )
             for x in result
         ]
-        return typing.cast(
-            SelectorList[_SelectorType], self.selectorlist_cls(result)
-        )
+        return typing.cast(SelectorList[_SelectorType], self.selectorlist_cls(result))
 
     def css(self: _SelectorType, query: str) -> SelectorList[_SelectorType]:
         """
@@ -670,9 +651,7 @@ class Selector:
         .. _cssselect: https://pypi.python.org/pypi/cssselect/
         """
         if self.type not in ("html", "xml", "text"):
-            raise ValueError(
-                f"Cannot use css on a Selector of type {self.type!r}"
-            )
+            raise ValueError(f"Cannot use css on a Selector of type {self.type!r}")
         return self.xpath(self._css2xpath(query))
 
     def _css2xpath(self, query: str) -> str:

@@ -13,8 +13,8 @@ __all__ = [
     "xpathfuncs",
 ]
 
-from parsel.selector import Selector, SelectorList  # NOQA
-from parsel.csstranslator import css2xpath  # NOQA
 from parsel import xpathfuncs  # NOQA
+from parsel.csstranslator import css2xpath  # NOQA
+from parsel.selector import Selector, SelectorList  # NOQA
 
 xpathfuncs.setup()

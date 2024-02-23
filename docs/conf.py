@@ -3,7 +3,6 @@
 import os
 import sys
 
-
 # Get the project root dir, which is the parent dir of this
 cwd = os.getcwd()
 project_root = os.path.dirname(cwd)
@@ -13,8 +12,7 @@ project_root = os.path.dirname(cwd)
 # version is used.
 sys.path.insert(0, project_root)
 
-import parsel
-
+import parsel  # noqa: E402
 
 # -- General configuration ---------------------------------------------
 
@@ -98,9 +96,8 @@ latex_documents = [
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
 man_pages = [
-    ("index", "parsel", "Parsel Documentation", ["Scrapy Project"], 1)
+    ("index", "parsel", "Parsel Documentation", ["Scrapy Project"], 1),
 ]
-
 
 # -- Options for Texinfo output ----------------------------------------
 

@@ -1,5 +1,5 @@
-from typing import Any
 import unittest
+from typing import Any
 
 from parsel import Selector
 from parsel.xpathfuncs import set_xpathfunc
@@ -23,17 +23,11 @@ class XPathFuncsTestCase(unittest.TestCase):
             ["Third"],
         )
         self.assertEqual(
-            [
-                x.extract()
-                for x in sel.xpath('//p[has-class("foo","bar")]/text()')
-            ],
+            [x.extract() for x in sel.xpath('//p[has-class("foo","bar")]/text()')],
             [],
         )
         self.assertEqual(
-            [
-                x.extract()
-                for x in sel.xpath('//p[has-class("foo","bar-baz")]/text()')
-            ],
+            [x.extract() for x in sel.xpath('//p[has-class("foo","bar-baz")]/text()')],
             ["First"],
         )
 
