@@ -13,6 +13,7 @@ setup(
     version="1.8.1",
     description="Parsel is a library to extract data from HTML and XML using XPath and CSS selectors",
     long_description=readme + "\n\n" + history,
+    long_description_content_type="text/x-rst",
     author="Scrapy project",
     author_email="info@scrapy.org",
     url="https://github.com/scrapy/parsel",
