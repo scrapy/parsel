@@ -22,7 +22,7 @@ def set_xpathfunc(fname: str, func: Optional[Callable]) -> None:  # type: ignore
     .. _`in lxml documentation`: https://lxml.de/extensions.html#xpath-extension-functions
 
     """
-    ns_fns = etree.FunctionNamespace(None)  # type: ignore[attr-defined]
+    ns_fns = etree.FunctionNamespace(None)
     if func is not None:
         ns_fns[fname] = func
     else:

@@ -95,7 +95,7 @@ class TranslatorMixin:
             method = getattr(self, method_name, None)
             if not method:
                 raise ExpressionError(
-                    f"The functional pseudo-element ::{pseudo_element.name}() is unknown"  # noqa: E231
+                    f"The functional pseudo-element ::{pseudo_element.name}() is unknown"
                 )
             xpath = method(xpath, pseudo_element)
         else:
@@ -105,7 +105,7 @@ class TranslatorMixin:
             method = getattr(self, method_name, None)
             if not method:
                 raise ExpressionError(
-                    f"The pseudo-element ::{pseudo_element} is unknown"  # noqa: E231
+                    f"The pseudo-element ::{pseudo_element} is unknown"
                 )
             xpath = method(xpath)
         return xpath
@@ -116,7 +116,7 @@ class TranslatorMixin:
         """Support selecting attribute values using ::attr() pseudo-element"""
         if function.argument_types() not in (["STRING"], ["IDENT"]):
             raise ExpressionError(
-                f"Expected a single string or ident for ::attr(), got {function.arguments!r}"  # noqa: E231
+                f"Expected a single string or ident for ::attr(), got {function.arguments!r}"
             )
         return XPathExpr.from_xpath(xpath, attribute=function.arguments[0].value)
 

@@ -30,7 +30,7 @@ from .csstranslator import GenericTranslator, HTMLTranslator
 from .utils import extract_regex, flatten, iflatten, shorten
 
 _SelectorType = TypeVar("_SelectorType", bound="Selector")
-_ParserType = Union[etree.XMLParser, etree.HTMLParser]
+_ParserType = Union[etree.XMLParser, etree.HTMLParser]  # type: ignore[type-arg]
 # simplified _OutputMethodArg from types-lxml
 _TostringMethodType = Literal[
     "html",
