@@ -3,6 +3,18 @@
 History
 -------
 
+1.9.0 (YYYY-MM-DD)
+~~~~~~~~~~~~~~~~~~
+
+* Now requires ``cssselect >= 1.2.0`` (this minimum version was required since
+  1.8.0 but that wasn't properly recorded)
+* Removed support for Python 3.7
+* Added support for Python 3.12 and PyPy 3.10
+* Fixed an exception when calling ``__str__`` or `__repr__`` on some JSON
+  selectors
+* Code formatted with ``black``
+* CI fixes and improvements
+
 1.8.1 (2023-04-18)
 ~~~~~~~~~~~~~~~~~~
 
