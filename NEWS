@@ -3,7 +3,7 @@
 History
 -------
 
-1.9.0 (YYYY-MM-DD)
+1.9.0 (2024-03-14)
 ~~~~~~~~~~~~~~~~~~
 
 * Now requires ``cssselect >= 1.2.0`` (this minimum version was required since
