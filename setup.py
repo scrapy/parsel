@@ -52,9 +52,6 @@ setup(
         "Programming Language :: Python :: Implementation :: CPython",
         "Programming Language :: Python :: Implementation :: PyPy",
     ],
-    setup_requires=[
-        "pytest-runner",
-    ],
     tests_require=[
         "pytest",
     ],
