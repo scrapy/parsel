@@ -8,30 +8,27 @@ jobs:
       fail-fast: false
       matrix:
         include:
-        - python-version: "3.11"
+        - python-version: "3.12"
           env:
-            TOXENV: security
-        - python-version: "3.11"
-          env:
-            TOXENV: flake8
-        - python-version: "3.11"
+            TOXENV: pre-commit
+        - python-version: "3.12"
           env:
             TOXENV: pylint
-        - python-version: "3.11"  # Keep in sync with .readthedocs.yml
+        - python-version: "3.12"
           env:
             TOXENV: docs
-        - python-version: "3.11"
+        - python-version: "3.12"
           env:
             TOXENV: typing
-        - python-version: "3.11"
+        - python-version: "3.12"
           env:
-            TOXENV: black
+            TOXENV: twinecheck
 
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v4
 
     - name: Set up Python ${{ matrix.python-version }}
-      uses: actions/setup-python@v2
+      uses: actions/setup-python@v5
       with:
         python-version: ${{ matrix.python-version }}
 

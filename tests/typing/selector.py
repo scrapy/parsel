@@ -1,6 +1,7 @@
 # Basic usage of the Selector, strongly typed to test the typing of parsel's API.
 import re
 from typing import List
+
 from parsel import Selector
 
 

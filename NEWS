@@ -3,6 +3,51 @@
 History
 -------
 
+1.9.1 (2024-04-08)
+~~~~~~~~~~~~~~~~~~
+
+* Removed the dependency on ``pytest-runner``.
+* Removed the obsolete ``Makefile``.
+
+1.9.0 (2024-03-14)
+~~~~~~~~~~~~~~~~~~
+
+* Now requires ``cssselect >= 1.2.0`` (this minimum version was required since
+  1.8.0 but that wasn't properly recorded)
+* Removed support for Python 3.7
+* Added support for Python 3.12 and PyPy 3.10
+* Fixed an exception when calling ``__str__`` or ``__repr__`` on some JSON
+  selectors
+* Code formatted with ``black``
+* CI fixes and improvements
+
+1.8.1 (2023-04-18)
+~~~~~~~~~~~~~~~~~~
+
+* Remove a Sphinx reference from NEWS to fix the PyPI description
+* Add a ``twine check`` CI check to detect such problems
+
+1.8.0 (2023-04-18)
+~~~~~~~~~~~~~~~~~~
+
+* Add support for JMESPath: you can now create a selector for a JSON document
+  and call ``Selector.jmespath()``. See `the documentation`_ for more
+  information and examples.
+* Selectors can now be constructed from ``bytes`` (using the ``body`` and
+  ``encoding`` arguments) instead of ``str`` (using the ``text`` argument), so
+  that there is no internal conversion from ``str`` to ``bytes`` and the memory
+  usage is lower.
+* Typing improvements
+* The ``pkg_resources`` module (which was absent from the requirements) is no
+  longer used
+* Documentation build fixes
+* New requirements:
+
+  * ``jmespath``
+  * ``typing_extensions`` (on Python 3.7)
+
+ .. _the documentation: https://parsel.readthedocs.io/en/latest/usage.html
+
 1.7.0 (2022-11-01)
 ~~~~~~~~~~~~~~~~~~
 
