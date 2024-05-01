@@ -814,7 +814,7 @@ class Selector:
             )
 
         try:
-            etree.tostring(
+            return etree.tostring(
                 tree,
                 method=_ctgroup[self.type]["_tostring_method"],
                 encoding="unicode",
