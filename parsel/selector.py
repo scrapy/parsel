@@ -22,7 +22,7 @@ from typing import (
 )
 from warnings import warn
 
-import html_text  # type: ignore[import]
+import html_text  # type: ignore[import-untyped]
 import jmespath
 from lxml import etree, html
 from lxml.html.clean import Cleaner  # pylint: disable=no-name-in-module
@@ -275,14 +275,6 @@ class SelectorList(List[_SelectorType]):
 
     extract = getall
 
-    # TODO: bring types back
-    # @typing.overload
-    # def get(self, default: None = None) -> Optional[str]:
-    #     pass
-    #
-    # @typing.overload
-    # def get(self, default: str) -> str:
-    #     pass
     def get(
         self,
         default: Optional[str] = None,
@@ -291,7 +283,7 @@ class SelectorList(List[_SelectorType]):
         cleaner: Union[str, None, Cleaner] = "auto",
         guess_punct_space: bool = True,
         guess_layout: bool = True,
-    ) -> Optional[str]:
+    ) -> Any:
         """
         Return the result of ``.get()`` for the first element in this list.
         If the list is empty, return the ``default`` value.
@@ -822,14 +814,11 @@ class Selector:
             )
 
         try:
-            return typing.cast(
-                str,
-                etree.tostring(
-                    tree,
-                    method=_ctgroup[self.type]["_tostring_method"],
-                    encoding="unicode",
-                    with_tail=False,
-                ),
+            etree.tostring(
+                tree,
+                method=_ctgroup[self.type]["_tostring_method"],
+                encoding="unicode",
+                with_tail=False,
             )
         except (AttributeError, TypeError):
             if tree is True:
@@ -975,7 +964,7 @@ class Selector:
         else:
             cleaner_obj = cleaner
 
-        root = cleaner_obj.clean_html(self.root)  # type: ignore[type-var]
+        root = cleaner_obj.clean_html(self.root)
         return self.__class__(
             root=root,
             _expr=self._expr,
