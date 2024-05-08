@@ -262,6 +262,16 @@ class SelectorList(List[_SelectorType]):
         ``text``, ``cleaner``, ``guess_punct_space`` and ``guess_layout``
         options are passed to :meth:`~.Selector.get`; see
         :meth:`~.Selector.get` for more details.
+
+        .. note::
+
+            When either text extraction or cleaning is requested, they're
+            performed on each element in the list individually. So, if you match
+            nested elements (i.e. both parent and descendant), cleaning or
+            text extraction could be run multiple times on the same part
+            of the tree. For example, ``selector.xpath("*").getall(text=True)``
+            has O(N^2) complexity regarding the number of nodes in the tree,
+            not O(N).
         """
         return [
             x.get(
