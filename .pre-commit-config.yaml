@@ -4,14 +4,14 @@ repos:
   hooks:
   - id: bandit
     args: [-r, -c, .bandit.yml]
-- repo: https://github.com/PyCQA/flake8
-  rev: 7.0.0
-  hooks:
-  - id: flake8
 - repo: https://github.com/psf/black.git
   rev: 24.2.0
   hooks:
   - id: black
+- repo: https://github.com/PyCQA/flake8
+  rev: 7.0.0
+  hooks:
+  - id: flake8
 - repo: https://github.com/pycqa/isort
   rev: 5.13.2
   hooks:
