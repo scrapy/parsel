@@ -30,7 +30,7 @@ def test_text_getall() -> None:
 
 
 def test_cleaned() -> None:
-    div_html = "<div><script>SCRIPT</script>" "<style>STYLE</style><p>hello</p><div>"
+    div_html = "<div><script>SCRIPT</script><style>STYLE</style><p>hello</p><div>"
     sel = Selector(div_html)
     assert sel.css("script").getall() == ["<script>SCRIPT</script>"]
     assert sel.cleaned().css("script").getall() == []
@@ -45,7 +45,7 @@ def test_cleaned() -> None:
 
 
 def test_cleaned_options() -> None:
-    div_html = "<div><script>SCRIPT</script>" "<style>STYLE</style><p>hello</p><div>"
+    div_html = "<div><script>SCRIPT</script><style>STYLE</style><p>hello</p><div>"
     sel = Selector(div_html)
     assert len(sel.css("script")) == 1
     assert len(sel.css("style")) == 1
