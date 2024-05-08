@@ -140,6 +140,19 @@ pseudo-elements::
     >>> selector.css('title::text').get()
     'Example website'
 
+To extract all text of one or more element and all their child elements, 
+formatted as plain text taking into account HTML tags (e.g. ``<br/>`` is 
+translated as a line break), set ``text=True`` in your call to 
+:meth:`~parsel.selector.Selector.get` or
+:meth:`~parsel.selector.Selector.getall` instead of including
+``::text`` (CSS) or ``/text()`` (XPath) in your query::
+
+    >>> selector.css('#images').get(text=True)
+    'Name: My image 1\nName: My image 2\nName: My image 3\nName: My image 4\nName: My image 5'
+
+See :meth:`Selector.get` for additional parameters that you can use to change
+how the extracted plain text is formatted.
+
 As you can see, ``.xpath()`` and ``.css()`` methods return a
 :class:`~parsel.selector.SelectorList` instance, which is a list of new
 selectors. This API can be used for quickly selecting nested data::

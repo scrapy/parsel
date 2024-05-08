@@ -1,6 +1,5 @@
 import pickle
 import re
-import typing
 import unittest
 import warnings
 import weakref
@@ -685,7 +684,7 @@ class SelectorTestCase(unittest.TestCase):
     def test_make_links_absolute(self) -> None:
         text = '<a href="file.html">link to file</a>'
         sel = Selector(text=text, base_url="http://example.com")
-        typing.cast(HtmlElement, sel.root).make_links_absolute()
+        cast(HtmlElement, sel.root).make_links_absolute()
         self.assertEqual(
             "http://example.com/file.html",
             sel.xpath("//a/@href").extract_first(),
@@ -1049,6 +1048,23 @@ class SelectorTestCase(unittest.TestCase):
         sel.css("body").drop()
         self.assertEqual(sel.get(), "<html></html>")
 
+    def test_dont_remove_text_after_deleted_element(self) -> None:
+        sel = self.sscls(
+            text="""<html><body>Text before.<span>Text in.</span> Text after.</body></html>
+            """
+        )
+        sel.css("span").drop()
+        self.assertEqual(
+            sel.get(), "<html><body>Text before. Text after.</body></html>"
+        )
+
+    def test_drop_with_xml_type(self) -> None:
+        sel = self.sscls(text="<a><b></b><c/></a>", type="xml")
+        el = sel.xpath("//b")[0]
+        assert el.root.getparent() is not None
+        el.drop()
+        assert sel.get() == "<a><c/></a>"
+
     def test_deep_nesting(self) -> None:
         lxml_version = Version(etree.__version__)
         lxml_huge_tree_version = Version("4.2")
@@ -1321,23 +1337,6 @@ class ExsltTestCase(unittest.TestCase):
             ).extract(),
             ["url", "name", "startDate", "location", "offers"],
         )
-
-    def test_dont_remove_text_after_deleted_element(self) -> None:
-        sel = self.sscls(
-            text="""<html><body>Text before.<span>Text in.</span> Text after.</body></html>
-            """
-        )
-        sel.css("span").drop()
-        self.assertEqual(
-            sel.get(), "<html><body>Text before. Text after.</body></html>"
-        )
-
-    def test_drop_with_xml_type(self) -> None:
-        sel = self.sscls(text="<a><b></b><c/></a>", type="xml")
-        el = sel.xpath("//b")[0]
-        assert el.root.getparent() is not None
-        el.drop()
-        assert sel.get() == "<a><c/></a>"
 
 
 class SelectorBytesInput(Selector):
