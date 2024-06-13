@@ -423,6 +423,7 @@ class Selector:
         "_huge_tree",
         "root",
         "_text",
+        "_text_lazy_html_root",
         "body",
         "__weakref__",
     ]
@@ -507,6 +508,7 @@ class Selector:
         self._expr = _expr
         self._huge_tree = huge_tree
         self._text = text
+        self._text_lazy_html_root = None
 
     def __getstate__(self) -> Any:
         raise TypeError("can't pickle Selector objects")
@@ -606,7 +608,9 @@ class Selector:
                 )
         else:
             try:
-                xpathev = self._get_root(self._text or "", type="html").xpath
+                if self._text_lazy_html_root is None:
+                    self._text_lazy_html_root = self._get_root(self.root or "", type="html")
+                xpathev = self._text_lazy_html_root.xpath
             except AttributeError:
                 return typing.cast(
                     SelectorList[_SelectorType], self.selectorlist_cls([])
@@ -722,8 +726,12 @@ class Selector:
         For HTML and XML, the result is always a string, and percent-encoded
         content is unquoted.
         """
-        if self.type in ("text", "json"):
+        if self.type == "json":
             return self.root
+        elif self.type == "text":
+            if self._text_lazy_html_root is None:
+                return self.root
+            return typing.cast(str, etree.tostring(self._text_lazy_html_root, encoding="unicode", with_tail=False))
         try:
             return typing.cast(
                 str,
