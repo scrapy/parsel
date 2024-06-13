@@ -508,7 +508,7 @@ class Selector:
         self._expr = _expr
         self._huge_tree = huge_tree
         self._text = text
-        self._text_lazy_html_root = None
+        self._text_lazy_html_root: Optional[etree._Element] = None
 
     def __getstate__(self) -> Any:
         raise TypeError("can't pickle Selector objects")
@@ -610,7 +610,8 @@ class Selector:
             try:
                 if self._text_lazy_html_root is None:
                     self._text_lazy_html_root = self._get_root(self.root or "", type="html")
-                xpathev = self._text_lazy_html_root.xpath
+                if self._text_lazy_html_root is not None:
+                    xpathev = self._text_lazy_html_root.xpath
             except AttributeError:
                 return typing.cast(
                     SelectorList[_SelectorType], self.selectorlist_cls([])
