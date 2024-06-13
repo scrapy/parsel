@@ -423,6 +423,7 @@ class Selector:
         "_huge_tree",
         "root",
         "_text",
+        "_text_lazy_html_root",
         "body",
         "__weakref__",
     ]
@@ -507,6 +508,7 @@ class Selector:
         self._expr = _expr
         self._huge_tree = huge_tree
         self._text = text
+        self._text_lazy_html_root: Optional[etree._Element] = None
 
     def __getstate__(self) -> Any:
         raise TypeError("can't pickle Selector objects")
@@ -606,7 +608,12 @@ class Selector:
                 )
         else:
             try:
-                xpathev = self._get_root(self._text or "", type="html").xpath
+                if self._text_lazy_html_root is None:
+                    self._text_lazy_html_root = self._get_root(
+                        self.root or "", type="html"
+                    )
+                if self._text_lazy_html_root is not None:
+                    xpathev = self._text_lazy_html_root.xpath
             except AttributeError:
                 return typing.cast(
                     SelectorList[_SelectorType], self.selectorlist_cls([])
@@ -722,25 +729,30 @@ class Selector:
         For HTML and XML, the result is always a string, and percent-encoded
         content is unquoted.
         """
-        if self.type in ("text", "json"):
+        if self.type in ("json", "text"):
+            if self.type == "text" and self._text_lazy_html_root is not None:
+                return etree.tostring(
+                    self._text_lazy_html_root, encoding="unicode", with_tail=False
+                )
             return self.root
-        try:
-            return typing.cast(
-                str,
-                etree.tostring(
-                    self.root,
-                    method=_ctgroup[self.type]["_tostring_method"],
-                    encoding="unicode",
-                    with_tail=False,
-                ),
-            )
-        except (AttributeError, TypeError):
-            if self.root is True:
-                return "1"
-            elif self.root is False:
-                return "0"
-            else:
-                return str(self.root)
+        else:
+            try:
+                return typing.cast(
+                    str,
+                    etree.tostring(
+                        self.root,
+                        method=_ctgroup[self.type]["_tostring_method"],
+                        encoding="unicode",
+                        with_tail=False,
+                    ),
+                )
+            except (AttributeError, TypeError):
+                if self.root is True:
+                    return "1"
+                elif self.root is False:
+                    return "0"
+                else:
+                    return str(self.root)
 
     extract = get
 
