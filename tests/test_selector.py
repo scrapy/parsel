@@ -1012,13 +1012,13 @@ class SelectorTestCase(unittest.TestCase):
             "<html><body><style>p{color:red;}</style><p>hello world</p></body></html>"
         )
         expect_result = "<html><body><p>hello world</p></body></html>"
-        sel = self.sscls(text=html, type="text")
-        self.assertEqual(sel.type, "text")
+        sel = self.sscls(text=html, type="html")
+        self.assertEqual(sel.type, "html")
         li_sel_list = sel.css("style")
         li_sel_list.drop()
         self.assertEqual(sel.get(), expect_result)
         # The type of the parent selector should not change
-        self.assertEqual(sel.type, "text")
+        self.assertEqual(sel.type, "html")
 
     def test_remove_selector_from_html_in_json(self) -> None:
         json_str = """{
@@ -1028,13 +1028,13 @@ class SelectorTestCase(unittest.TestCase):
         """
         expect_result = "<html><body><p>hello world</p></body></html>"
         sel = self.sscls(text=json_str)
-        html_sel = sel.jmespath("body")[0]
-        self.assertEqual(html_sel.type, "text")
+        html_sel = sel.jmespath("body", type="html")[0]
+        self.assertEqual(html_sel.type, "html")
         li_sel_list = html_sel.css("style")
         li_sel_list.drop()
         self.assertEqual(html_sel.get(), expect_result)
         # The type of the parent selector should not change
-        self.assertEqual(html_sel.type, "text")
+        self.assertEqual(html_sel.type, "html")
 
     def test_remove_pseudo_element_selector_list(self) -> None:
         sel = self.sscls(
