@@ -142,7 +142,9 @@ class SelectorList(List[_SelectorType]):
     def __getstate__(self) -> None:
         raise TypeError("can't pickle SelectorList objects")
 
-    def jmespath(self, query: str, *, type: Optional[str] = None, **kwargs: Any) -> "SelectorList[_SelectorType]":
+    def jmespath(
+        self, query: str, *, type: Optional[str] = None, **kwargs: Any
+    ) -> "SelectorList[_SelectorType]":
         """
         Call the ``.jmespath()`` method for each element in this list and return
         their results flattened as another :class:`SelectorList`.
@@ -154,7 +156,9 @@ class SelectorList(List[_SelectorType]):
 
             selector.jmespath('author.name', options=jmespath.Options(dict_cls=collections.OrderedDict))
         """
-        return self.__class__(flatten([x.jmespath(query, type=type, **kwargs) for x in self]))
+        return self.__class__(
+            flatten([x.jmespath(query, type=type, **kwargs) for x in self])
+        )
 
     def xpath(
         self,
@@ -181,10 +185,19 @@ class SelectorList(List[_SelectorType]):
             selector.xpath('//a[href=$url]', url="http://www.example.com")
         """
         return self.__class__(
-            flatten([x.xpath(xpath, namespaces=namespaces, type=type, **kwargs) for x in self])
+            flatten(
+                [
+                    x.xpath(xpath, namespaces=namespaces, type=type, **kwargs)
+                    for x in self
+                ]
+            )
         )
 
-    def css(self, query: str, type: Optional[str] = None,) -> "SelectorList[_SelectorType]":
+    def css(
+        self,
+        query: str,
+        type: Optional[str] = None,
+    ) -> "SelectorList[_SelectorType]":
         """
         Call the ``.css()`` method for each element in this list and return
         their results flattened as another :class:`SelectorList`.
@@ -644,7 +657,9 @@ class Selector:
         ]
         return typing.cast(SelectorList[_SelectorType], self.selectorlist_cls(result))
 
-    def css(self: _SelectorType, query: str, type: Optional[str] = None) -> SelectorList[_SelectorType]:
+    def css(
+        self: _SelectorType, query: str, type: Optional[str] = None
+    ) -> SelectorList[_SelectorType]:
         """
         Apply the given CSS selector and return a :class:`SelectorList` instance.
 
