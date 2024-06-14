@@ -1,6 +1,7 @@
 """XPath and JMESPath selectors based on the lxml and jmespath Python
 packages."""
 
+import builtins
 import json
 import typing
 import warnings
@@ -141,7 +142,9 @@ class SelectorList(List[_SelectorType]):
     def __getstate__(self) -> None:
         raise TypeError("can't pickle SelectorList objects")
 
-    def jmespath(self, query: str, **kwargs: Any) -> "SelectorList[_SelectorType]":
+    def jmespath(
+        self, query: str, *, type: Optional[str] = None, **kwargs: Any
+    ) -> "SelectorList[_SelectorType]":
         """
         Call the ``.jmespath()`` method for each element in this list and return
         their results flattened as another :class:`SelectorList`.
@@ -153,12 +156,16 @@ class SelectorList(List[_SelectorType]):
 
             selector.jmespath('author.name', options=jmespath.Options(dict_cls=collections.OrderedDict))
         """
-        return self.__class__(flatten([x.jmespath(query, **kwargs) for x in self]))
+        return self.__class__(
+            flatten([x.jmespath(query, type=type, **kwargs) for x in self])
+        )
 
     def xpath(
         self,
         xpath: str,
         namespaces: Optional[Mapping[str, str]] = None,
+        *,
+        type: Optional[str] = None,
         **kwargs: Any,
     ) -> "SelectorList[_SelectorType]":
         """
@@ -178,17 +185,26 @@ class SelectorList(List[_SelectorType]):
             selector.xpath('//a[href=$url]', url="http://www.example.com")
         """
         return self.__class__(
-            flatten([x.xpath(xpath, namespaces=namespaces, **kwargs) for x in self])
+            flatten(
+                [
+                    x.xpath(xpath, namespaces=namespaces, type=type, **kwargs)
+                    for x in self
+                ]
+            )
         )
 
-    def css(self, query: str) -> "SelectorList[_SelectorType]":
+    def css(
+        self,
+        query: str,
+        type: Optional[str] = None,
+    ) -> "SelectorList[_SelectorType]":
         """
         Call the ``.css()`` method for each element in this list and return
         their results flattened as another :class:`SelectorList`.
 
         ``query`` is the same argument as the one in :meth:`Selector.css`
         """
-        return self.__class__(flatten([x.css(query) for x in self]))
+        return self.__class__(flatten([x.css(query, type=type) for x in self]))
 
     def re(
         self, regex: Union[str, Pattern[str]], replace_entities: bool = True
@@ -532,6 +548,7 @@ class Selector:
     def jmespath(
         self: _SelectorType,
         query: str,
+        type: Optional[str] = None,
         **kwargs: Any,
     ) -> SelectorList[_SelectorType]:
         """
@@ -565,9 +582,9 @@ class Selector:
 
         def make_selector(x: Any) -> _SelectorType:  # closure function
             if isinstance(x, str):
-                return self.__class__(text=x, _expr=query, type="text")
+                return self.__class__(text=x, _expr=query, type=type or "text")
             else:
-                return self.__class__(root=x, _expr=query)
+                return self.__class__(root=x, _expr=query, type=type)
 
         result = [make_selector(x) for x in result]
         return typing.cast(SelectorList[_SelectorType], self.selectorlist_cls(result))
@@ -576,6 +593,7 @@ class Selector:
         self: _SelectorType,
         query: str,
         namespaces: Optional[Mapping[str, str]] = None,
+        type: Optional[str] = None,
         **kwargs: Any,
     ) -> SelectorList[_SelectorType]:
         """
@@ -625,7 +643,7 @@ class Selector:
         except etree.XPathError as exc:
             raise ValueError(f"XPath error: {exc} in {query}")
 
-        if type(result) is not list:
+        if builtins.type(result) is not list:
             result = [result]
 
         result = [
@@ -633,13 +651,15 @@ class Selector:
                 root=x,
                 _expr=query,
                 namespaces=self.namespaces,
-                type=_xml_or_html(self.type),
+                type=type or _xml_or_html(self.type),
             )
             for x in result
         ]
         return typing.cast(SelectorList[_SelectorType], self.selectorlist_cls(result))
 
-    def css(self: _SelectorType, query: str) -> SelectorList[_SelectorType]:
+    def css(
+        self: _SelectorType, query: str, type: Optional[str] = None
+    ) -> SelectorList[_SelectorType]:
         """
         Apply the given CSS selector and return a :class:`SelectorList` instance.
 
@@ -652,7 +672,7 @@ class Selector:
         """
         if self.type not in ("html", "xml", "text"):
             raise ValueError(f"Cannot use css on a Selector of type {self.type!r}")
-        return self.xpath(self._css2xpath(query))
+        return self.xpath(self._css2xpath(query), type=type)
 
     def _css2xpath(self, query: str) -> str:
         type = _xml_or_html(self.type)
