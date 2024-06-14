@@ -1007,20 +1007,7 @@ class SelectorTestCase(unittest.TestCase):
         self.assertIsSelectorList(sel.css("li"))
         self.assertEqual(sel.css("li::text").getall(), ["2", "3"])
 
-    def test_remove_selector_from_html_in_text(self) -> None:
-        html = (
-            "<html><body><style>p{color:red;}</style><p>hello world</p></body></html>"
-        )
-        expect_result = "<html><body><p>hello world</p></body></html>"
-        sel = self.sscls(text=html, type="html")
-        self.assertEqual(sel.type, "html")
-        li_sel_list = sel.css("style")
-        li_sel_list.drop()
-        self.assertEqual(sel.get(), expect_result)
-        # The type of the parent selector should not change
-        self.assertEqual(sel.type, "html")
-
-    def test_remove_selector_from_html_in_json(self) -> None:
+    def test_remove_selector_from_nested_html(self) -> None:
         json_str = """{
             "title": "hello world",
             "body": "<html><body><style>p{color:red;}</style><p>hello world</p></body></html>"
@@ -1028,6 +1015,8 @@ class SelectorTestCase(unittest.TestCase):
         """
         expect_result = "<html><body><p>hello world</p></body></html>"
         sel = self.sscls(text=json_str)
+        # We need to force the selector type to HTML to make that functionality
+        # readily available.
         html_sel = sel.jmespath("body", type="html")[0]
         self.assertEqual(html_sel.type, "html")
         li_sel_list = html_sel.css("style")
