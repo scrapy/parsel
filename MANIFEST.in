@@ -1,5 +1,3 @@
-include AUTHORS.rst
-include CONTRIBUTING.rst
 include NEWS
 include LICENSE
 include README.rst
