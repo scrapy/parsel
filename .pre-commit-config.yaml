@@ -1,15 +1,15 @@
 repos:
 - repo: https://github.com/PyCQA/bandit
-  rev: 1.7.8
+  rev: 1.7.10
   hooks:
   - id: bandit
     args: [-r, -c, .bandit.yml]
 - repo: https://github.com/PyCQA/flake8
-  rev: 7.0.0
+  rev: 7.1.1
   hooks:
   - id: flake8
 - repo: https://github.com/psf/black.git
-  rev: 24.2.0
+  rev: 24.10.0
   hooks:
   - id: black
 - repo: https://github.com/pycqa/isort
