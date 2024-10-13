@@ -63,7 +63,7 @@ class SafeXMLParser(etree.XMLParser):
 class CTGroupValue(TypedDict):
     _parser: Union[Type[etree.XMLParser], Type[html.HTMLParser]]
     _csstranslator: Union[GenericTranslator, HTMLTranslator]
-    _tostring_method: str
+    _tostring_method: _TostringMethodType
 
 
 _ctgroup: Dict[str, CTGroupValue] = {
@@ -727,10 +727,7 @@ class Selector:
         try:
             return etree.tostring(
                 self.root,
-                method=typing.cast(
-                    "Literal['html', 'text', 'xml']",
-                    _ctgroup[self.type]["_tostring_method"],
-                ),
+                method=_ctgroup[self.type]["_tostring_method"],
                 encoding="unicode",
                 with_tail=False,
             )

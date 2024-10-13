@@ -80,7 +80,7 @@ class TranslatorMixin:
     """
 
     def xpath_element(self: TranslatorProtocol, selector: Element) -> XPathExpr:
-        # https://github.com/python/mypy/issues/12344
+        # https://github.com/python/mypy/issues/14757
         xpath = super().xpath_element(selector)  # type: ignore[safe-super]
         return XPathExpr.from_xpath(xpath)
 
