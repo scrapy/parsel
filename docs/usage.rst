@@ -609,13 +609,6 @@ returns ``True`` for nodes that have all of the specified HTML classes::
     ...         <p>Fourth</p>
     ... """)
     ...
-    >>> sel = Selector("""
-    ...         <p class="foo bar-baz">First</p>
-    ...         <p class="foo">Second</p>
-    ...         <p class="bar">Third</p>
-    ...         <p>Fourth</p>
-    ... """)
-    ...
     >>> sel.xpath('//p[has-class("foo")]')
     [<Selector query='//p[has-class("foo")]' data='<p class="foo bar-baz">First</p>'>,
      <Selector query='//p[has-class("foo")]' data='<p class="foo">Second</p>'>]
