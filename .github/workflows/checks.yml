@@ -14,7 +14,7 @@ jobs:
         - python-version: "3.13"
           env:
             TOXENV: pylint
-        - python-version: "3.13"
+        - python-version: "3.12"  # Keep in sync with .readthedocs.yml
           env:
             TOXENV: docs
         - python-version: "3.13"
