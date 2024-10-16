@@ -30,7 +30,7 @@ from .csstranslator import GenericTranslator, HTMLTranslator
 from .utils import extract_regex, flatten, iflatten, shorten
 
 _SelectorType = TypeVar("_SelectorType", bound="Selector")
-_ParserType = Union[etree.XMLParser, etree.HTMLParser]  # type: ignore[type-arg]
+_ParserType = Union[etree.XMLParser, etree.HTMLParser]
 # simplified _OutputMethodArg from types-lxml
 _TostringMethodType = Literal[
     "html",
@@ -54,16 +54,16 @@ class CannotDropElementWithoutParent(CannotRemoveElementWithoutParent):
     pass
 
 
-class SafeXMLParser(etree.XMLParser):  # type: ignore[type-arg]
+class SafeXMLParser(etree.XMLParser):
     def __init__(self, *args: Any, **kwargs: Any) -> None:
         kwargs.setdefault("resolve_entities", False)
         super().__init__(*args, **kwargs)
 
 
 class CTGroupValue(TypedDict):
-    _parser: Union[Type[etree.XMLParser], Type[html.HTMLParser]]  # type: ignore[type-arg]
+    _parser: Union[Type[etree.XMLParser], Type[html.HTMLParser]]
     _csstranslator: Union[GenericTranslator, HTMLTranslator]
-    _tostring_method: str
+    _tostring_method: _TostringMethodType
 
 
 _ctgroup: Dict[str, CTGroupValue] = {
@@ -725,14 +725,11 @@ class Selector:
         if self.type in ("text", "json"):
             return self.root
         try:
-            return typing.cast(
-                str,
-                etree.tostring(
-                    self.root,
-                    method=_ctgroup[self.type]["_tostring_method"],
-                    encoding="unicode",
-                    with_tail=False,
-                ),
+            return etree.tostring(
+                self.root,
+                method=_ctgroup[self.type]["_tostring_method"],
+                encoding="unicode",
+                with_tail=False,
             )
         except (AttributeError, TypeError):
             if self.root is True:
