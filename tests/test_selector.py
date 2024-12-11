@@ -1346,7 +1346,7 @@ class SelectorBytesInput(Selector):
         text: Optional[str] = None,
         type: Optional[str] = None,
         body: bytes = b"",
-        encoding: str = "utf8",
+        encoding: str = "utf-8",
         namespaces: Optional[Mapping[str, str]] = None,
         root: Optional[Any] = _NOT_SET,
         base_url: Optional[str] = None,

@@ -90,7 +90,7 @@ def create_root_node(
     base_url: Optional[str] = None,
     huge_tree: bool = LXML_SUPPORTS_HUGE_TREE,
     body: bytes = b"",
-    encoding: str = "utf8",
+    encoding: str = "utf-8",
 ) -> etree._Element:
     """Create root node for text using given parser class."""
     if not text:
@@ -318,7 +318,7 @@ def _get_root_and_type_from_bytes(
 ) -> Tuple[Any, str]:
     if input_type == "text":
         return body.decode(encoding), input_type
-    if encoding == "utf8":
+    if encoding == "utf-8":
         try:
             data = json.load(BytesIO(body))
         except ValueError:
@@ -445,7 +445,7 @@ class Selector:
         text: Optional[str] = None,
         type: Optional[str] = None,
         body: bytes = b"",
-        encoding: str = "utf8",
+        encoding: str = "utf-8",
         namespaces: Optional[Mapping[str, str]] = None,
         root: Optional[Any] = _NOT_SET,
         base_url: Optional[str] = None,
@@ -518,7 +518,7 @@ class Selector:
         huge_tree: bool = LXML_SUPPORTS_HUGE_TREE,
         type: Optional[str] = None,
         body: bytes = b"",
-        encoding: str = "utf8",
+        encoding: str = "utf-8",
     ) -> etree._Element:
         return create_root_node(
             text,
