@@ -3,6 +3,15 @@
 History
 -------
 
+1.10.0 (YYYY-MM-DD)
+~~~~~~~~~~~~~~~~~~~
+
+* Removed support for Python 3.8.
+* Added support for Python 3.13.
+* Changed the default encoding name from ``"utf8"`` to ``"utf-8"`` everywhere.
+  The former name is not supported in certain environments.
+* CI fixes and improvements.
+
 1.9.1 (2024-04-08)
 ~~~~~~~~~~~~~~~~~~
 
