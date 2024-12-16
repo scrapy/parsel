@@ -10,7 +10,7 @@ with open("NEWS", encoding="utf-8") as history_file:
 
 setup(
     name="parsel",
-    version="1.9.1",
+    version="1.10.0",
     description="Parsel is a library to extract data from HTML and XML using XPath and CSS selectors",
     long_description=readme + "\n\n" + history,
     long_description_content_type="text/x-rst",
