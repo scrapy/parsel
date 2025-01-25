@@ -20,7 +20,6 @@ from typing import (
     TypeVar,
     Union,
 )
-from warnings import warn
 
 import jmespath
 from lxml import etree, html
@@ -281,18 +280,6 @@ class SelectorList(List[_SelectorType]):
         for x in self:
             return x.attrib
         return {}
-
-    def remove(self) -> None:  # type: ignore[override]
-        """
-        Remove matched nodes from the parent for each element in this list.
-        """
-        warn(
-            "Method parsel.selector.SelectorList.remove is deprecated, please use parsel.selector.SelectorList.drop method instead",
-            category=DeprecationWarning,
-            stacklevel=2,
-        )
-        for x in self:
-            x.remove()
 
     def drop(self) -> None:
         """
@@ -769,35 +756,6 @@ class Selector:
                     el.attrib[an.split("}", 1)[1]] = el.attrib.pop(an)
         # remove namespace declarations
         etree.cleanup_namespaces(self.root)
-
-    def remove(self) -> None:
-        """
-        Remove matched nodes from the parent element.
-        """
-        warn(
-            "Method parsel.selector.Selector.remove is deprecated, please use parsel.selector.Selector.drop method instead",
-            category=DeprecationWarning,
-            stacklevel=2,
-        )
-        try:
-            parent = self.root.getparent()
-        except AttributeError:
-            # 'str' object has no attribute 'getparent'
-            raise CannotRemoveElementWithoutRoot(
-                "The node you're trying to remove has no root, "
-                "are you trying to remove a pseudo-element? "
-                "Try to use 'li' as a selector instead of 'li::text' or "
-                "'//li' instead of '//li/text()', for example."
-            )
-
-        try:
-            parent.remove(self.root)
-        except AttributeError:
-            # 'NoneType' object has no attribute 'remove'
-            raise CannotRemoveElementWithoutParent(
-                "The node you're trying to remove has no parent, "
-                "are you trying to remove a root element?"
-            )
 
     def drop(self) -> None:
         """
