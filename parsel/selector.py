@@ -337,7 +337,7 @@ def _get_root_and_type_from_text(
 
 
 def _get_root_type(root: Any, *, input_type: str | None) -> str:
-    if isinstance(root, etree._Element):  # pylint: disable=protected-access
+    if isinstance(root, etree._Element):
         if input_type in {"json", "text"}:
             raise ValueError(
                 f"Selector got an lxml.etree._Element object as root, "
@@ -354,8 +354,7 @@ def _is_valid_json(text: str) -> bool:
         json.loads(text)
     except (TypeError, ValueError):
         return False
-    else:
-        return True
+    return True
 
 
 def _load_json_or_none(text: str) -> Any:
@@ -602,7 +601,7 @@ class Selector:
         except etree.XPathError as exc:
             raise ValueError(f"XPath error: {exc} in {query}")
 
-        if type(result) is not list:
+        if not isinstance(result, list):
             result = [result]
 
         result = [
