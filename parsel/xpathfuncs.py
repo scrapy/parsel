@@ -1,5 +1,7 @@
+from __future__ import annotations
+
 import re
-from typing import Any, Callable, Optional
+from typing import Any, Callable
 
 from lxml import etree
 from w3lib.html import HTML5_WHITESPACE
@@ -8,7 +10,7 @@ regex = f"[{HTML5_WHITESPACE}]+"
 replace_html5_whitespaces = re.compile(regex).sub
 
 
-def set_xpathfunc(fname: str, func: Optional[Callable]) -> None:  # type: ignore[type-arg]
+def set_xpathfunc(fname: str, func: Callable | None) -> None:  # type: ignore[type-arg]
     """Register a custom extension function to use in XPath expressions.
 
     The function ``func`` registered under ``fname`` identifier will be called

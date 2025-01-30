@@ -1,10 +1,13 @@
+from __future__ import annotations
+
 import pickle
 import re
 import typing
 import unittest
 import warnings
 import weakref
-from typing import Any, Mapping, Optional, cast
+from collections.abc import Mapping
+from typing import Any, cast
 
 from lxml import etree
 from lxml.html import HtmlElement
@@ -1343,14 +1346,14 @@ class ExsltTestCase(unittest.TestCase):
 class SelectorBytesInput(Selector):
     def __init__(
         self,
-        text: Optional[str] = None,
-        type: Optional[str] = None,
+        text: str | None = None,
+        type: str | None = None,
         body: bytes = b"",
         encoding: str = "utf-8",
-        namespaces: Optional[Mapping[str, str]] = None,
-        root: Optional[Any] = _NOT_SET,
-        base_url: Optional[str] = None,
-        _expr: Optional[str] = None,
+        namespaces: Mapping[str, str] | None = None,
+        root: Any | None = _NOT_SET,
+        base_url: str | None = None,
+        _expr: str | None = None,
         huge_tree: bool = LXML_SUPPORTS_HUGE_TREE,
     ) -> None:
         if text:

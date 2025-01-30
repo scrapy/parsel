@@ -2,8 +2,10 @@
 Selector tests for cssselect backend
 """
 
+from __future__ import annotations
+
 import unittest
-from typing import Any, Callable, List, Protocol, Tuple, Type, Union
+from typing import Any, Callable, Protocol
 
 import cssselect
 import pytest
@@ -51,7 +53,7 @@ HTMLBODY = """
 
 
 class TranslatorTestProtocol(Protocol):
-    tr_cls: Type[TranslatorProtocol]
+    tr_cls: type[TranslatorProtocol]
     tr: TranslatorProtocol
 
     def c2x(self, css: str, prefix: str = ...) -> str:
@@ -62,7 +64,7 @@ class TranslatorTestProtocol(Protocol):
 
     def assertRaises(
         self,
-        expected_exception: Union[Type[BaseException], Tuple[Type[BaseException], ...]],
+        expected_exception: type[BaseException] | tuple[type[BaseException], ...],
         callable: Callable[..., object],
         *args: Any,
         **kwargs: Any,
@@ -177,7 +179,7 @@ class CSSSelectorTest(unittest.TestCase):
     def setUp(self) -> None:
         self.sel = self.sscls(text=HTMLBODY)
 
-    def x(self, *a: Any, **kw: Any) -> List[str]:
+    def x(self, *a: Any, **kw: Any) -> list[str]:
         return [v.strip() for v in self.sel.css(*a, **kw).extract() if v.strip()]
 
     def test_selector_simple(self) -> None:
