@@ -1,6 +1,6 @@
 """Tests for known XML attacks"""
 
-from os import path
+from pathlib import Path
 from unittest import TestCase
 
 from psutil import Process
@@ -11,10 +11,9 @@ MiB_1 = 1024**2
 
 
 def _load(attack: str) -> str:
-    folder_path = path.dirname(__file__)
-    file_path = path.join(folder_path, "xml_attacks", f"{attack}.xml")
-    with open(file_path, "rb") as attack_file:
-        return attack_file.read().decode("utf-8")
+    folder_path = Path(__file__).parent
+    file_path = folder_path / "xml_attacks" / f"{attack}.xml"
+    return file_path.read_bytes().decode("utf-8")
 
 
 # List of known attacks:

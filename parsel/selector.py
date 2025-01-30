@@ -6,10 +6,8 @@ from __future__ import annotations
 import json
 import typing
 import warnings
-from collections.abc import Mapping
 from io import BytesIO
-from re import Pattern
-from typing import Any, Literal, SupportsIndex, TypedDict, TypeVar, Union
+from typing import TYPE_CHECKING, Any, Literal, SupportsIndex, TypedDict, TypeVar, Union
 
 import jmespath
 from lxml import etree, html
@@ -17,6 +15,11 @@ from packaging.version import Version
 
 from .csstranslator import GenericTranslator, HTMLTranslator
 from .utils import extract_regex, flatten, iflatten, shorten
+
+if TYPE_CHECKING:
+    from collections.abc import Mapping
+    from re import Pattern
+
 
 _SelectorType = TypeVar("_SelectorType", bound="Selector")
 _ParserType = Union[etree.XMLParser, etree.HTMLParser]
@@ -50,7 +53,7 @@ class SafeXMLParser(etree.XMLParser):
 
 
 class CTGroupValue(TypedDict):
-    _parser: type[etree.XMLParser] | type[html.HTMLParser]
+    _parser: type[etree.XMLParser | html.HTMLParser]
     _csstranslator: GenericTranslator | HTMLTranslator
     _tostring_method: _TostringMethodType
 
@@ -97,7 +100,8 @@ def create_root_node(
             if "use XML_PARSE_HUGE option" in error.message:
                 warnings.warn(
                     f"Input data is too big. Upgrade to lxml "
-                    f"{lxml_huge_tree_version} or later for huge_tree support."
+                    f"{lxml_huge_tree_version} or later for huge_tree support.",
+                    stacklevel=2,
                 )
     if root is None:
         root = etree.fromstring(b"<html/>", parser=parser, base_url=base_url)
@@ -124,8 +128,7 @@ class SelectorList(list[_SelectorType]):
         o = super().__getitem__(pos)
         if isinstance(pos, slice):
             return self.__class__(typing.cast("SelectorList[_SelectorType]", o))
-        else:
-            return typing.cast(_SelectorType, o)
+        return typing.cast(_SelectorType, o)
 
     def __getstate__(self) -> None:
         raise TypeError("can't pickle SelectorList objects")
@@ -341,7 +344,7 @@ def _get_root_type(root: Any, *, input_type: str | None) -> str:
                 f"and {input_type!r} as type."
             )
         return _xml_or_html(input_type)
-    elif isinstance(root, (dict, list)) or _is_valid_json(root):
+    if isinstance(root, (dict, list)) or _is_valid_json(root):
         return "json"
     return input_type or "json"
 
@@ -392,14 +395,14 @@ class Selector:
     """
 
     __slots__ = [
-        "namespaces",
-        "type",
+        "__weakref__",
         "_expr",
         "_huge_tree",
-        "root",
         "_text",
         "body",
-        "__weakref__",
+        "namespaces",
+        "root",
+        "type",
     ]
 
     _default_namespaces = {
@@ -541,8 +544,7 @@ class Selector:
         def make_selector(x: Any) -> _SelectorType:  # closure function
             if isinstance(x, str):
                 return self.__class__(text=x, _expr=query, type="text")
-            else:
-                return self.__class__(root=x, _expr=query)
+            return self.__class__(root=x, _expr=query)
 
         result = [make_selector(x) for x in result]
         return typing.cast(SelectorList[_SelectorType], self.selectorlist_cls(result))
@@ -707,10 +709,9 @@ class Selector:
         except (AttributeError, TypeError):
             if self.root is True:
                 return "1"
-            elif self.root is False:
+            if self.root is False:
                 return "0"
-            else:
-                return str(self.root)
+            return str(self.root)
 
     extract = get
 

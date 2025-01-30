@@ -1,10 +1,13 @@
 from __future__ import annotations
 
-from re import Pattern
+from typing import TYPE_CHECKING
 
 from pytest import mark, raises
 
 from parsel.utils import extract_regex, shorten
+
+if TYPE_CHECKING:
+    from re import Pattern
 
 
 @mark.parametrize(

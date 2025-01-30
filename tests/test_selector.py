@@ -6,8 +6,7 @@ import typing
 import unittest
 import warnings
 import weakref
-from collections.abc import Mapping
-from typing import Any, cast
+from typing import TYPE_CHECKING, Any, cast
 
 from lxml import etree
 from lxml.html import HtmlElement
@@ -21,9 +20,11 @@ from parsel.selector import (
     CannotRemoveElementWithoutRoot,
 )
 
+if TYPE_CHECKING:
+    from collections.abc import Mapping
+
 
 class SelectorTestCase(unittest.TestCase):
-
     sscls = Selector
 
     def assertIsSelector(self, value: Any) -> None:
@@ -770,13 +771,13 @@ class SelectorTestCase(unittest.TestCase):
         self.assertEqual(xs.xpath(".").extract(), ["<root>lala</root>"])
 
     def test_invalid_xpath(self) -> None:
-        "Test invalid xpath raises ValueError with the invalid xpath"
+        """Test invalid xpath raises ValueError with the invalid xpath"""
         x = self.sscls(text="<html></html>")
         xpath = "//test[@foo='bar]"
         self.assertRaisesRegex(ValueError, re.escape(xpath), x.xpath, xpath)
 
     def test_invalid_xpath_unicode(self) -> None:
-        "Test *Unicode* invalid xpath raises ValueError with the invalid xpath"
+        """Test *Unicode* invalid xpath raises ValueError with the invalid xpath"""
         x = self.sscls(text="<html></html>")
         xpath = "//test[@foo='\\u0431ar]"
         self.assertRaisesRegex(ValueError, re.escape(xpath), x.xpath, xpath)
@@ -845,9 +846,9 @@ class SelectorTestCase(unittest.TestCase):
         """Check that classes are using slots and are weak-referenceable"""
         x = self.sscls(text="")
         weakref.ref(x)
-        assert not hasattr(
-            x, "__dict__"
-        ), f"{x.__class__.__name__} does not use __slots__"
+        assert not hasattr(x, "__dict__"), (
+            f"{x.__class__.__name__} does not use __slots__"
+        )
 
     def test_remove_namespaces(self) -> None:
         xml = """<?xml version="1.0" encoding="UTF-8"?>
@@ -942,15 +943,15 @@ class SelectorTestCase(unittest.TestCase):
         # only when smart_strings are on
         x = self.sscls(text=body)
         li_text = x.xpath("//li/text()")
-        self.assertFalse(any([hasattr(e.root, "getparent") for e in li_text]))
+        self.assertFalse(any(hasattr(e.root, "getparent") for e in li_text))
         div_class = x.xpath("//div/@class")
-        self.assertFalse(any([hasattr(e.root, "getparent") for e in div_class]))
+        self.assertFalse(any(hasattr(e.root, "getparent") for e in div_class))
 
         smart_x = SmartStringsSelector(text=body)
         smart_li_text = smart_x.xpath("//li/text()")
-        self.assertTrue(all([hasattr(e.root, "getparent") for e in smart_li_text]))
+        self.assertTrue(all(hasattr(e.root, "getparent") for e in smart_li_text))
         smart_div_class = smart_x.xpath("//div/@class")
-        self.assertTrue(all([hasattr(e.root, "getparent") for e in smart_div_class]))
+        self.assertTrue(all(hasattr(e.root, "getparent") for e in smart_div_class))
 
     def test_xml_entity_expansion(self) -> None:
         malicious_xml = (
@@ -1200,7 +1201,6 @@ class SelectorTestCase(unittest.TestCase):
 
 
 class ExsltTestCase(unittest.TestCase):
-
     sscls = Selector
 
     def test_regexp(self) -> None:

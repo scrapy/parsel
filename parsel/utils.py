@@ -1,11 +1,12 @@
 from __future__ import annotations
 
 import re
-from collections.abc import Iterable, Iterator
-from re import Match, Pattern
-from typing import Any, cast
+from typing import TYPE_CHECKING, Any, cast
 
 from w3lib.html import replace_entities as w3lib_replace_entities
+
+if TYPE_CHECKING:
+    from collections.abc import Iterable, Iterator
 
 
 def flatten(x: Iterable[Any]) -> list[Any]:
@@ -61,7 +62,7 @@ def _is_listlike(x: Any) -> bool:
 
 
 def extract_regex(
-    regex: str | Pattern[str], text: str, replace_entities: bool = True
+    regex: str | re.Pattern[str], text: str, replace_entities: bool = True
 ) -> list[str]:
     """Extract a list of strings from the given text/encoding using the following policies:
     * if the regex contains a named group called "extract" that will be returned
@@ -74,7 +75,7 @@ def extract_regex(
     if "extract" in regex.groupindex:
         # named group
         try:
-            extracted = cast(Match[str], regex.search(text)).group("extract")
+            extracted = cast(re.Match[str], regex.search(text)).group("extract")
         except AttributeError:
             strings = []
         else:

@@ -54,7 +54,4 @@ def has_class(context: Any, *classes: str) -> bool:
         return False
     node_cls = " " + node_cls + " "
     node_cls = replace_html5_whitespaces(" ", node_cls)
-    for cls in classes:
-        if " " + cls + " " not in node_cls:
-            return False
-    return True
+    return all(" " + cls + " " in node_cls for cls in classes)

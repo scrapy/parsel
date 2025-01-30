@@ -1,12 +1,10 @@
 #!/usr/bin/env python
+from pathlib import Path
 
 from setuptools import setup
 
-with open("README.rst", encoding="utf-8") as readme_file:
-    readme = readme_file.read()
-
-with open("NEWS", encoding="utf-8") as history_file:
-    history = history_file.read().replace(".. :changelog:", "")
+readme = Path("README.rst").read_text(encoding="utf-8")
+history = Path("NEWS").read_text(encoding="utf-8").replace(".. :changelog:", "")
 
 setup(
     name="parsel",

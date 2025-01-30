@@ -15,7 +15,6 @@ if TYPE_CHECKING:
 
 
 class XPathExpr(OriginalXPathExpr):
-
     textnode: bool = False
     attribute: str | None = None
 
@@ -143,5 +142,5 @@ _translator = HTMLTranslator()
 
 
 def css2xpath(query: str) -> str:
-    "Return translated XPath version of a given CSS query"
+    """Return translated XPath version of a given CSS query"""
     return _translator.css_to_xpath(query)

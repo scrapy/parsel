@@ -173,7 +173,6 @@ class UtilCss2XPathTest(unittest.TestCase):
 
 
 class CSSSelectorTest(unittest.TestCase):
-
     sscls = Selector
 
     def setUp(self) -> None:
