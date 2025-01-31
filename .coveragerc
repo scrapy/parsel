@@ -1,7 +1,0 @@
-[run]
-branch = true
-
-[report]
-exclude_lines =
-    @typing.overload
-    if TYPE_CHECKING:
