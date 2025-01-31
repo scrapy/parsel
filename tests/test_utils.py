@@ -1,8 +1,13 @@
-from typing import List, Pattern, Type, Union
+from __future__ import annotations
+
+from typing import TYPE_CHECKING
 
 from pytest import mark, raises
 
 from parsel.utils import extract_regex, shorten
+
+if TYPE_CHECKING:
+    from re import Pattern
 
 
 @mark.parametrize(
@@ -19,7 +24,7 @@ from parsel.utils import extract_regex, shorten
         (7, "foobar"),
     ),
 )
-def test_shorten(width: int, expected: Union[str, Type[Exception]]) -> None:
+def test_shorten(width: int, expected: str | type[Exception]) -> None:
     if isinstance(expected, str):
         assert shorten("foobar", width) == expected
     else:
@@ -69,9 +74,9 @@ def test_shorten(width: int, expected: Union[str, Type[Exception]]) -> None:
     ),
 )
 def test_extract_regex(
-    regex: Union[str, Pattern[str]],
+    regex: str | Pattern[str],
     text: str,
     replace_entities: bool,
-    expected: List[str],
+    expected: list[str],
 ) -> None:
     assert extract_regex(regex, text, replace_entities) == expected

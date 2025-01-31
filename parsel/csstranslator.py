@@ -1,5 +1,7 @@
+from __future__ import annotations
+
 from functools import lru_cache
-from typing import TYPE_CHECKING, Any, Optional, Protocol
+from typing import TYPE_CHECKING, Any, Protocol
 
 from cssselect import GenericTranslator as OriginalGenericTranslator
 from cssselect import HTMLTranslator as OriginalHTMLTranslator
@@ -13,17 +15,16 @@ if TYPE_CHECKING:
 
 
 class XPathExpr(OriginalXPathExpr):
-
     textnode: bool = False
-    attribute: Optional[str] = None
+    attribute: str | None = None
 
     @classmethod
     def from_xpath(
         cls,
         xpath: OriginalXPathExpr,
         textnode: bool = False,
-        attribute: Optional[str] = None,
-    ) -> "Self":
+        attribute: str | None = None,
+    ) -> Self:
         x = cls(path=xpath.path, element=xpath.element, condition=xpath.condition)
         x.textnode = textnode
         x.attribute = attribute
@@ -47,12 +48,12 @@ class XPathExpr(OriginalXPathExpr):
         return path
 
     def join(
-        self: "Self",
+        self: Self,
         combiner: str,
         other: OriginalXPathExpr,
         *args: Any,
         **kwargs: Any,
-    ) -> "Self":
+    ) -> Self:
         if not isinstance(other, XPathExpr):
             raise ValueError(
                 f"Expressions of type {__name__}.XPathExpr can ony join expressions"
@@ -141,5 +142,5 @@ _translator = HTMLTranslator()
 
 
 def css2xpath(query: str) -> str:
-    "Return translated XPath version of a given CSS query"
+    """Return translated XPath version of a given CSS query"""
     return _translator.css_to_xpath(query)

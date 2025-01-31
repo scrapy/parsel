@@ -1,6 +1,7 @@
 # Basic usage of the Selector, strongly typed to test the typing of parsel's API.
+from __future__ import annotations
+
 import re
-from typing import List
 
 from parsel import Selector
 
@@ -10,9 +11,9 @@ def correct() -> None:
         text="<html><body><ul><li>1</li><li>2</li><li>3</li></ul></body></html>"
     )
 
-    li_values: List[str] = selector.css("li").getall()
+    li_values: list[str] = selector.css("li").getall()
     selector.re_first(re.compile(r"[32]"), "").strip()
-    xpath_values: List[str] = selector.xpath(
+    xpath_values: list[str] = selector.xpath(
         "//somens:a/text()", namespaces={"somens": "http://scrapy.org"}
     ).extract()
 
@@ -35,23 +36,24 @@ def incorrect() -> None:
     )
 
     # Wrong query type in css.
-    selector.css(5).getall()  # type: ignore
+    selector.css(5).getall()  # type: ignore[arg-type]
 
     # Cannot assign a list of str to an int.
-    li_values: int = selector.css("li").getall()  # type: ignore
+    li_values: int = selector.css("li").getall()  # type: ignore[assignment]
 
     # Cannot use a string to define namespaces in xpath.
     selector.xpath(
-        "//somens:a/text()", namespaces='{"somens": "http://scrapy.org"}'  # type: ignore
+        "//somens:a/text()",
+        namespaces='{"somens": "http://scrapy.org"}',  # type: ignore[arg-type]
     ).extract()
 
     # Typo in the extract method name.
-    selector.css("li").extact()  # type: ignore
+    selector.css("li").extact()  # type: ignore[attr-defined]
 
     class MySelector(Selector):
         def my_own_func(self) -> int:
             return 3
 
     my_selector = MySelector()
-    res: str = my_selector.my_own_func()  # type: ignore
-    sub_res: str = my_selector.xpath("//somens:a/text()")[0].my_own_func()  # type: ignore
+    res: str = my_selector.my_own_func()  # type: ignore[assignment]
+    sub_res: str = my_selector.xpath("//somens:a/text()")[0].my_own_func()  # type: ignore[assignment]

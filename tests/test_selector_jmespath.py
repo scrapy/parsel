@@ -1,4 +1,4 @@
-# -*- coding: utf-8 -*-
+from __future__ import annotations
 
 import unittest
 
@@ -161,10 +161,10 @@ class JMESPathTestCase(unittest.TestCase):
         ):
             selector = Selector(text=text, root=_NOT_SET)
             self.assertEqual(selector.type, "json")
-            self.assertEqual(selector._text, text)  # pylint: disable=protected-access
+            self.assertEqual(selector._text, text)
             self.assertEqual(selector.root, root)
 
             selector = Selector(text=None, root=root)
             self.assertEqual(selector.type, "json")
-            self.assertEqual(selector._text, None)  # pylint: disable=protected-access
+            self.assertEqual(selector._text, None)
             self.assertEqual(selector.root, root)

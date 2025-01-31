@@ -1,25 +1,13 @@
 """XPath and JMESPath selectors based on the lxml and jmespath Python
 packages."""
 
+from __future__ import annotations
+
 import json
 import typing
 import warnings
 from io import BytesIO
-from typing import (
-    Any,
-    Dict,
-    List,
-    Literal,
-    Mapping,
-    Optional,
-    Pattern,
-    SupportsIndex,
-    Tuple,
-    Type,
-    TypedDict,
-    TypeVar,
-    Union,
-)
+from typing import TYPE_CHECKING, Any, Literal, SupportsIndex, TypedDict, TypeVar, Union
 
 import jmespath
 from lxml import etree, html
@@ -27,6 +15,11 @@ from packaging.version import Version
 
 from .csstranslator import GenericTranslator, HTMLTranslator
 from .utils import extract_regex, flatten, iflatten, shorten
+
+if TYPE_CHECKING:
+    from collections.abc import Mapping
+    from re import Pattern
+
 
 _SelectorType = TypeVar("_SelectorType", bound="Selector")
 _ParserType = Union[etree.XMLParser, etree.HTMLParser]
@@ -60,12 +53,12 @@ class SafeXMLParser(etree.XMLParser):
 
 
 class CTGroupValue(TypedDict):
-    _parser: Union[Type[etree.XMLParser], Type[html.HTMLParser]]
-    _csstranslator: Union[GenericTranslator, HTMLTranslator]
+    _parser: type[etree.XMLParser | html.HTMLParser]
+    _csstranslator: GenericTranslator | HTMLTranslator
     _tostring_method: _TostringMethodType
 
 
-_ctgroup: Dict[str, CTGroupValue] = {
+_ctgroup: dict[str, CTGroupValue] = {
     "html": {
         "_parser": html.HTMLParser,
         "_csstranslator": HTMLTranslator(),
@@ -79,14 +72,14 @@ _ctgroup: Dict[str, CTGroupValue] = {
 }
 
 
-def _xml_or_html(type: Optional[str]) -> str:
+def _xml_or_html(type: str | None) -> str:
     return "xml" if type == "xml" else "html"
 
 
 def create_root_node(
     text: str,
-    parser_cls: Type[_ParserType],
-    base_url: Optional[str] = None,
+    parser_cls: type[_ParserType],
+    base_url: str | None = None,
     huge_tree: bool = LXML_SUPPORTS_HUGE_TREE,
     body: bytes = b"",
     encoding: str = "utf-8",
@@ -107,40 +100,40 @@ def create_root_node(
             if "use XML_PARSE_HUGE option" in error.message:
                 warnings.warn(
                     f"Input data is too big. Upgrade to lxml "
-                    f"{lxml_huge_tree_version} or later for huge_tree support."
+                    f"{lxml_huge_tree_version} or later for huge_tree support.",
+                    stacklevel=2,
                 )
     if root is None:
         root = etree.fromstring(b"<html/>", parser=parser, base_url=base_url)
     return root
 
 
-class SelectorList(List[_SelectorType]):
+class SelectorList(list[_SelectorType]):
     """
     The :class:`SelectorList` class is a subclass of the builtin ``list``
     class, which provides a few additional methods.
     """
 
     @typing.overload
-    def __getitem__(self, pos: "SupportsIndex") -> _SelectorType:
+    def __getitem__(self, pos: SupportsIndex) -> _SelectorType:
         pass
 
     @typing.overload
-    def __getitem__(self, pos: slice) -> "SelectorList[_SelectorType]":
+    def __getitem__(self, pos: slice) -> SelectorList[_SelectorType]:
         pass
 
     def __getitem__(
-        self, pos: Union["SupportsIndex", slice]
-    ) -> Union[_SelectorType, "SelectorList[_SelectorType]"]:
+        self, pos: SupportsIndex | slice
+    ) -> _SelectorType | SelectorList[_SelectorType]:
         o = super().__getitem__(pos)
         if isinstance(pos, slice):
             return self.__class__(typing.cast("SelectorList[_SelectorType]", o))
-        else:
-            return typing.cast(_SelectorType, o)
+        return typing.cast(_SelectorType, o)
 
     def __getstate__(self) -> None:
         raise TypeError("can't pickle SelectorList objects")
 
-    def jmespath(self, query: str, **kwargs: Any) -> "SelectorList[_SelectorType]":
+    def jmespath(self, query: str, **kwargs: Any) -> SelectorList[_SelectorType]:
         """
         Call the ``.jmespath()`` method for each element in this list and return
         their results flattened as another :class:`SelectorList`.
@@ -157,9 +150,9 @@ class SelectorList(List[_SelectorType]):
     def xpath(
         self,
         xpath: str,
-        namespaces: Optional[Mapping[str, str]] = None,
+        namespaces: Mapping[str, str] | None = None,
         **kwargs: Any,
-    ) -> "SelectorList[_SelectorType]":
+    ) -> SelectorList[_SelectorType]:
         """
         Call the ``.xpath()`` method for each element in this list and return
         their results flattened as another :class:`SelectorList`.
@@ -180,7 +173,7 @@ class SelectorList(List[_SelectorType]):
             flatten([x.xpath(xpath, namespaces=namespaces, **kwargs) for x in self])
         )
 
-    def css(self, query: str) -> "SelectorList[_SelectorType]":
+    def css(self, query: str) -> SelectorList[_SelectorType]:
         """
         Call the ``.css()`` method for each element in this list and return
         their results flattened as another :class:`SelectorList`.
@@ -189,9 +182,7 @@ class SelectorList(List[_SelectorType]):
         """
         return self.__class__(flatten([x.css(query) for x in self]))
 
-    def re(
-        self, regex: Union[str, Pattern[str]], replace_entities: bool = True
-    ) -> List[str]:
+    def re(self, regex: str | Pattern[str], replace_entities: bool = True) -> list[str]:
         """
         Call the ``.re()`` method for each element in this list and return
         their results flattened, as a list of strings.
@@ -206,16 +197,16 @@ class SelectorList(List[_SelectorType]):
     @typing.overload
     def re_first(
         self,
-        regex: Union[str, Pattern[str]],
+        regex: str | Pattern[str],
         default: None = None,
         replace_entities: bool = True,
-    ) -> Optional[str]:
+    ) -> str | None:
         pass
 
     @typing.overload
     def re_first(
         self,
-        regex: Union[str, Pattern[str]],
+        regex: str | Pattern[str],
         default: str,
         replace_entities: bool = True,
     ) -> str:
@@ -223,10 +214,10 @@ class SelectorList(List[_SelectorType]):
 
     def re_first(
         self,
-        regex: Union[str, Pattern[str]],
-        default: Optional[str] = None,
+        regex: str | Pattern[str],
+        default: str | None = None,
         replace_entities: bool = True,
-    ) -> Optional[str]:
+    ) -> str | None:
         """
         Call the ``.re()`` method for the first element in this list and
         return the result in an string. If the list is empty or the
@@ -244,7 +235,7 @@ class SelectorList(List[_SelectorType]):
             return typing.cast(str, el)
         return default
 
-    def getall(self) -> List[str]:
+    def getall(self) -> list[str]:
         """
         Call the ``.get()`` method for each element is this list and return
         their results flattened, as a list of strings.
@@ -254,14 +245,14 @@ class SelectorList(List[_SelectorType]):
     extract = getall
 
     @typing.overload
-    def get(self, default: None = None) -> Optional[str]:
+    def get(self, default: None = None) -> str | None:
         pass
 
     @typing.overload
     def get(self, default: str) -> str:
         pass
 
-    def get(self, default: Optional[str] = None) -> Any:
+    def get(self, default: str | None = None) -> Any:
         """
         Return the result of ``.get()`` for the first element in this list.
         If the list is empty, return the default value.
@@ -300,9 +291,9 @@ def _get_root_and_type_from_bytes(
     body: bytes,
     encoding: str,
     *,
-    input_type: Optional[str],
+    input_type: str | None,
     **lxml_kwargs: Any,
-) -> Tuple[Any, str]:
+) -> tuple[Any, str]:
     if input_type == "text":
         return body.decode(encoding), input_type
     if encoding == "utf-8":
@@ -327,8 +318,8 @@ def _get_root_and_type_from_bytes(
 
 
 def _get_root_and_type_from_text(
-    text: str, *, input_type: Optional[str], **lxml_kwargs: Any
-) -> Tuple[Any, str]:
+    text: str, *, input_type: str | None, **lxml_kwargs: Any
+) -> tuple[Any, str]:
     if input_type == "text":
         return text, input_type
     try:
@@ -345,15 +336,15 @@ def _get_root_and_type_from_text(
     return root, type
 
 
-def _get_root_type(root: Any, *, input_type: Optional[str]) -> str:
-    if isinstance(root, etree._Element):  # pylint: disable=protected-access
+def _get_root_type(root: Any, *, input_type: str | None) -> str:
+    if isinstance(root, etree._Element):
         if input_type in {"json", "text"}:
             raise ValueError(
                 f"Selector got an lxml.etree._Element object as root, "
                 f"and {input_type!r} as type."
             )
         return _xml_or_html(input_type)
-    elif isinstance(root, (dict, list)) or _is_valid_json(root):
+    if isinstance(root, (dict, list)) or _is_valid_json(root):
         return "json"
     return input_type or "json"
 
@@ -363,8 +354,7 @@ def _is_valid_json(text: str) -> bool:
         json.loads(text)
     except (TypeError, ValueError):
         return False
-    else:
-        return True
+    return True
 
 
 def _load_json_or_none(text: str) -> Any:
@@ -404,14 +394,14 @@ class Selector:
     """
 
     __slots__ = [
-        "namespaces",
-        "type",
+        "__weakref__",
         "_expr",
         "_huge_tree",
-        "root",
         "_text",
         "body",
-        "__weakref__",
+        "namespaces",
+        "root",
+        "type",
     ]
 
     _default_namespaces = {
@@ -429,14 +419,14 @@ class Selector:
 
     def __init__(
         self,
-        text: Optional[str] = None,
-        type: Optional[str] = None,
+        text: str | None = None,
+        type: str | None = None,
         body: bytes = b"",
         encoding: str = "utf-8",
-        namespaces: Optional[Mapping[str, str]] = None,
-        root: Optional[Any] = _NOT_SET,
-        base_url: Optional[str] = None,
-        _expr: Optional[str] = None,
+        namespaces: Mapping[str, str] | None = None,
+        root: Any | None = _NOT_SET,
+        base_url: str | None = None,
+        _expr: str | None = None,
         huge_tree: bool = LXML_SUPPORTS_HUGE_TREE,
     ) -> None:
         self.root: Any
@@ -501,9 +491,9 @@ class Selector:
     def _get_root(
         self,
         text: str = "",
-        base_url: Optional[str] = None,
+        base_url: str | None = None,
         huge_tree: bool = LXML_SUPPORTS_HUGE_TREE,
-        type: Optional[str] = None,
+        type: str | None = None,
         body: bytes = b"",
         encoding: str = "utf-8",
     ) -> etree._Element:
@@ -553,8 +543,7 @@ class Selector:
         def make_selector(x: Any) -> _SelectorType:  # closure function
             if isinstance(x, str):
                 return self.__class__(text=x, _expr=query, type="text")
-            else:
-                return self.__class__(root=x, _expr=query)
+            return self.__class__(root=x, _expr=query)
 
         result = [make_selector(x) for x in result]
         return typing.cast(SelectorList[_SelectorType], self.selectorlist_cls(result))
@@ -562,7 +551,7 @@ class Selector:
     def xpath(
         self: _SelectorType,
         query: str,
-        namespaces: Optional[Mapping[str, str]] = None,
+        namespaces: Mapping[str, str] | None = None,
         **kwargs: Any,
     ) -> SelectorList[_SelectorType]:
         """
@@ -612,7 +601,7 @@ class Selector:
         except etree.XPathError as exc:
             raise ValueError(f"XPath error: {exc} in {query}")
 
-        if type(result) is not list:
+        if not isinstance(result, list):
             result = [result]
 
         result = [
@@ -645,9 +634,7 @@ class Selector:
         type = _xml_or_html(self.type)
         return _ctgroup[type]["_csstranslator"].css_to_xpath(query)
 
-    def re(
-        self, regex: Union[str, Pattern[str]], replace_entities: bool = True
-    ) -> List[str]:
+    def re(self, regex: str | Pattern[str], replace_entities: bool = True) -> list[str]:
         """
         Apply the given regex and return a list of strings with the
         matches.
@@ -666,16 +653,16 @@ class Selector:
     @typing.overload
     def re_first(
         self,
-        regex: Union[str, Pattern[str]],
+        regex: str | Pattern[str],
         default: None = None,
         replace_entities: bool = True,
-    ) -> Optional[str]:
+    ) -> str | None:
         pass
 
     @typing.overload
     def re_first(
         self,
-        regex: Union[str, Pattern[str]],
+        regex: str | Pattern[str],
         default: str,
         replace_entities: bool = True,
     ) -> str:
@@ -683,10 +670,10 @@ class Selector:
 
     def re_first(
         self,
-        regex: Union[str, Pattern[str]],
-        default: Optional[str] = None,
+        regex: str | Pattern[str],
+        default: str | None = None,
         replace_entities: bool = True,
-    ) -> Optional[str]:
+    ) -> str | None:
         """
         Apply the given regex and return the first string which matches. If
         there is no match, return the default value (``None`` if the argument
@@ -721,14 +708,13 @@ class Selector:
         except (AttributeError, TypeError):
             if self.root is True:
                 return "1"
-            elif self.root is False:
+            if self.root is False:
                 return "0"
-            else:
-                return str(self.root)
+            return str(self.root)
 
     extract = get
 
-    def getall(self) -> List[str]:
+    def getall(self) -> list[str]:
         """
         Serialize and return the matched node in a 1-element list of strings.
         """
@@ -787,7 +773,7 @@ class Selector:
             )
 
     @property
-    def attrib(self) -> Dict[str, str]:
+    def attrib(self) -> dict[str, str]:
         """Return the attributes dictionary for underlying element."""
         return dict(self.root.attrib)
 
