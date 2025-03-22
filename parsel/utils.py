@@ -75,7 +75,7 @@ def extract_regex(
     if "extract" in regex.groupindex:
         # named group
         try:
-            extracted = cast(re.Match[str], regex.search(text)).group("extract")
+            extracted = cast("re.Match[str]", regex.search(text)).group("extract")
         except AttributeError:
             strings = []
         else:

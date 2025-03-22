@@ -9,7 +9,6 @@ import weakref
 from typing import TYPE_CHECKING, Any, cast
 
 from lxml import etree
-from lxml.html import HtmlElement
 from packaging.version import Version
 
 from parsel import Selector, SelectorList
@@ -22,6 +21,8 @@ from parsel.selector import (
 
 if TYPE_CHECKING:
     from collections.abc import Mapping
+
+    from lxml.html import HtmlElement
 
 
 class SelectorTestCase(unittest.TestCase):
@@ -689,7 +690,7 @@ class SelectorTestCase(unittest.TestCase):
     def test_make_links_absolute(self) -> None:
         text = '<a href="file.html">link to file</a>'
         sel = Selector(text=text, base_url="http://example.com")
-        typing.cast(HtmlElement, sel.root).make_links_absolute()
+        typing.cast("HtmlElement", sel.root).make_links_absolute()
         self.assertEqual(
             "http://example.com/file.html",
             sel.xpath("//a/@href").extract_first(),
@@ -976,7 +977,7 @@ class SelectorTestCase(unittest.TestCase):
             selectorlist_cls = MySelectorList
 
             def extra_method(self) -> str:
-                return "extra" + cast(str, self.get())
+                return "extra" + cast("str", self.get())
 
         sel = MySelector(text="<html><div>foo</div></html>")
         self.assertIsInstance(sel.xpath("//div"), MySelectorList)
