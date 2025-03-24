@@ -20,6 +20,9 @@ if TYPE_CHECKING:
     from collections.abc import Mapping
     from re import Pattern
 
+    # typing.Self requires Python 3.11
+    from typing_extensions import Self
+
 
 _SelectorType = TypeVar("_SelectorType", bound="Selector")
 _ParserType = Union[etree.XMLParser, etree.HTMLParser]
@@ -128,7 +131,7 @@ class SelectorList(list[_SelectorType]):
         o = super().__getitem__(pos)
         if isinstance(pos, slice):
             return self.__class__(typing.cast("SelectorList[_SelectorType]", o))
-        return typing.cast(_SelectorType, o)
+        return typing.cast("_SelectorType", o)
 
     def __getstate__(self) -> None:
         raise TypeError("can't pickle SelectorList objects")
@@ -232,7 +235,7 @@ class SelectorList(list[_SelectorType]):
         for el in iflatten(
             x.re(regex, replace_entities=replace_entities) for x in self
         ):
-            return typing.cast(str, el)
+            return typing.cast("str", el)
         return default
 
     def getall(self) -> list[str]:
@@ -507,10 +510,10 @@ class Selector:
         )
 
     def jmespath(
-        self: _SelectorType,
+        self,
         query: str,
         **kwargs: Any,
-    ) -> SelectorList[_SelectorType]:
+    ) -> SelectorList[Self]:
         """
         Find objects matching the JMESPath ``query`` and return the result as a
         :class:`SelectorList` instance with all elements flattened. List
@@ -540,20 +543,20 @@ class Selector:
         elif not isinstance(result, list):
             result = [result]
 
-        def make_selector(x: Any) -> _SelectorType:  # closure function
+        def make_selector(x: Any) -> Selector:  # closure function
             if isinstance(x, str):
                 return self.__class__(text=x, _expr=query, type="text")
             return self.__class__(root=x, _expr=query)
 
         result = [make_selector(x) for x in result]
-        return typing.cast(SelectorList[_SelectorType], self.selectorlist_cls(result))
+        return typing.cast("SelectorList[Self]", self.selectorlist_cls(result))
 
     def xpath(
-        self: _SelectorType,
+        self,
         query: str,
         namespaces: Mapping[str, str] | None = None,
         **kwargs: Any,
-    ) -> SelectorList[_SelectorType]:
+    ) -> SelectorList[Self]:
         """
         Find nodes matching the xpath ``query`` and return the result as a
         :class:`SelectorList` instance with all elements flattened. List
@@ -577,16 +580,12 @@ class Selector:
             try:
                 xpathev = self.root.xpath
             except AttributeError:
-                return typing.cast(
-                    SelectorList[_SelectorType], self.selectorlist_cls([])
-                )
+                return typing.cast("SelectorList[Self]", self.selectorlist_cls([]))
         else:
             try:
                 xpathev = self._get_root(self._text or "", type="html").xpath
             except AttributeError:
-                return typing.cast(
-                    SelectorList[_SelectorType], self.selectorlist_cls([])
-                )
+                return typing.cast("SelectorList[Self]", self.selectorlist_cls([]))
 
         nsp = dict(self.namespaces)
         if namespaces is not None:
@@ -613,9 +612,9 @@ class Selector:
             )
             for x in result
         ]
-        return typing.cast(SelectorList[_SelectorType], self.selectorlist_cls(result))
+        return typing.cast("SelectorList[Self]", self.selectorlist_cls(result))
 
-    def css(self: _SelectorType, query: str) -> SelectorList[_SelectorType]:
+    def css(self, query: str) -> SelectorList[Self]:
         """
         Apply the given CSS selector and return a :class:`SelectorList` instance.
 
@@ -764,7 +763,7 @@ class Selector:
                     raise ValueError("This node has no parent")
                 parent.remove(self.root)
             else:
-                typing.cast(html.HtmlElement, self.root).drop_tree()
+                typing.cast("html.HtmlElement", self.root).drop_tree()
         except (AttributeError, AssertionError):
             # 'NoneType' object has no attribute 'drop'
             raise CannotDropElementWithoutParent(
