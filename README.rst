@@ -2,8 +2,8 @@
 Parsel
 ======
 
-.. image:: https://github.com/scrapy/parsel/actions/workflows/tests.yml/badge.svg
-   :target: https://github.com/scrapy/parsel/actions/workflows/tests.yml
+.. image:: https://github.com/scrapy/parsel/actions/workflows/tests-ubuntu.yml/badge.svg
+   :target: https://github.com/scrapy/parsel/actions/workflows/tests-ubuntu.yml
    :alt: Tests
 
 .. image:: https://img.shields.io/pypi/pyversions/parsel.svg
@@ -71,4 +71,3 @@ Example (`open online demo`_):
 .. _regular expressions: https://docs.python.org/library/re.html
 .. _XML: https://en.wikipedia.org/wiki/XML
 .. _XPath: https://en.wikipedia.org/wiki/XPath
-
