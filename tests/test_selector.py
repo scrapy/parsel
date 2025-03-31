@@ -1200,6 +1200,10 @@ class SelectorTestCase(unittest.TestCase):
         assert repr(selector) == "<Selector query=None data='1'>"
         assert str(selector) == "1"
 
+    def test_body_bytearray_support(self) -> None:
+        selector = Selector(body=bytearray("<h1>Hello World</h1>", "utf-8"))
+        assert selector.xpath("//h1/text()").get() == "Hello World"
+
 
 class ExsltTestCase(unittest.TestCase):
     sscls = Selector

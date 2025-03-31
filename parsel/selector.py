@@ -424,7 +424,7 @@ class Selector:
         self,
         text: str | None = None,
         type: str | None = None,
-        body: bytes = b"",
+        body: bytes | bytearray = b"",
         encoding: str = "utf-8",
         namespaces: Mapping[str, str] | None = None,
         root: Any | None = _NOT_SET,
@@ -462,11 +462,11 @@ class Selector:
             self.root = root
             self.type = type
         elif body:
-            if not isinstance(body, bytes):
-                msg = f"body argument should be of type bytes, got {body.__class__}"
+            if not isinstance(body, (bytes, bytearray)):
+                msg = f"body argument should be of type bytes or bytearray, got {body.__class__}"
                 raise TypeError(msg)
             root, type = _get_root_and_type_from_bytes(
-                body=body,
+                body=bytes(body),
                 encoding=encoding,
                 input_type=type,
                 base_url=base_url,
