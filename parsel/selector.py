@@ -734,7 +734,7 @@ class Selector:
         For JSON selectors, this method does nothing (fails gracefully).
         """
         if self.type == "json":
-            return
+            return None
 
         for el in self.root.iter("*"):
             if el.tag.startswith("{"):
