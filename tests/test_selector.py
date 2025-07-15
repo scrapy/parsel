@@ -1204,6 +1204,14 @@ class SelectorTestCase(unittest.TestCase):
         selector = Selector(body=bytearray("<h1>Hello World</h1>", "utf-8"))
         assert selector.xpath("//h1/text()").get() == "Hello World"
 
+    def test_remove_namespace_json(self) -> None:
+        sel = self.sscls(text='{"key": "value"}', type="json")
+        self.assertIsNone(sel.remove_namespaces())
+
+    def test_attrib_empty_json(self) -> None:
+        sel = self.sscls(text='{"key": "value"}', type="json")
+        self.assertEqual(sel.attrib, {})
+
 
 class ExsltTestCase(unittest.TestCase):
     sscls = Selector
