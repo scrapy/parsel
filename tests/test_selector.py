@@ -1206,7 +1206,7 @@ class SelectorTestCase(unittest.TestCase):
 
     def test_remove_namespace_json(self) -> None:
         sel = self.sscls(text='{"key": "value"}', type="json")
-        self.assertIsNone(sel.remove_namespaces())
+        sel.remove_namespaces()
 
     def test_attrib_empty_json(self) -> None:
         sel = self.sscls(text='{"key": "value"}', type="json")
