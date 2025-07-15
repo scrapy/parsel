@@ -734,7 +734,7 @@ class Selector:
         For JSON selectors, this method does nothing (fails gracefully).
         """
         if self.type == "json":
-            return None
+            return
 
         for el in self.root.iter("*"):
             if el.tag.startswith("{"):
@@ -745,7 +745,6 @@ class Selector:
                     el.attrib[an.split("}", 1)[1]] = el.attrib.pop(an)
         # remove namespace declarations
         etree.cleanup_namespaces(self.root)
-        return None
 
     def drop(self) -> None:
         """
