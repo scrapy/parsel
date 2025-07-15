@@ -745,6 +745,7 @@ class Selector:
                     el.attrib[an.split("}", 1)[1]] = el.attrib.pop(an)
         # remove namespace declarations
         etree.cleanup_namespaces(self.root)
+        return None
 
     def drop(self) -> None:
         """
