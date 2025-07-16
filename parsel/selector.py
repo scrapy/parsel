@@ -731,7 +731,7 @@ class Selector:
         """
         Remove all namespaces, allowing to traverse the document using
         namespace-less xpaths. See :ref:`removing-namespaces`.
-        For JSON selectors, this method does nothing (fails gracefully).
+        For JSON selectors, this method does nothing.
         """
         if self.type == "json":
             return
@@ -779,7 +779,7 @@ class Selector:
     def attrib(self) -> dict[str, str]:
         """
         Return the attributes dictionary for underlying element.
-        For JSON selectors, return an empty dict (fails gracefully)
+        For JSON selectors, return an empty dict.
         """
         if self.type == "json":
             return {}
