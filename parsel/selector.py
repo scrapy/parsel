@@ -731,7 +731,11 @@ class Selector:
         """
         Remove all namespaces, allowing to traverse the document using
         namespace-less xpaths. See :ref:`removing-namespaces`.
+        For JSON selectors, this method does nothing.
         """
+        if self.type == "json":
+            return
+
         for el in self.root.iter("*"):
             if el.tag.startswith("{"):
                 el.tag = el.tag.split("}", 1)[1]
@@ -773,7 +777,13 @@ class Selector:
 
     @property
     def attrib(self) -> dict[str, str]:
-        """Return the attributes dictionary for underlying element."""
+        """
+        Return the attributes dictionary for underlying element.
+        For JSON selectors, return an empty dict.
+        """
+        if self.type == "json":
+            return {}
+
         return dict(self.root.attrib)
 
     def __bool__(self) -> bool:
