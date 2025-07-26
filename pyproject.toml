@@ -1,11 +1,71 @@
+[build-system]
+requires = ["hatchling>=1.27.0"]
+build-backend = "hatchling.build"
+
+[project]
+name = "parsel"
+description = "Parsel is a library to extract data from HTML and XML using XPath and CSS selectors"
+readme = "README.rst"
+license = "BSD-3-Clause"
+license-files = ["LICENSE"]
+authors = [
+    { name = "Scrapy project", email = "info@scrapy.org" },
+]
+keywords = [
+    "parsel",
+]
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: BSD License",
+    "Natural Language :: English",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: Implementation :: CPython",
+    "Programming Language :: Python :: Implementation :: PyPy",
+    "Topic :: Text Processing :: Markup",
+    "Topic :: Text Processing :: Markup :: HTML",
+    "Topic :: Text Processing :: Markup :: XML",
+]
+dependencies = [
+    "cssselect>=1.2.0",
+    "jmespath",
+    "lxml",
+    "packaging",
+    "w3lib>=1.19.0",
+]
+requires-python = ">=3.9"
+dynamic = ["version"]
+
+[project.urls]
+Homepage = "https://github.com/scrapy/parsel"
+Documentation = "https://parsel.readthedocs.io/en/latest/"
+Source = "https://github.com/scrapy/parsel"
+Tracker = "https://github.com/scrapy/parsel/issues"
+"Release notes" = "https://parsel.readthedocs.io/en/latest/history.html"
+
+[tool.hatch.version]
+path = "parsel/__init__.py"
+
+[tool.hatch.build.targets.sdist]
+include = [
+    "/docs",
+    "/parsel",
+    "/tests",
+    "/NEWS",
+    "/codecov.yml",
+    "/tox.ini",
+]
+
 [tool.bumpversion]
 current_version = "1.10.0"
 commit = true
 tag = true
 tag_name = "v{new_version}"
-
-[[tool.bumpversion.files]]
-filename = "setup.py"
 
 [[tool.bumpversion.files]]
 filename = "parsel/__init__.py"
