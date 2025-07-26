@@ -1360,7 +1360,7 @@ class SelectorBytesInput(Selector):
     def __init__(
         self,
         text: str | None = None,
-        type: str | None = None,
+        type: str | None = None,  # noqa: A002
         body: bytes = b"",
         encoding: str = "utf-8",
         namespaces: Mapping[str, str] | None = None,

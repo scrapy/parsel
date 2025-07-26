@@ -13,7 +13,7 @@ from cssselect.parser import SelectorSyntaxError
 from cssselect.xpath import ExpressionError
 from packaging.version import Version
 
-from parsel import Selector
+from parsel import Selector, css2xpath
 from parsel.csstranslator import GenericTranslator, HTMLTranslator, TranslatorProtocol
 
 HTMLBODY = """
@@ -65,7 +65,7 @@ class TranslatorTestProtocol(Protocol):
     def assertRaises(
         self,
         expected_exception: type[BaseException] | tuple[type[BaseException], ...],
-        callable: Callable[..., object],
+        callable: Callable[..., object],  # noqa: A002
         *args: Any,
         **kwargs: Any,
     ) -> None:
@@ -163,8 +163,6 @@ class GenericTranslatorTest(TranslatorTestMixin, unittest.TestCase):
 
 class UtilCss2XPathTest(unittest.TestCase):
     def test_css2xpath(self) -> None:
-        from parsel import css2xpath
-
         expected_xpath = (
             "descendant-or-self::*[@class and contains("
             "concat(' ', normalize-space(@class), ' '), ' some-class ')]"
