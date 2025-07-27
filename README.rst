@@ -34,32 +34,33 @@ Find the Parsel online documentation at https://parsel.readthedocs.org.
 
 Example (`open online demo`_):
 
-.. code-block:: python
+.. code-block:: pycon
 
     >>> from parsel import Selector
     >>> text = """
-            <html>
-                <body>
-                    <h1>Hello, Parsel!</h1>
-                    <ul>
-                        <li><a href="http://example.com">Link 1</a></li>
-                        <li><a href="http://scrapy.org">Link 2</a></li>
-                    </ul>
-                    <script type="application/json">{"a": ["b", "c"]}</script>
-                </body>
-            </html>"""
+    ... <html>
+    ...     <body>
+    ...         <h1>Hello, Parsel!</h1>
+    ...         <ul>
+    ...             <li><a href="http://example.com">Link 1</a></li>
+    ...             <li><a href="http://scrapy.org">Link 2</a></li>
+    ...         </ul>
+    ...         <script type="application/json">{"a": ["b", "c"]}</script>
+    ...     </body>
+    ... </html>"""
     >>> selector = Selector(text=text)
-    >>> selector.css('h1::text').get()
+    >>> selector.css("h1::text").get()
     'Hello, Parsel!'
-    >>> selector.xpath('//h1/text()').re(r'\w+')
+    >>> selector.xpath("//h1/text()").re(r"\w+")
     ['Hello', 'Parsel']
-    >>> for li in selector.css('ul > li'):
-    ...     print(li.xpath('.//@href').get())
+    >>> for li in selector.css("ul > li"):
+    ...     print(li.xpath(".//@href").get())
+    ...
     http://example.com
     http://scrapy.org
-    >>> selector.css('script::text').jmespath("a").get()
+    >>> selector.css("script::text").jmespath("a").get()
     'b'
-    >>> selector.css('script::text').jmespath("a").getall()
+    >>> selector.css("script::text").jmespath("a").getall()
     ['b', 'c']
 
 .. _CSS: https://en.wikipedia.org/wiki/Cascading_Style_Sheets
