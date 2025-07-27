@@ -974,7 +974,7 @@ class SelectorTestCase(unittest.TestCase):
             pass
 
         class MySelector(Selector):
-            selectorlist_cls = MySelectorList
+            selectorlist_cls = MySelectorList  # type: ignore[assignment]
 
             def extra_method(self) -> str:
                 return "extra" + cast("str", self.get())
@@ -1386,7 +1386,7 @@ class SelectorBytesInput(Selector):
 
 
 class SelectorTestCaseBytes(SelectorTestCase):
-    sscls = SelectorBytesInput
+    sscls = SelectorBytesInput  # type: ignore[assignment]
 
     def test_representation_slice(self) -> None:
         pass
@@ -1407,4 +1407,4 @@ class SelectorTestCaseBytes(SelectorTestCase):
 
 
 class ExsltTestCaseBytes(ExsltTestCase):
-    sscls = SelectorBytesInput
+    sscls = SelectorBytesInput  # type: ignore[assignment]
