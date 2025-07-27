@@ -75,8 +75,8 @@ _ctgroup: dict[str, CTGroupValue] = {
 }
 
 
-def _xml_or_html(type: str | None) -> str:
-    return "xml" if type == "xml" else "html"
+def _xml_or_html(type_: str | None) -> str:
+    return "xml" if type_ == "xml" else "html"
 
 
 def create_root_node(
@@ -286,8 +286,8 @@ class SelectorList(list[_SelectorType]):
 _NOT_SET = object()
 
 
-def _get_root_from_text(text: str, *, type: str, **lxml_kwargs: Any) -> etree._Element:
-    return create_root_node(text, _ctgroup[type]["_parser"], **lxml_kwargs)
+def _get_root_from_text(text: str, *, type_: str, **lxml_kwargs: Any) -> etree._Element:
+    return create_root_node(text, _ctgroup[type_]["_parser"], **lxml_kwargs)
 
 
 def _get_root_and_type_from_bytes(
@@ -309,15 +309,15 @@ def _get_root_and_type_from_bytes(
     if input_type == "json":
         return None, "json"
     assert input_type in ("html", "xml", None)  # nosec
-    type = _xml_or_html(input_type)
+    type_ = _xml_or_html(input_type)
     root = create_root_node(
         text="",
         body=body,
         encoding=encoding,
-        parser_cls=_ctgroup[type]["_parser"],
+        parser_cls=_ctgroup[type_]["_parser"],
         **lxml_kwargs,
     )
-    return root, type
+    return root, type_
 
 
 def _get_root_and_type_from_text(
@@ -334,9 +334,9 @@ def _get_root_and_type_from_text(
     if input_type == "json":
         return None, "json"
     assert input_type in ("html", "xml", None)  # nosec
-    type = _xml_or_html(input_type)
-    root = _get_root_from_text(text, type=type, **lxml_kwargs)
-    return root, type
+    type_ = _xml_or_html(input_type)
+    root = _get_root_from_text(text, type_=type_, **lxml_kwargs)
+    return root, type_
 
 
 def _get_root_type(root: Any, *, input_type: str | None) -> str:
@@ -423,7 +423,7 @@ class Selector:
     def __init__(
         self,
         text: str | None = None,
-        type: str | None = None,
+        type: str | None = None,  # noqa: A002
         body: bytes | bytearray = b"",
         encoding: str = "utf-8",
         namespaces: Mapping[str, str] | None = None,
@@ -453,7 +453,7 @@ class Selector:
                 msg = f"text argument should be of type str, got {text.__class__}"
                 raise TypeError(msg)
 
-            root, type = _get_root_and_type_from_text(
+            root, type = _get_root_and_type_from_text(  # noqa: A001
                 text,
                 input_type=type,
                 base_url=base_url,
@@ -465,7 +465,7 @@ class Selector:
             if not isinstance(body, (bytes, bytearray)):
                 msg = f"body argument should be of type bytes or bytearray, got {body.__class__}"
                 raise TypeError(msg)
-            root, type = _get_root_and_type_from_bytes(
+            root, type = _get_root_and_type_from_bytes(  # noqa: A001
                 body=bytes(body),
                 encoding=encoding,
                 input_type=type,
@@ -496,7 +496,7 @@ class Selector:
         text: str = "",
         base_url: str | None = None,
         huge_tree: bool = LXML_SUPPORTS_HUGE_TREE,
-        type: str | None = None,
+        type_: str | None = None,
         body: bytes = b"",
         encoding: str = "utf-8",
     ) -> etree._Element:
@@ -504,7 +504,7 @@ class Selector:
             text,
             body=body,
             encoding=encoding,
-            parser_cls=_ctgroup[type or self.type]["_parser"],
+            parser_cls=_ctgroup[type_ or self.type]["_parser"],
             base_url=base_url,
             huge_tree=huge_tree,
         )
@@ -583,7 +583,7 @@ class Selector:
                 return typing.cast("SelectorList[Self]", self.selectorlist_cls([]))
         else:
             try:
-                xpathev = self._get_root(self._text or "", type="html").xpath
+                xpathev = self._get_root(self._text or "", type_="html").xpath
             except AttributeError:
                 return typing.cast("SelectorList[Self]", self.selectorlist_cls([]))
 
@@ -630,8 +630,8 @@ class Selector:
         return self.xpath(self._css2xpath(query))
 
     def _css2xpath(self, query: str) -> str:
-        type = _xml_or_html(self.type)
-        return _ctgroup[type]["_csstranslator"].css_to_xpath(query)
+        type_ = _xml_or_html(self.type)
+        return _ctgroup[type_]["_csstranslator"].css_to_xpath(query)
 
     def re(self, regex: str | Pattern[str], replace_entities: bool = True) -> list[str]:
         """

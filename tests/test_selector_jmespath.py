@@ -1,12 +1,14 @@
 from __future__ import annotations
 
-import unittest
+from typing import cast
+
+import pytest
 
 from parsel import Selector
 from parsel.selector import _NOT_SET
 
 
-class JMESPathTestCase(unittest.TestCase):
+class TestJMESPath:
     def test_json_has_html(self) -> None:
         """Sometimes the information is returned in a json wrapper"""
         data = """
@@ -35,16 +37,13 @@ class JMESPathTestCase(unittest.TestCase):
         }
         """
         sel = Selector(text=data)
-        self.assertEqual(
-            sel.jmespath("html").get(),
-            "<div><a>a<br>b</a>c</div><div><a>d</a>e<b>f</b></div>",
+        assert (
+            sel.jmespath("html").get()
+            == "<div><a>a<br>b</a>c</div><div><a>d</a>e<b>f</b></div>"
         )
-        self.assertEqual(
-            sel.jmespath("html").xpath("//div/a/text()").getall(),
-            ["a", "b", "d"],
-        )
-        self.assertEqual(sel.jmespath("html").css("div > b").getall(), ["<b>f</b>"])
-        self.assertEqual(sel.jmespath("content").jmespath("name.age").get(), 18)
+        assert sel.jmespath("html").xpath("//div/a/text()").getall() == ["a", "b", "d"]
+        assert sel.jmespath("html").css("div > b").getall() == ["<b>f</b>"]
+        assert cast("int", sel.jmespath("content").jmespath("name.age").get()) == 18
 
     def test_html_has_json(self) -> None:
         html_text = """
@@ -77,15 +76,19 @@ class JMESPathTestCase(unittest.TestCase):
         </div>
         """
         sel = Selector(text=html_text)
-        self.assertEqual(
-            sel.xpath("//div/content/text()").jmespath("user[*].name").getall(),
-            ["A", "B", "C", "D"],
-        )
-        self.assertEqual(
-            sel.xpath("//div/content").jmespath("user[*].name").getall(),
-            ["A", "B", "C", "D"],
-        )
-        self.assertEqual(sel.xpath("//div/content").jmespath("total").get(), 4)
+        assert sel.xpath("//div/content/text()").jmespath("user[*].name").getall() == [
+            "A",
+            "B",
+            "C",
+            "D",
+        ]
+        assert sel.xpath("//div/content").jmespath("user[*].name").getall() == [
+            "A",
+            "B",
+            "C",
+            "D",
+        ]
+        assert cast("int", sel.xpath("//div/content").jmespath("total").get()) == 4
 
     def test_jmestpath_with_re(self) -> None:
         html_text = """
@@ -118,33 +121,29 @@ class JMESPathTestCase(unittest.TestCase):
             </div>
             """
         sel = Selector(text=html_text)
-        self.assertEqual(
-            sel.xpath("//div/content/text()").jmespath("user[*].name").re(r"(\w+)"),
-            ["A", "B", "C", "D"],
-        )
-        self.assertEqual(
-            sel.xpath("//div/content").jmespath("user[*].name").re(r"(\w+)"),
-            ["A", "B", "C", "D"],
-        )
+        assert sel.xpath("//div/content/text()").jmespath("user[*].name").re(
+            r"(\w+)"
+        ) == ["A", "B", "C", "D"]
+        assert sel.xpath("//div/content").jmespath("user[*].name").re(r"(\w+)") == [
+            "A",
+            "B",
+            "C",
+            "D",
+        ]
 
-        with self.assertRaises(TypeError):
+        with pytest.raises(TypeError):
             sel.xpath("//div/content").jmespath("user[*].age").re(r"(\d+)")
 
-        self.assertEqual(
-            sel.xpath("//div/content").jmespath("unavailable").re(r"(\d+)"), []
+        assert sel.xpath("//div/content").jmespath("unavailable").re(r"(\d+)") == []
+
+        assert (
+            sel.xpath("//div/content").jmespath("unavailable").re_first(r"(\d+)")
+            is None
         )
 
-        self.assertEqual(
-            sel.xpath("//div/content").jmespath("unavailable").re_first(r"(\d+)"),
-            None,
-        )
-
-        self.assertEqual(
-            sel.xpath("//div/content")
-            .jmespath("user[*].age.to_string(@)")
-            .re(r"(\d+)"),
-            ["18", "32", "22", "25"],
-        )
+        assert sel.xpath("//div/content").jmespath("user[*].age.to_string(@)").re(
+            r"(\d+)"
+        ) == ["18", "32", "22", "25"]
 
     def test_json_types(self) -> None:
         for text, root in (
@@ -160,11 +159,11 @@ class JMESPathTestCase(unittest.TestCase):
             ("null", None),
         ):
             selector = Selector(text=text, root=_NOT_SET)
-            self.assertEqual(selector.type, "json")
-            self.assertEqual(selector._text, text)
-            self.assertEqual(selector.root, root)
+            assert selector.type == "json"
+            assert selector._text == text
+            assert selector.root == root
 
             selector = Selector(text=None, root=root)
-            self.assertEqual(selector.type, "json")
-            self.assertEqual(selector._text, None)
-            self.assertEqual(selector.root, root)
+            assert selector.type == "json"
+            assert selector._text is None
+            assert selector.root == root
