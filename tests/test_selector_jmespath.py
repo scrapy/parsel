@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from typing import cast
+
 import pytest
 
 from parsel import Selector
@@ -41,7 +43,7 @@ class TestJMESPath:
         )
         assert sel.jmespath("html").xpath("//div/a/text()").getall() == ["a", "b", "d"]
         assert sel.jmespath("html").css("div > b").getall() == ["<b>f</b>"]
-        assert sel.jmespath("content").jmespath("name.age").get() == 18
+        assert cast("int", sel.jmespath("content").jmespath("name.age").get()) == 18
 
     def test_html_has_json(self) -> None:
         html_text = """
@@ -86,7 +88,7 @@ class TestJMESPath:
             "C",
             "D",
         ]
-        assert sel.xpath("//div/content").jmespath("total").get() == 4
+        assert cast("int", sel.xpath("//div/content").jmespath("total").get()) == 4
 
     def test_jmestpath_with_re(self) -> None:
         html_text = """
