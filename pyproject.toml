@@ -114,7 +114,9 @@ disable = [
 ]
 
 [tool.pytest.ini_options]
-addopts = "--assert=plain --doctest-modules --ignore=setup.py"
+addopts = [
+    "--doctest-modules",
+]
 
 [tool.ruff.lint]
 extend-select = [
@@ -150,6 +152,8 @@ extend-select = [
     "PIE",
     # pylint
     "PL",
+    # flake8-pytest-style
+    "PT",
     # flake8-use-pathlib
     "PTH",
     # flake8-pyi

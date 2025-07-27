@@ -4,8 +4,8 @@ Selector tests for cssselect backend
 
 from __future__ import annotations
 
-import unittest
-from typing import Any, Callable, Protocol
+from abc import ABC, abstractmethod
+from typing import Any
 
 import cssselect
 import pytest
@@ -52,33 +52,18 @@ HTMLBODY = """
 """
 
 
-class TranslatorTestProtocol(Protocol):
-    tr_cls: type[TranslatorProtocol]
-    tr: TranslatorProtocol
+class TestTranslatorBase(ABC):
+    @property
+    @abstractmethod
+    def tr_cls(self) -> type[TranslatorProtocol]:
+        raise NotImplementedError
 
-    def c2x(self, css: str, prefix: str = ...) -> str:
-        pass
+    def c2x(self, css: str) -> str:
+        return self.tr_cls().css_to_xpath(css)
 
-    def assertEqual(self, first: Any, second: Any, msg: Any = ...) -> None:
-        pass
-
-    def assertRaises(
-        self,
-        expected_exception: type[BaseException] | tuple[type[BaseException], ...],
-        callable: Callable[..., object],  # noqa: A002
-        *args: Any,
-        **kwargs: Any,
-    ) -> None:
-        pass
-
-
-class TranslatorTestMixin:
-    def setUp(self: TranslatorTestProtocol) -> None:
-        self.tr = self.tr_cls()
-        self.c2x = self.tr.css_to_xpath
-
-    def test_attr_function(self: TranslatorTestProtocol) -> None:
-        cases = [
+    @pytest.mark.parametrize(
+        ("css", "xpath"),
+        [
             ("::attr(name)", "descendant-or-self::*/@name"),
             ("a::attr(href)", "descendant-or-self::a/@href"),
             (
@@ -86,21 +71,26 @@ class TranslatorTestMixin:
                 "descendant-or-self::a/descendant-or-self::*/@img",
             ),
             ("a > ::attr(class)", "descendant-or-self::a/*/@class"),
-        ]
-        for css, xpath in cases:
-            self.assertEqual(self.c2x(css), xpath, css)
+        ],
+    )
+    def test_attr_function(self, css: str, xpath: str) -> None:
+        assert self.c2x(css) == xpath, css
 
-    def test_attr_function_exception(self: TranslatorTestProtocol) -> None:
-        cases = [
+    @pytest.mark.parametrize(
+        ("css", "exc"),
+        [
             ("::attr(12)", ExpressionError),
             ("::attr(34test)", ExpressionError),
             ("::attr(@href)", SelectorSyntaxError),
-        ]
-        for css, exc in cases:
-            self.assertRaises(exc, self.c2x, css)
+        ],
+    )
+    def test_attr_function_exception(self, css: str, exc: type[Exception]) -> None:
+        with pytest.raises(exc):
+            self.c2x(css)
 
-    def test_text_pseudo_element(self: TranslatorTestProtocol) -> None:
-        cases = [
+    @pytest.mark.parametrize(
+        ("css", "xpath"),
+        [
             ("::text", "descendant-or-self::text()"),
             ("p::text", "descendant-or-self::p/text()"),
             ("p ::text", "descendant-or-self::p/descendant-or-self::text()"),
@@ -124,106 +114,102 @@ class TranslatorTestMixin:
                 "p::text, a::text",
                 "descendant-or-self::p/text() | descendant-or-self::a/text()",
             ),
-        ]
-        for css, xpath in cases:
-            self.assertEqual(self.c2x(css), xpath, css)
+        ],
+    )
+    def test_text_pseudo_element(self, css: str, xpath: str) -> None:
+        assert self.c2x(css) == xpath, css
 
-    def test_pseudo_function_exception(self: TranslatorTestProtocol) -> None:
-        cases = [
+    @pytest.mark.parametrize(
+        ("css", "exc"),
+        [
             ("::attribute(12)", ExpressionError),
             ("::text()", ExpressionError),
             ("::attr(@href)", SelectorSyntaxError),
-        ]
-        for css, exc in cases:
-            self.assertRaises(exc, self.c2x, css)
+        ],
+    )
+    def test_pseudo_function_exception(self, css: str, exc: type[Exception]) -> None:
+        with pytest.raises(exc):
+            self.c2x(css)
 
-    def test_unknown_pseudo_element(self: TranslatorTestProtocol) -> None:
-        cases = [
+    @pytest.mark.parametrize(
+        ("css", "exc"),
+        [
             ("::text-node", ExpressionError),
-        ]
-        for css, exc in cases:
-            self.assertRaises(exc, self.c2x, css)
+        ],
+    )
+    def test_unknown_pseudo_element(self, css: str, exc: type[Exception]) -> None:
+        with pytest.raises(exc):
+            self.c2x(css)
 
-    def test_unknown_pseudo_class(self: TranslatorTestProtocol) -> None:
-        cases = [
+    @pytest.mark.parametrize(
+        ("css", "exc"),
+        [
             (":text", ExpressionError),
             (":attribute(name)", ExpressionError),
-        ]
-        for css, exc in cases:
-            self.assertRaises(exc, self.c2x, css)
+        ],
+    )
+    def test_unknown_pseudo_class(self, css: str, exc: type[Exception]) -> None:
+        with pytest.raises(exc):
+            self.c2x(css)
 
 
-class HTMLTranslatorTest(TranslatorTestMixin, unittest.TestCase):
+class TestHTMLTranslator(TestTranslatorBase):
     tr_cls = HTMLTranslator
 
 
-class GenericTranslatorTest(TranslatorTestMixin, unittest.TestCase):
+class TestGenericTranslator(TestTranslatorBase):
     tr_cls = GenericTranslator
 
 
-class UtilCss2XPathTest(unittest.TestCase):
-    def test_css2xpath(self) -> None:
-        expected_xpath = (
-            "descendant-or-self::*[@class and contains("
-            "concat(' ', normalize-space(@class), ' '), ' some-class ')]"
-        )
-        self.assertEqual(css2xpath(".some-class"), expected_xpath)
+def test_css2xpath() -> None:
+    expected_xpath = (
+        "descendant-or-self::*[@class and contains("
+        "concat(' ', normalize-space(@class), ' '), ' some-class ')]"
+    )
+    assert css2xpath(".some-class") == expected_xpath
 
 
-class CSSSelectorTest(unittest.TestCase):
-    sscls = Selector
-
-    def setUp(self) -> None:
-        self.sel = self.sscls(text=HTMLBODY)
+class TestCSSSelector:
+    sel = Selector(text=HTMLBODY)
 
     def x(self, *a: Any, **kw: Any) -> list[str]:
         return [v.strip() for v in self.sel.css(*a, **kw).extract() if v.strip()]
 
     def test_selector_simple(self) -> None:
         for x in self.sel.css("input"):
-            self.assertTrue(isinstance(x, self.sel.__class__), x)
-        self.assertEqual(
-            self.sel.css("input").extract(),
-            [x.extract() for x in self.sel.css("input")],
-        )
+            assert isinstance(x, self.sel.__class__), x
+        assert self.sel.css("input").extract() == [
+            x.extract() for x in self.sel.css("input")
+        ]
 
     def test_text_pseudo_element(self) -> None:
-        self.assertEqual(self.x("#p-b2"), ['<b id="p-b2">guy</b>'])
-        self.assertEqual(self.x("#p-b2::text"), ["guy"])
-        self.assertEqual(self.x("#p-b2 ::text"), ["guy"])
-        self.assertEqual(self.x("#paragraph::text"), ["lorem ipsum text"])
-        self.assertEqual(
-            self.x("#paragraph ::text"),
-            ["lorem ipsum text", "hi", "there", "guy"],
-        )
-        self.assertEqual(self.x("p::text"), ["lorem ipsum text"])
-        self.assertEqual(self.x("p ::text"), ["lorem ipsum text", "hi", "there", "guy"])
+        assert self.x("#p-b2") == ['<b id="p-b2">guy</b>']
+        assert self.x("#p-b2::text") == ["guy"]
+        assert self.x("#p-b2 ::text") == ["guy"]
+        assert self.x("#paragraph::text") == ["lorem ipsum text"]
+        assert self.x("#paragraph ::text") == ["lorem ipsum text", "hi", "there", "guy"]
+        assert self.x("p::text") == ["lorem ipsum text"]
+        assert self.x("p ::text") == ["lorem ipsum text", "hi", "there", "guy"]
 
     def test_attribute_function(self) -> None:
-        self.assertEqual(self.x("#p-b2::attr(id)"), ["p-b2"])
-        self.assertEqual(self.x(".cool-footer::attr(class)"), ["cool-footer"])
-        self.assertEqual(
-            self.x(".cool-footer ::attr(id)"), ["foobar-div", "foobar-span"]
-        )
-        self.assertEqual(
-            self.x('map[name="dummymap"] ::attr(shape)'), ["circle", "default"]
-        )
+        assert self.x("#p-b2::attr(id)") == ["p-b2"]
+        assert self.x(".cool-footer::attr(class)") == ["cool-footer"]
+        assert self.x(".cool-footer ::attr(id)") == ["foobar-div", "foobar-span"]
+        assert self.x('map[name="dummymap"] ::attr(shape)') == ["circle", "default"]
 
     def test_nested_selector(self) -> None:
-        self.assertEqual(self.sel.css("p").css("b::text").extract(), ["hi", "guy"])
-        self.assertEqual(
-            self.sel.css("div").css("area:last-child").extract(),
-            ['<area shape="default" id="area-nohref">'],
-        )
+        assert self.sel.css("p").css("b::text").extract() == ["hi", "guy"]
+        assert self.sel.css("div").css("area:last-child").extract() == [
+            '<area shape="default" id="area-nohref">'
+        ]
 
     @pytest.mark.xfail(
         Version(cssselect.__version__) < Version("1.2.0"),
         reason="Support added in cssselect 1.2.0",
     )
     def test_pseudoclass_has(self) -> None:
-        self.assertEqual(self.x("p:has(b)::text"), ["lorem ipsum text"])
+        assert self.x("p:has(b)::text") == ["lorem ipsum text"]
 
 
-class CSSSelectorTestBytes(CSSSelectorTest):
-    def setUp(self) -> None:
-        self.sel = self.sscls(body=bytes(HTMLBODY, encoding="utf-8"))
+class TestCSSSelectorBytes(TestCSSSelector):
+    sel = Selector(body=bytes(HTMLBODY, encoding="utf-8"))
