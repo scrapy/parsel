@@ -26,9 +26,6 @@ jobs:
         - python-version: "3.14.0-rc.2"
           env:
             TOXENV: py
-        - python-version: pypy3.10
-          env:
-            TOXENV: pypy3
         - python-version: pypy3.11
           env:
             TOXENV: pypy3
