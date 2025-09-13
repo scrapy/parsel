@@ -31,7 +31,7 @@ jobs:
             TOXENV: pypy3
 
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v5
 
     - name: Install system libraries
       if: contains(matrix.python-version, 'pypy')
@@ -40,7 +40,7 @@ jobs:
         sudo apt-get install libxml2-dev libxslt-dev
 
     - name: Set up Python ${{ matrix.python-version }}
-      uses: actions/setup-python@v5
+      uses: actions/setup-python@v6
       with:
         python-version: ${{ matrix.python-version }}
 
