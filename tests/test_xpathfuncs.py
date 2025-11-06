@@ -97,7 +97,7 @@ def test_set_xpathfunc() -> None:
     <p CLASS="foo">First</p>
     """
     sel = Selector(text=body)
-    with pytest.raises(ValueError, match="Unregistered function in myfunc"):
+    with pytest.raises(ValueError, match=r"Unregistered function(: myfunc)? in myfunc"):
         sel.xpath("myfunc()")
 
     set_xpathfunc("myfunc", myfunc)
@@ -105,5 +105,5 @@ def test_set_xpathfunc() -> None:
     assert myfunc.call_count == 1  # type: ignore[attr-defined]
 
     set_xpathfunc("myfunc", None)
-    with pytest.raises(ValueError, match="Unregistered function in myfunc"):
+    with pytest.raises(ValueError, match=r"Unregistered function(: myfunc)? in myfunc"):
         sel.xpath("myfunc()")
