@@ -8,19 +8,19 @@ jobs:
       fail-fast: false
       matrix:
         include:
-        - python-version: "3.13"
+        - python-version: "3.14"
           env:
             TOXENV: pre-commit
-        - python-version: "3.13"
+        - python-version: "3.14"
           env:
             TOXENV: pylint
         - python-version: "3.13"  # Keep in sync with .readthedocs.yml
           env:
             TOXENV: docs
-        - python-version: "3.13"
+        - python-version: "3.14"
           env:
             TOXENV: typing
-        - python-version: "3.13"
+        - python-version: "3.14"
           env:
             TOXENV: twinecheck
 

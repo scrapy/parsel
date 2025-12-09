@@ -7,7 +7,15 @@ import json
 import typing
 import warnings
 from io import BytesIO
-from typing import TYPE_CHECKING, Any, Literal, SupportsIndex, TypedDict, TypeVar, Union
+from typing import (
+    TYPE_CHECKING,
+    Any,
+    Literal,
+    SupportsIndex,
+    TypeAlias,
+    TypedDict,
+    TypeVar,
+)
 
 import jmespath
 from lxml import etree, html
@@ -25,7 +33,7 @@ if TYPE_CHECKING:
 
 
 _SelectorType = TypeVar("_SelectorType", bound="Selector")
-_ParserType = Union[etree.XMLParser, etree.HTMLParser]
+_ParserType: TypeAlias = etree.XMLParser | etree.HTMLParser
 # simplified _OutputMethodArg from types-lxml
 _TostringMethodType = Literal[
     "html",
