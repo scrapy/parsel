@@ -4,7 +4,7 @@ from typing import TYPE_CHECKING
 
 import pytest
 
-from parsel.utils import extract_regex, shorten
+from parsel.utils import extract_regex, shorten, flatten, iflatten
 
 if TYPE_CHECKING:
     from re import Pattern
@@ -80,3 +80,14 @@ def test_extract_regex(
     expected: list[str],
 ) -> None:
     assert extract_regex(regex, text, replace_entities) == expected
+
+def test_flatten_nested_iterables():
+    data = [1, [2, (3, 4)], {5, 6}, (x for x in [7, 8])]
+    result = flatten(data)
+    # flatten should return all elements as a flat list
+    assert sorted(result) == [1, 2, 3, 4, 5, 6, 7, 8]
+
+def test_iflatten_generator():
+    data = [[1, 2], (3, 4)]
+    result = list(iflatten(data))
+    assert result == [1, 2, 3, 4]
