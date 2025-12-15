@@ -80,3 +80,32 @@ def test_extract_regex(
     expected: list[str],
 ) -> None:
     assert extract_regex(regex, text, replace_entities) == expected
+
+
+def test_extract_regex_no_match_with_extract_group() -> None:
+    regex = r"(?P<extract>\d+)"
+    text = "no digits here"
+    result = extract_regex(regex, text, replace_entities=True)
+    assert result == []
+
+
+@pytest.mark.parametrize(
+    ("text", "width", "suffix", "expected"),
+    [
+        ("foobar", 3, "...", "..."),
+        ("foobar", 4, "...", "f..."),
+        ("foobar", 5, "...", "fo..."),
+        ("foobar", 6, "...", "foobar"),
+        ("hello", 3, "…", "he…"),
+        ("hello", 4, "…", "hel…"),
+        ("test", 2, "->", "->"),
+        ("test", 3, "->", "t->"),
+        ("test", 4, "->", "test"),
+        ("", 0, "...", ""),
+        ("", 3, "...", ""),
+    ],
+)
+def test_shorten_with_custom_suffix(
+    text: str, width: int, suffix: str, expected: str
+) -> None:
+    assert shorten(text, width, suffix=suffix) == expected
