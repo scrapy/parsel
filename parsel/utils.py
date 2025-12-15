@@ -29,7 +29,11 @@ def flatten(x: Iterable[Any]) -> list[Any]:
 
 def iflatten(x: Iterable[Any]) -> Iterator[Any]:
     """iflatten(sequence) -> Iterator
-    Similar to ``.flatten()``, but returns iterator instead"""
+    Similar to ``.flatten()``, but returns iterator instead
+    Examples:
+    >>> list(iflatten([[1, 2], (3, 4)]))
+    [1, 2, 3, 4]
+    """
     for el in x:
         if _is_listlike(el):
             yield from flatten(el)
