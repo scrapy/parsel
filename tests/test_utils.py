@@ -11,25 +11,34 @@ if TYPE_CHECKING:
 
 
 @pytest.mark.parametrize(
-    ("width", "expected"),
+    ("text", "width", "suffix", "expected"),
     [
-        (-1, ValueError),
-        (0, ""),
-        (1, "."),
-        (2, ".."),
-        (3, "..."),
-        (4, "f..."),
-        (5, "fo..."),
-        (6, "foobar"),
-        (7, "foobar"),
+        ("foobar", -1, "...", ValueError),
+        ("foobar", 0, "...", ""),
+        ("foobar", 1, "...", "."),
+        ("foobar", 2, "...", ".."),
+        ("foobar", 3, "...", "..."),
+        ("foobar", 4, "...", "f..."),
+        ("foobar", 5, "...", "fo..."),
+        ("foobar", 6, "...", "foobar"),
+        ("foobar", 7, "...", "foobar"),
+        ("hello", 3, "…", "he…"),
+        ("hello", 4, "…", "hel…"),
+        ("test", 2, "->", "->"),
+        ("test", 3, "->", "t->"),
+        ("test", 4, "->", "test"),
+        ("", 0, "...", ""),
+        ("", 3, "...", ""),
     ],
 )
-def test_shorten(width: int, expected: str | type[Exception]) -> None:
+def test_shorten(
+    text: str, width: int, suffix: str, expected: str | type[Exception]
+) -> None:
     if isinstance(expected, str):
-        assert shorten("foobar", width) == expected
+        assert shorten(text, width, suffix=suffix) == expected
     else:
         with pytest.raises(expected):
-            shorten("foobar", width)
+            shorten(text, width, suffix=suffix)
 
 
 @pytest.mark.parametrize(
@@ -70,6 +79,12 @@ def test_shorten(width: int, expected: str | type[Exception]) -> None:
             "&quot;sometext&quot; &amp; &quot;moretext&quot;",
             False,
             ["&quot;sometext&quot; &amp; &quot;moretext&quot;"],
+        ),
+        (
+            r"(?P<extract>\d+)",
+            "no digits here",
+            True,
+            [],
         ),
     ],
 )
