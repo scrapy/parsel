@@ -259,7 +259,7 @@ class TestSelector:
 
         assert sel.xpath("//div").get(default="missing") == "missing"
         assert sel.css("div").get(default="") == ""
-        assert sel.xpath("//nonexistent").get(default=0) == 0
+        assert sel.xpath("//nonexistent").get(default="default") == "default"
 
     def test_getall_empty_selectorlist(self) -> None:
         """Test getall() on empty SelectorList returns empty list"""
