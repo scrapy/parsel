@@ -243,6 +243,155 @@ class TestSelector:
         assert sel.xpath("//ul/li").get() == '<li id="1">1</li>'
         assert sel.xpath("//ul/li/text()").get() == "1"
 
+    def test_get_empty_selectorlist(self) -> None:
+        """Test get() on empty SelectorList returns None"""
+        body = '<ul><li id="1">1</li></ul>'
+        sel = self.sscls(text=body)
+
+        assert sel.xpath("//div").get() is None
+        assert sel.css("div").get() is None
+        assert sel.xpath("//nonexistent").get() is None
+
+    def test_get_with_default_empty_selectorlist(self) -> None:
+        """Test get() with default value on empty SelectorList"""
+        body = '<ul><li id="1">1</li></ul>'
+        sel = self.sscls(text=body)
+
+        assert sel.xpath("//div").get(default="missing") == "missing"
+        assert sel.css("div").get(default="") == ""
+        assert sel.xpath("//nonexistent").get(default=0) == 0
+
+    def test_getall_empty_selectorlist(self) -> None:
+        """Test getall() on empty SelectorList returns empty list"""
+        body = '<ul><li id="1">1</li></ul>'
+        sel = self.sscls(text=body)
+
+        assert sel.xpath("//div").getall() == []
+        assert sel.css("div").getall() == []
+        assert sel.xpath("//nonexistent").getall() == []
+        assert isinstance(sel.xpath("//div").getall(), list)
+
+    def test_get_on_different_node_types(self) -> None:
+        """Test get() on different node types (element, text, attribute)"""
+        body = '<div id="test" class="example">Hello <span>World</span></div>'
+        sel = self.sscls(text=body)
+
+        # Element node
+        assert (
+            sel.xpath("//div").get()
+            == '<div id="test" class="example">Hello <span>World</span></div>'
+        )
+
+        # Text node
+        assert sel.xpath("//div/text()").get() == "Hello "
+
+        # Attribute node
+        assert sel.xpath("//div/@id").get() == "test"
+        assert sel.xpath("//div/@class").get() == "example"
+
+    def test_getall_on_different_node_types(self) -> None:
+        """Test getall() on different node types"""
+        body = '<div id="test">Hello <span>World</span> <span>Again</span></div>'
+        sel = self.sscls(text=body)
+
+        # Element nodes
+        assert sel.xpath("//span").getall() == [
+            "<span>World</span>",
+            "<span>Again</span>",
+        ]
+
+        # Text nodes
+        text_nodes = sel.xpath("//div//text()").getall()
+        assert "Hello " in text_nodes
+        assert "World" in text_nodes
+        assert "Again" in text_nodes
+
+        # Attribute nodes
+        assert sel.xpath("//div/@id").getall() == ["test"]
+
+    def test_get_vs_getall_consistency(self) -> None:
+        """Test that get() and getall() are consistent"""
+        body = '<ul><li id="1">1</li><li id="2">2</li><li id="3">3</li></ul>'
+        sel = self.sscls(text=body)
+
+        # get() should return first element of getall()
+        all_items = sel.xpath("//li").getall()
+        first_item = sel.xpath("//li").get()
+        assert first_item == all_items[0] if all_items else first_item is None
+
+        # getall() should return list even for single element
+        single = sel.xpath("//ul").getall()
+        assert isinstance(single, list)
+        assert len(single) == 1
+
+    def test_get_with_default_on_non_empty(self) -> None:
+        """Test get() with default value when results exist (default should be ignored)"""
+        body = '<ul><li id="1">1</li></ul>'
+        sel = self.sscls(text=body)
+
+        # Default should be ignored when results exist
+        result = sel.xpath("//li").get(default="missing")
+        assert result == '<li id="1">1</li>'
+        assert result != "missing"
+
+    def test_getall_preserves_order(self) -> None:
+        """Test getall() preserves order of elements"""
+        body = "<div><p>1</p><p>2</p><p>3</p></div>"
+        sel = self.sscls(text=body)
+
+        results = sel.xpath("//p").getall()
+        assert len(results) == 3
+        assert "1" in results[0]
+        assert "2" in results[1]
+        assert "3" in results[2]
+
+    def test_get_on_text_vs_element_nodes(self) -> None:
+        """Test get() behavior on text nodes vs element nodes"""
+        body = "<div>Text content</div>"
+        sel = self.sscls(text=body)
+
+        # Element node includes tags
+        element = sel.xpath("//div").get()
+        assert element == "<div>Text content</div>"
+        assert "<div>" in element
+
+        # Text node is just text
+        text = sel.xpath("//div/text()").get()
+        assert text == "Text content"
+        assert "<div>" not in text
+
+    def test_getall_on_text_vs_element_nodes(self) -> None:
+        """Test getall() behavior on text nodes vs element nodes"""
+        body = "<div>First <span>Second</span> Third</div>"
+        sel = self.sscls(text=body)
+
+        # Element nodes include tags
+        elements = sel.xpath("//div//*").getall()
+        assert any("<span>" in elem for elem in elements)
+
+        # Text nodes are just text
+        texts = sel.xpath("//div//text()").getall()
+        assert all("<" not in text or ">" not in text for text in texts)
+
+    def test_get_on_css_selector(self) -> None:
+        """Test get() works with CSS selectors"""
+        body = '<div class="test">Content</div>'
+        sel = self.sscls(text=body)
+
+        assert sel.css("div").get() == '<div class="test">Content</div>'
+        assert sel.css(".test").get() == '<div class="test">Content</div>'
+        assert sel.css("nonexistent").get() is None
+
+    def test_getall_on_css_selector(self) -> None:
+        """Test getall() works with CSS selectors"""
+        body = '<div class="test">1</div><div class="test">2</div>'
+        sel = self.sscls(text=body)
+
+        results = sel.css(".test").getall()
+        assert len(results) == 2
+        assert "1" in results[0]
+        assert "2" in results[1]
+
     def test_re_first(self) -> None:
         """Test if re_first() returns first matched element"""
         body = '<ul><li id="1">1</li><li id="2">2</li></ul>'
