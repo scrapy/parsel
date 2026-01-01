@@ -33,9 +33,9 @@ classifiers = [
 ]
 dependencies = [
     "cssselect>=1.2.0",
-    "jmespath",
-    "lxml",
-    "packaging",
+    "jmespath>=1.0.0",
+    "lxml>=5.1.0",
+    "packaging>=23.0",
     "w3lib>=1.19.0",
 ]
 requires-python = ">=3.10"
