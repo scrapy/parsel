@@ -1,28 +1,22 @@
 name: Publish
-on: [push]
+on:
+  push:
+    tags:
+      - v[0-9]+.[0-9]+.[0-9]+
 
 jobs:
   publish:
     runs-on: ubuntu-latest
-    if: startsWith(github.event.ref, 'refs/tags/')
 
     steps:
-    - uses: actions/checkout@v5
+    - uses: actions/checkout@v6
 
     - name: Set up Python
       uses: actions/setup-python@v6
       with:
         python-version: "3.14"
 
-    - name: Check Tag
-      id: check-release-tag
-      run: |
-        if [[ ${{ github.event.ref }} =~ ^refs/tags/v[0-9]+[.][0-9]+[.][0-9]+(rc[0-9]+|[.]dev[0-9]+)?$ ]]; then
-          echo ::set-output name=release_tag::true
-        fi
-
     - name: Publish to PyPI
-      if: steps.check-release-tag.outputs.release_tag == 'true'
       run: |
         pip install --upgrade setuptools wheel twine
         python setup.py sdist bdist_wheel

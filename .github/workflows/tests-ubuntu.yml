@@ -31,7 +31,7 @@ jobs:
             TOXENV: min-deps
 
     steps:
-    - uses: actions/checkout@v5
+    - uses: actions/checkout@v6
 
     - name: Install system libraries
       if: contains(matrix.python-version, 'pypy')
