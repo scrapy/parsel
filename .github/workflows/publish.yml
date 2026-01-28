@@ -7,6 +7,11 @@ on:
 jobs:
   publish:
     runs-on: ubuntu-latest
+    environment:
+      name: pypi
+      url: https://pypi.org/p/parsel
+    permissions:
+      id-token: write
 
     steps:
     - uses: actions/checkout@v6
@@ -16,10 +21,10 @@ jobs:
       with:
         python-version: "3.14"
 
-    - name: Publish to PyPI
+    - name: Build
       run: |
-        pip install --upgrade setuptools wheel twine
-        python setup.py sdist bdist_wheel
-        export TWINE_USERNAME=__token__
-        export TWINE_PASSWORD=${{ secrets.PYPI_TOKEN }}
-        twine upload dist/*
+        python -m pip install --upgrade build
+        python -m build
+
+    - name: Publish to PyPI
+      uses: pypa/gh-action-pypi-publish@release/v1
