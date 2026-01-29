@@ -70,6 +70,12 @@ tag_name = "v{new_version}"
 [[tool.bumpversion.files]]
 filename = "parsel/__init__.py"
 
+[[tool.bumpversion.files]]
+filename = "NEWS"
+search = "\\(unreleased\\)$"
+replace = "({now:%Y-%m-%d})"
+regex = true
+
 [tool.coverage.run]
 branch = true
 
