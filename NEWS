@@ -3,7 +3,7 @@
 History
 -------
 
-1.11.0 (unreleased)
+1.11.0 (2026-01-29)
 ~~~~~~~~~~~~~~~~~~~
 
 * Removed support for Python 3.9 and PyPy 3.10.

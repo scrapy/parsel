@@ -5,7 +5,7 @@ or CSS selectors
 
 __author__ = "Scrapy project"
 __email__ = "info@scrapy.org"
-__version__ = "1.10.0"
+__version__ = "1.11.0"
 __all__ = [
     "Selector",
     "SelectorList",
