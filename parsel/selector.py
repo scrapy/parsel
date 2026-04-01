@@ -246,7 +246,7 @@ class SelectorList(list[_SelectorType]):
             return typing.cast("str", el)
         return default
 
-    def getall(self) -> list[str]:
+    def getall(self) -> list[Any]:
         """
         Call the ``.get()`` method for each element is this list and return
         their results flattened, as a list of strings.
@@ -721,7 +721,7 @@ class Selector:
 
     extract = get
 
-    def getall(self) -> list[str]:
+    def getall(self) -> list[Any]:
         """
         Serialize and return the matched node in a 1-element list of strings.
         """
