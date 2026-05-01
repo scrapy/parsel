@@ -33,6 +33,7 @@ if TYPE_CHECKING:
 
 
 _SelectorType = TypeVar("_SelectorType", bound="Selector")
+_DefaultType = TypeVar("_DefaultType")
 _ParserType: TypeAlias = etree.XMLParser | etree.HTMLParser
 # simplified _OutputMethodArg from types-lxml
 _TostringMethodType = Literal[
@@ -246,24 +247,24 @@ class SelectorList(list[_SelectorType]):
             return typing.cast("str", el)
         return default
 
-    def getall(self) -> list[str]:
+    def getall(self) -> list[object]:
         """
         Call the ``.get()`` method for each element is this list and return
-        their results flattened, as a list of strings.
+        their results flattened.
         """
         return [x.get() for x in self]
 
     extract = getall
 
     @typing.overload
-    def get(self, default: None = None) -> str | None:
+    def get(self, default: None = None) -> object | None:
         pass
 
     @typing.overload
-    def get(self, default: str) -> str:
+    def get(self, default: _DefaultType) -> object | _DefaultType:
         pass
 
-    def get(self, default: str | None = None) -> Any:
+    def get(self, default: _DefaultType | None = None) -> object | _DefaultType | None:
         """
         Return the result of ``.get()`` for the first element in this list.
         If the list is empty, return the default value.
@@ -654,7 +655,7 @@ class Selector:
         Passing ``replace_entities`` as ``False`` switches off these
         replacements.
         """
-        data = self.get()
+        data = typing.cast("str", self.get())
         return extract_regex(regex, data, replace_entities=replace_entities)
 
     @typing.overload
@@ -696,7 +697,7 @@ class Selector:
             default,
         )
 
-    def get(self) -> Any:
+    def get(self) -> object:
         """
         Serialize and return the matched nodes.
 
@@ -721,9 +722,9 @@ class Selector:
 
     extract = get
 
-    def getall(self) -> list[str]:
+    def getall(self) -> list[object]:
         """
-        Serialize and return the matched node in a 1-element list of strings.
+        Serialize and return the matched node in a 1-element list.
         """
         return [self.get()]
 
