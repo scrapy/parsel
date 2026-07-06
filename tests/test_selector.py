@@ -9,12 +9,10 @@ from typing import TYPE_CHECKING, Any, cast
 
 import pytest
 from lxml import etree
-from packaging.version import Version
 
 from parsel import Selector, SelectorList
 from parsel.selector import (
     _NOT_SET,
-    LXML_SUPPORTS_HUGE_TREE,
     CannotRemoveElementWithoutParent,
     CannotRemoveElementWithoutRoot,
 )
@@ -938,9 +936,6 @@ class TestSelector:
         assert sel.get() == "<html></html>"
 
     def test_deep_nesting(self) -> None:
-        lxml_version = Version(etree.__version__)
-        lxml_huge_tree_version = Version("4.2")
-
         content = """
         <html>
         <body>
@@ -986,16 +981,6 @@ class TestSelector:
         </html>
         """
 
-        # If lxml doesn't support huge trees expect wrong results and a warning
-        if lxml_version < lxml_huge_tree_version:
-            with warnings.catch_warnings(record=True) as w:
-                sel = Selector(text=content)
-                assert "huge_tree" in str(w[0].message)
-                assert len(sel.css("span")) <= 256
-                assert len(sel.css("td")) == 0
-            return
-
-        # Same goes for explicitly disabling huge trees
         with warnings.catch_warnings(record=True) as w:
             sel = Selector(text=content, huge_tree=False)
             assert "huge_tree" in str(w[0].message)
@@ -1227,7 +1212,7 @@ class SelectorBytesInput(Selector):
         root: Any | None = _NOT_SET,
         base_url: str | None = None,
         _expr: str | None = None,
-        huge_tree: bool = LXML_SUPPORTS_HUGE_TREE,
+        huge_tree: bool = True,
     ) -> None:
         if text:
             body = bytes(text, encoding=encoding)
