@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import re
+from typing import Any
 
 from parsel import Selector
 
@@ -11,9 +12,9 @@ def correct() -> None:
         text="<html><body><ul><li>1</li><li>2</li><li>3</li></ul></body></html>"
     )
 
-    li_values: list[str] = selector.css("li").getall()
+    li_values: list[Any] = selector.css("li").getall()
     selector.re_first(re.compile(r"[32]"), "").strip()
-    xpath_values: list[str] = selector.xpath(
+    xpath_values: list[Any] = selector.xpath(
         "//somens:a/text()", namespaces={"somens": "http://scrapy.org"}
     ).extract()
 
@@ -24,6 +25,11 @@ def correct() -> None:
     my_selector = MySelector()
     res: int = my_selector.my_own_func()
     sub_res: int = my_selector.xpath("//somens:a/text()")[0].my_own_func()
+
+    json_selector = Selector(text='{"numbers": [1, 2, 3], "nested": {"value": 42}}')
+    number: int = json_selector.jmespath("nested.value").get(default=0)
+    numbers: list[Any] = json_selector.jmespath("numbers[*]").getall()
+    first_number: Any | None = json_selector.jmespath("numbers[0]").get()
 
 
 # Negative checks: all the code lines below have typing errors.

@@ -3,6 +3,14 @@
 History
 -------
 
+1.11.1 (unreleased)
+~~~~~~~~~~~~~~~~~~~
+
+* Fixed the type annotations of ``Selector.get()``, ``SelectorList.get()``,
+  ``Selector.getall()``, and ``SelectorList.getall()`` to return ``Any``
+  instead of ``str``, matching the runtime behavior for JMESPath and other
+  selectors that may return non-string values.
+
 1.11.0 (2026-01-29)
 ~~~~~~~~~~~~~~~~~~~
 
