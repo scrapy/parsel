@@ -3,6 +3,7 @@ packages."""
 
 from __future__ import annotations
 
+import codecs
 import json
 import typing
 import warnings
@@ -96,6 +97,8 @@ def create_root_node(
     encoding: str = "utf-8",
 ) -> etree._Element:
     """Create root node for text using given parser class."""
+    # lxml rejects some Python codec aliases (e.g. latin-1); use canonical names.
+    encoding = codecs.lookup(encoding).name
     if not text:
         body = body.replace(b"\x00", b"").strip()
     else:

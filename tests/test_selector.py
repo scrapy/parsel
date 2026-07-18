@@ -690,6 +690,14 @@ class TestSelector:
     def test_empty_bodies_shouldnt_raise_errors(self) -> None:
         self.sscls(text="").xpath("//text()").extract()
 
+    def test_latin1_encoding_alias_for_body(self) -> None:
+        # Python's latin-1 alias must work with body=; lxml only accepts latin1/iso8859-1.
+        body = "£".encode("latin-1")
+        sel = self.sscls(text=None, body=body, encoding="latin-1")
+        assert sel.xpath("//body/text()").get() == "£"
+        sel2 = self.sscls(text=None, body=body, encoding="iso-8859-1")
+        assert sel2.xpath("//body/text()").get() == "£"
+
     def test_bodies_with_comments_only(self) -> None:
         sel = self.sscls(text="<!-- hello world -->", base_url="http://example.com")
         assert sel.root.base == "http://example.com"
