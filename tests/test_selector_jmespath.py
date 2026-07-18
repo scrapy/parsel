@@ -167,3 +167,24 @@ class TestJMESPath:
             assert selector.type == "json"
             assert selector._text is None
             assert selector.root == root
+
+    def test_jmespath_on_attr_string_root(self) -> None:
+        html = '<div data-json=\'{"z": 9}\'><a href="http://example.com">t</a></div>'
+        sel = Selector(text=html)
+        assert sel.css("a::attr(href)").jmespath("@").get() == "http://example.com"
+        assert cast("int", sel.css("a::attr(href)").jmespath("length(@)").get()) == 18
+        assert cast("int", sel.css("div::attr(data-json)").jmespath("z").get()) == 9
+
+    def test_jmespath_on_type_text(self) -> None:
+        sel = Selector(text='{"a": ["b", "c"]}', type="text")
+        assert sel.jmespath("a").getall() == ["b", "c"]
+        assert sel.jmespath("a").jmespath("length(@)").getall() == [1, 1]
+        assert Selector(text="hello", type="text").jmespath("length(@)").get() == 5
+
+    def test_jmespath_chain_from_html_json_text(self) -> None:
+        html = '<script type="application/json">{"a": ["b", "c"]}</script>'
+        sel = Selector(text=html)
+        assert sel.css("script::text").jmespath("a").jmespath("length(@)").getall() == [
+            1,
+            1,
+        ]
