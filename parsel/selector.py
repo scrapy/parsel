@@ -97,7 +97,8 @@ def create_root_node(
 ) -> etree._Element:
     """Create root node for text using given parser class."""
     if not text:
-        body = body.replace(b"\x00", b"").strip()
+        # Match whitespace-only text: empty body after strip → empty document.
+        body = body.replace(b"\x00", b"").strip() or b"<html/>"
     else:
         body = text.strip().replace("\x00", "").encode(encoding) or b"<html/>"
 

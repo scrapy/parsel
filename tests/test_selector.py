@@ -690,6 +690,15 @@ class TestSelector:
     def test_empty_bodies_shouldnt_raise_errors(self) -> None:
         self.sscls(text="").xpath("//text()").extract()
 
+    def test_empty_xml_text_shouldnt_raise_errors(self) -> None:
+        # Empty text with type=xml must match whitespace-only (empty doc), not XMLSyntaxError.
+        sel = self.sscls(text="", type="xml")
+        assert sel.type == "xml"
+        assert sel.get() == "<html/>"
+        assert sel.xpath("//text()").getall() == []
+        ws = self.sscls(text="   ", type="xml")
+        assert ws.get() == "<html/>"
+
     def test_bodies_with_comments_only(self) -> None:
         sel = self.sscls(text="<!-- hello world -->", base_url="http://example.com")
         assert sel.root.base == "http://example.com"
