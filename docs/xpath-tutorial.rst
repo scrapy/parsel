@@ -1,3 +1,5 @@
+.. _xpath-tutorial:
+
 ==============
 XPath Tutorial
 ==============
