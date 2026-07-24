@@ -1,7 +1,7 @@
 exclude: docs/_static
 repos:
 - repo: https://github.com/astral-sh/ruff-pre-commit
-  rev: v0.15.21
+  rev: v0.15.22
   hooks:
     - id: ruff-check
       args: [ --fix ]
@@ -25,3 +25,8 @@ repos:
   rev: v1.7.12
   hooks:
     - id: actionlint
+- repo: https://github.com/zizmorcore/zizmor-pre-commit
+  rev: v1.28.0
+  hooks:
+    - id: zizmor
+      args: [--no-progress, --fix]

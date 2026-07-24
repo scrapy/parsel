@@ -19,7 +19,6 @@ from typing import (
 
 import jmespath
 from lxml import etree, html
-from packaging.version import Version
 
 from .csstranslator import GenericTranslator, HTMLTranslator
 from .utils import extract_regex, flatten, iflatten, shorten
@@ -39,10 +38,6 @@ _TostringMethodType = Literal[
     "html",
     "xml",
 ]
-
-lxml_version = Version(etree.__version__)
-lxml_huge_tree_version = Version("4.2")
-LXML_SUPPORTS_HUGE_TREE = lxml_version >= lxml_huge_tree_version
 
 
 class CannotRemoveElementWithoutRoot(Exception):
@@ -91,7 +86,7 @@ def create_root_node(
     text: str,
     parser_cls: type[_ParserType],
     base_url: str | None = None,
-    huge_tree: bool = LXML_SUPPORTS_HUGE_TREE,
+    huge_tree: bool = True,
     body: bytes = b"",
     encoding: str = "utf-8",
 ) -> etree._Element:
@@ -101,17 +96,13 @@ def create_root_node(
     else:
         body = text.strip().replace("\x00", "").encode(encoding) or b"<html/>"
 
-    if huge_tree and LXML_SUPPORTS_HUGE_TREE:
-        parser = parser_cls(recover=True, encoding=encoding, huge_tree=True)
-        root = etree.fromstring(body, parser=parser, base_url=base_url)
-    else:
-        parser = parser_cls(recover=True, encoding=encoding)
-        root = etree.fromstring(body, parser=parser, base_url=base_url)
+    parser = parser_cls(recover=True, encoding=encoding, huge_tree=huge_tree)
+    root = etree.fromstring(body, parser=parser, base_url=base_url)
+    if not huge_tree:
         for error in parser.error_log:
             if "use XML_PARSE_HUGE option" in error.message:
                 warnings.warn(
-                    f"Input data is too big. Upgrade to lxml "
-                    f"{lxml_huge_tree_version} or later for huge_tree support.",
+                    "Input data is too big. Set huge_tree=True for huge_tree support.",
                     stacklevel=2,
                 )
     if root is None:
@@ -397,11 +388,11 @@ class Selector:
 
     ``huge_tree`` controls the lxml/libxml2 feature that forbids parsing
     certain large documents to protect from possible memory exhaustion. The
-    argument is ``True`` by default if the installed lxml version supports it,
-    which disables the protection to allow parsing such documents. Set it to
-    ``False`` if you want to enable the protection.
-    See `this lxml FAQ entry <https://lxml.de/FAQ.html#is-lxml-vulnerable-to-xml-bombs>`_
-    for more information.
+    argument is ``True`` by default, which disables the protection to allow
+    parsing such documents. Set it to ``False`` if you want to enable the
+    protection. See `this lxml FAQ entry
+    <https://lxml.de/FAQ.html#is-lxml-vulnerable-to-xml-bombs>`_ for more
+    information.
     """
 
     __slots__ = [
@@ -438,7 +429,7 @@ class Selector:
         root: Any | None = _NOT_SET,
         base_url: str | None = None,
         _expr: str | None = None,
-        huge_tree: bool = LXML_SUPPORTS_HUGE_TREE,
+        huge_tree: bool = True,
     ) -> None:
         self.root: Any
         if type not in ("html", "json", "text", "xml", None):
@@ -496,7 +487,7 @@ class Selector:
         self,
         text: str = "",
         base_url: str | None = None,
-        huge_tree: bool = LXML_SUPPORTS_HUGE_TREE,
+        huge_tree: bool = True,
         type_: str | None = None,
         body: bytes = b"",
         encoding: str = "utf-8",
