@@ -13,7 +13,9 @@ Usage::
         <html><body><p>Hello</p></body></html>
 
 The first argument is the initial XPath expression and the directive body is the
-initial HTML input.
+initial HTML input. The body is optional: when it is omitted, the widget falls
+back to :data:`DEFAULT_HTML`, the sample document used throughout the tutorial,
+so that the many demos that operate on it do not have to repeat it.
 
 The widget is emitted as raw HTML, so it only appears on the HTML builder;
 other builders (Markdown, LaTeX, …) ignore it. The example itself is still
@@ -33,6 +35,32 @@ if TYPE_CHECKING:
     from sphinx.util.typing import ExtensionMetadata
 
 
+# The sample document that the tutorial introduces once and then reuses in most
+# demos. Keep it in sync with the ``htmlsample`` shown in xpath-tutorial.rst.
+DEFAULT_HTML = """\
+<html>
+<head>
+  <title>This is a title</title>
+  <meta content="text/html; charset=utf-8" http-equiv="content-type" />
+</head>
+<body>
+  <div>
+    <div>
+      <p>This is a paragraph.</p>
+      <p>Is this <a href="page2.html">a link</a>?</p>
+      <br />
+      Apparently.
+    </div>
+    <div class="second">
+      Nothing to add.
+      Except maybe this <a href="page3.html">other link</a>.
+      <!-- And this comment -->
+    </div>
+  </div>
+</body>
+</html>"""
+
+
 class XPathDemoDirective(Directive):
     has_content = True
     required_arguments = 1
@@ -47,7 +75,8 @@ class XPathDemoDirective(Directive):
         output_id = f"xpath-demo-output-{serial}"
 
         expression = escape(self.arguments[0], quote=True)
-        html_input = escape("\n".join(self.content))
+        content = "\n".join(self.content) if self.content else DEFAULT_HTML
+        html_input = escape(content)
 
         widget = (
             f'<div class="xpath-demo">'

@@ -233,7 +233,6 @@ on.
 
 XPath expressions are passed to an XPath engine as strings.
 
-
 Selecting the root node (a special case)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -243,28 +242,6 @@ only child is the document element (the top-level ``<html>`` element here).
 
 .. xpathdemo:: /
 
-    <html>
-    <head>
-      <title>This is a title</title>
-      <meta content="text/html; charset=utf-8" http-equiv="content-type" />
-    </head>
-    <body>
-      <div>
-        <div>
-          <p>This is a paragraph.</p>
-          <p>Is this <a href="page2.html">a link</a>?</p>
-          <br />
-          Apparently.
-        </div>
-        <div class="second">
-          Nothing to add.
-          Except maybe this <a href="page3.html">other link</a>.
-          <!-- And this comment -->
-        </div>
-      </div>
-    </body>
-    </html>
-
 This is very similar to ``cd /`` in a Unix shell (going to the root directory).
 
 .. warning::
@@ -272,7 +249,6 @@ This is very similar to ``cd /`` in a Unix shell (going to the root directory).
     empty list instead of the root node. It is an lxml limitation (it works with
     libxml2 directly). In practice this rarely matters -- the root node is
     virtually never used directly.
-
 
 Selecting elements
 ~~~~~~~~~~~~~~~~~~
@@ -307,28 +283,6 @@ being ``/*``:
 
 .. xpathdemo:: /*
 
-    <html>
-    <head>
-      <title>This is a title</title>
-      <meta content="text/html; charset=utf-8" http-equiv="content-type" />
-    </head>
-    <body>
-      <div>
-        <div>
-          <p>This is a paragraph.</p>
-          <p>Is this <a href="page2.html">a link</a>?</p>
-          <br />
-          Apparently.
-        </div>
-        <div class="second">
-          Nothing to add.
-          Except maybe this <a href="page3.html">other link</a>.
-          <!-- And this comment -->
-        </div>
-      </div>
-    </body>
-    </html>
-
 The asterisk here, ``*``, means "any element". And ``/*`` means "any
 element under the root node". HTML documents have only one element like
 this: the ``<html>`` element.
@@ -336,28 +290,6 @@ this: the ``<html>`` element.
 Another example: how to get ``<title>`` elements? Use ``/html/head/title``:
 
 .. xpathdemo:: /html/head/title
-
-    <html>
-    <head>
-      <title>This is a title</title>
-      <meta content="text/html; charset=utf-8" http-equiv="content-type" />
-    </head>
-    <body>
-      <div>
-        <div>
-          <p>This is a paragraph.</p>
-          <p>Is this <a href="page2.html">a link</a>?</p>
-          <br />
-          Apparently.
-        </div>
-        <div class="second">
-          Nothing to add.
-          Except maybe this <a href="page3.html">other link</a>.
-          <!-- And this comment -->
-        </div>
-      </div>
-    </body>
-    </html>
 
 Again, if you are familiar with the Unix filesystem, you probably
 intuitively understand what this does:
@@ -384,54 +316,10 @@ For example, the ``<div>`` just under the ``<body>`` has 2 ``<div>`` children:
 
 .. xpathdemo:: /html/body/div/div
 
-    <html>
-    <head>
-      <title>This is a title</title>
-      <meta content="text/html; charset=utf-8" http-equiv="content-type" />
-    </head>
-    <body>
-      <div>
-        <div>
-          <p>This is a paragraph.</p>
-          <p>Is this <a href="page2.html">a link</a>?</p>
-          <br />
-          Apparently.
-        </div>
-        <div class="second">
-          Nothing to add.
-          Except maybe this <a href="page3.html">other link</a>.
-          <!-- And this comment -->
-        </div>
-      </div>
-    </body>
-    </html>
-
 Another example is getting the paragraphs inside the first child of that
 ``<div>`` under ``<body>``, there are two of them:
 
 .. xpathdemo:: /html/body/div/div[1]/p
-
-    <html>
-    <head>
-      <title>This is a title</title>
-      <meta content="text/html; charset=utf-8" http-equiv="content-type" />
-    </head>
-    <body>
-      <div>
-        <div>
-          <p>This is a paragraph.</p>
-          <p>Is this <a href="page2.html">a link</a>?</p>
-          <br />
-          Apparently.
-        </div>
-        <div class="second">
-          Nothing to add.
-          Except maybe this <a href="page3.html">other link</a>.
-          <!-- And this comment -->
-        </div>
-      </div>
-    </body>
-    </html>
 
 Here we're introducing a **positional predicate**, ``[1]``. The ``div[1]``
 part means *"the first <div> child under its parent"*.
@@ -441,28 +329,6 @@ There are other elements with those two paragraphs under that very
 ``<div>``. Let's try and select all of them, regardless of their name:
 
 .. xpathdemo:: /html/body/div/div[1]/*
-
-    <html>
-    <head>
-      <title>This is a title</title>
-      <meta content="text/html; charset=utf-8" http-equiv="content-type" />
-    </head>
-    <body>
-      <div>
-        <div>
-          <p>This is a paragraph.</p>
-          <p>Is this <a href="page2.html">a link</a>?</p>
-          <br />
-          Apparently.
-        </div>
-        <div class="second">
-          Nothing to add.
-          Except maybe this <a href="page3.html">other link</a>.
-          <!-- And this comment -->
-        </div>
-      </div>
-    </body>
-    </html>
 
 .. note::
     Continuing the filesystem analogy, ``*`` is similar in effect to what
@@ -485,28 +351,6 @@ part of our last XPath expression, forming ``/html/body/div/div[1]/text()``:
 
 .. xpathdemo:: /html/body/div/div[1]/text()
 
-    <html>
-    <head>
-      <title>This is a title</title>
-      <meta content="text/html; charset=utf-8" http-equiv="content-type" />
-    </head>
-    <body>
-      <div>
-        <div>
-          <p>This is a paragraph.</p>
-          <p>Is this <a href="page2.html">a link</a>?</p>
-          <br />
-          Apparently.
-        </div>
-        <div class="second">
-          Nothing to add.
-          Except maybe this <a href="page3.html">other link</a>.
-          <!-- And this comment -->
-        </div>
-      </div>
-    </body>
-    </html>
-
 You may have expected only one text result, the last one, ``"Apparently."``.
 But we got four! And three of them are blank even. Why is that?
 
@@ -523,7 +367,6 @@ HTML source::
     #     <------>                           <------>                                               <------>
     '<div>\n      <p>This is a paragraph.</p>\n      <p>Is this <a href="page2.html">a link</a>?</p>\n      <br>\n  Apparently.\n    </div>'
 
-
 We've marked the first three text nodes before the non-whitespace only
 text node.
 
@@ -533,33 +376,10 @@ contains a text node, with the string content "This is a title"):
 
 .. xpathdemo:: /html/head/title/text()
 
-    <html>
-    <head>
-      <title>This is a title</title>
-      <meta content="text/html; charset=utf-8" http-equiv="content-type" />
-    </head>
-    <body>
-      <div>
-        <div>
-          <p>This is a paragraph.</p>
-          <p>Is this <a href="page2.html">a link</a>?</p>
-          <br />
-          Apparently.
-        </div>
-        <div class="second">
-          Nothing to add.
-          Except maybe this <a href="page3.html">other link</a>.
-          <!-- And this comment -->
-        </div>
-      </div>
-    </body>
-    </html>
-
 .. note::
     Again, there's only one ``<title>``, and it contains only one text node,
     but selecting text nodes in ``<title>`` returns a single string-value
     in a list, not one string.
-
 
 Selecting nodes without a full, explicit path
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -582,57 +402,12 @@ Let's try this: ``//body//p``
 
 .. xpathdemo:: //body//p
 
-    <html>
-    <head>
-      <title>This is a title</title>
-      <meta content="text/html; charset=utf-8" http-equiv="content-type" />
-    </head>
-    <body>
-      <div>
-        <div>
-          <p>This is a paragraph.</p>
-          <p>Is this <a href="page2.html">a link</a>?</p>
-          <br />
-          Apparently.
-        </div>
-        <div class="second">
-          Nothing to add.
-          Except maybe this <a href="page3.html">other link</a>.
-          <!-- And this comment -->
-        </div>
-      </div>
-    </body>
-    </html>
-
 So we got 2 paragraphs, what we expected.
 
 This also works for text nodes (there are a lot of them in our sample
 document!). Try ``//body//text()``:
 
 .. xpathdemo:: //body//text()
-
-    <html>
-    <head>
-      <title>This is a title</title>
-      <meta content="text/html; charset=utf-8" http-equiv="content-type" />
-    </head>
-    <body>
-      <div>
-        <div>
-          <p>This is a paragraph.</p>
-          <p>Is this <a href="page2.html">a link</a>?</p>
-          <br />
-          Apparently.
-        </div>
-        <div class="second">
-          Nothing to add.
-          Except maybe this <a href="page3.html">other link</a>.
-          <!-- And this comment -->
-        </div>
-      </div>
-    </body>
-    </html>
-
 
 Selecting attributes
 ~~~~~~~~~~~~~~~~~~~~
@@ -647,58 +422,11 @@ the attribute name:
 
 .. xpathdemo:: //a/@href
 
-    <html>
-    <head>
-      <title>This is a title</title>
-      <meta content="text/html; charset=utf-8" http-equiv="content-type" />
-    </head>
-    <body>
-      <div>
-        <div>
-          <p>This is a paragraph.</p>
-          <p>Is this <a href="page2.html">a link</a>?</p>
-          <br />
-          Apparently.
-        </div>
-        <div class="second">
-          Nothing to add.
-          Except maybe this <a href="page3.html">other link</a>.
-          <!-- And this comment -->
-        </div>
-      </div>
-    </body>
-    </html>
-
-
 .. xpathdemo:: //meta/@*
-
-    <html>
-    <head>
-      <title>This is a title</title>
-      <meta content="text/html; charset=utf-8" http-equiv="content-type" />
-    </head>
-    <body>
-      <div>
-        <div>
-          <p>This is a paragraph.</p>
-          <p>Is this <a href="page2.html">a link</a>?</p>
-          <br />
-          Apparently.
-        </div>
-        <div class="second">
-          Nothing to add.
-          Except maybe this <a href="page3.html">other link</a>.
-          <!-- And this comment -->
-        </div>
-      </div>
-    </body>
-    </html>
-
 
 The ``*`` (asterisk) here after ``@`` means the same thing as in ``/*``
 except that this is for attributes, and not elements: meaning that you
 want any attributes, whatever their name.
-
 
 Get a string representation of an element
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -707,29 +435,6 @@ The XPath language also comes with a few string functions, that you can
 wrap around an XPath expression selecting elements:
 
 .. xpathdemo:: string(/html/head/title)
-
-    <html>
-    <head>
-      <title>This is a title</title>
-      <meta content="text/html; charset=utf-8" http-equiv="content-type" />
-    </head>
-    <body>
-      <div>
-        <div>
-          <p>This is a paragraph.</p>
-          <p>Is this <a href="page2.html">a link</a>?</p>
-          <br />
-          Apparently.
-        </div>
-        <div class="second">
-          Nothing to add.
-          Except maybe this <a href="page3.html">other link</a>.
-          <!-- And this comment -->
-        </div>
-      </div>
-    </body>
-    </html>
-
 
 This example uses ``string(<xpathexpression>)``, one of several handy
 `functions <https://www.w3.org/TR/xpath/#section-String-Functions>`__ in XPath.
@@ -747,31 +452,7 @@ have multiple children and multiple text node children or descendant.
 What happens when you apply ``string()`` on the document ``<body>`` for example?
 You get a text representation of the document, without the tags:
 
-
 .. xpathdemo:: string(//body)
-
-    <html>
-    <head>
-      <title>This is a title</title>
-      <meta content="text/html; charset=utf-8" http-equiv="content-type" />
-    </head>
-    <body>
-      <div>
-        <div>
-          <p>This is a paragraph.</p>
-          <p>Is this <a href="page2.html">a link</a>?</p>
-          <br />
-          Apparently.
-        </div>
-        <div class="second">
-          Nothing to add.
-          Except maybe this <a href="page3.html">other link</a>.
-          <!-- And this comment -->
-        </div>
-      </div>
-    </body>
-    </html>
-
 
 Counting elements
 ~~~~~~~~~~~~~~~~~
@@ -782,28 +463,6 @@ document:
 
 .. xpathdemo:: count(//p)
 
-    <html>
-    <head>
-      <title>This is a title</title>
-      <meta content="text/html; charset=utf-8" http-equiv="content-type" />
-    </head>
-    <body>
-      <div>
-        <div>
-          <p>This is a paragraph.</p>
-          <p>Is this <a href="page2.html">a link</a>?</p>
-          <br />
-          Apparently.
-        </div>
-        <div class="second">
-          Nothing to add.
-          Except maybe this <a href="page3.html">other link</a>.
-          <!-- And this comment -->
-        </div>
-      </div>
-    </body>
-    </html>
-
 .. note::
     With parsel, you get a floating point number back, and in the form of a
     string. This is specific to parsel. Another XPath engine might return a
@@ -812,32 +471,7 @@ document:
 Another example: get the number of attributes in the document (whatever
 their parent element):
 
-
 .. xpathdemo:: count(//@*)
-
-    <html>
-    <head>
-      <title>This is a title</title>
-      <meta content="text/html; charset=utf-8" http-equiv="content-type" />
-    </head>
-    <body>
-      <div>
-        <div>
-          <p>This is a paragraph.</p>
-          <p>Is this <a href="page2.html">a link</a>?</p>
-          <br />
-          Apparently.
-        </div>
-        <div class="second">
-          Nothing to add.
-          Except maybe this <a href="page3.html">other link</a>.
-          <!-- And this comment -->
-        </div>
-      </div>
-    </body>
-    </html>
-
-
 
 Boolean operations
 ~~~~~~~~~~~~~~~~~~
@@ -848,55 +482,9 @@ cover a bit later).
 
 For example, testing the number of paragraphs:
 
-
 .. xpathdemo:: count(//p) = 2
 
-    <html>
-    <head>
-      <title>This is a title</title>
-      <meta content="text/html; charset=utf-8" http-equiv="content-type" />
-    </head>
-    <body>
-      <div>
-        <div>
-          <p>This is a paragraph.</p>
-          <p>Is this <a href="page2.html">a link</a>?</p>
-          <br />
-          Apparently.
-        </div>
-        <div class="second">
-          Nothing to add.
-          Except maybe this <a href="page3.html">other link</a>.
-          <!-- And this comment -->
-        </div>
-      </div>
-    </body>
-    </html>
-
 .. xpathdemo:: count(//p) = 42
-
-    <html>
-    <head>
-      <title>This is a title</title>
-      <meta content="text/html; charset=utf-8" http-equiv="content-type" />
-    </head>
-    <body>
-      <div>
-        <div>
-          <p>This is a paragraph.</p>
-          <p>Is this <a href="page2.html">a link</a>?</p>
-          <br />
-          Apparently.
-        </div>
-        <div class="second">
-          Nothing to add.
-          Except maybe this <a href="page3.html">other link</a>.
-          <!-- And this comment -->
-        </div>
-      </div>
-    </body>
-    </html>
-
 
 Part 2: Location Paths: how to move inside the document tree
 ============================================================
@@ -935,8 +523,6 @@ So the examples we saw earlier are (or contain) an XPath location path:
 
         >>> doc.xpath("/    html   / head   /title")
         [(1) '<title>This is a title</title>']
-
-
 
     .. code:: pycon
 
@@ -982,7 +568,6 @@ Absolute paths are relative to the root node.
         [(1) '<p>This is a paragraph.</p>'
          (2) '<p>Is this <a href="page2.html">a link</a>?</p>']
 
-
     Compare this with using the relative ``'p'`` or ``'./p'`` expression
     that will only look at children ``<p>`` under each ``<div>``, and only
     one of those ``<div>`` will show having paragraphs as shown below:
@@ -1006,7 +591,6 @@ Absolute paths are relative to the root node.
         [(1) '<p>This is a paragraph.</p>'
          (2) '<p>Is this <a href="page2.html">a link</a>?</p>']
         []
-
 
 Abbreviated syntax vs. full syntax
 ----------------------------------
@@ -1079,8 +663,6 @@ sample document, the one just under the ``<body>`` element:
         </div>
       </div>
 
-
-
 The ``self`` axis represents *the context node*, i.e. where you are
 currently in the Location Path steps. (This may not sound very useful,
 but we will see later when this can be handy.)
@@ -1101,8 +683,6 @@ but we will see later when this can be handy.)
           <!-- And this comment -->
         </div>
       </div>']
-
-
 
 ``self::`` is usually seen in its abbreviated form, ``.`` (one dot), which
 means ``self::node()``. Chaining ``self`` steps (``self::*/self::*`` or
@@ -1126,7 +706,6 @@ of saying "right here":
         </div>
       </div>']
 
-
 Move up or down the tree: child, descendant, parent, ancestor
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -1147,7 +726,6 @@ Here, our context node ``<div>`` has two ``<div>`` children:
           Except maybe this <a href="page3.html">other link</a>.
           <!-- And this comment -->
         </div>']
-
 
 ``child`` is in fact the default axis, hence it can be omitted (e.g. we
 saw that ``/html/head/title`` is equivalent of
@@ -1196,7 +774,6 @@ Unix filesystem):
         </div>
       </div>
     </body>']
-
 
 Let's simplify our ASCII tree representation from earlier to only
 consider element nodes:
@@ -1266,7 +843,6 @@ the tree, looking at children of each child, recursively:
         </div>'
      (7) '<a href="page3.html">other link</a>']
 
-
 You might guess already what ``ancestor`` is for: it is the dual axis of
 ``descendant``. It goes to the parent of the context node, the parent of
 this parent, the parent of the parent of this parent, etc.
@@ -1311,8 +887,6 @@ this parent, the parent of the parent of this parent, etc.
       </div>
     </body>']
 
-
-
 Special case of ``descendant-or-/ancestor-or-self`` axes
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
@@ -1352,7 +926,6 @@ include the context node.
      (15) '
       ']
 
-
 Move "sideways": children nodes of the same parent
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -1389,14 +962,10 @@ Here we started using 2 new patterns along with the axes:
     >>> paragraph.xpath("preceding-sibling::*")
     [(1) '<p>This is a paragraph.</p>']
 
-
-
 .. code:: pycon
 
     >>> paragraph.xpath("following-sibling::*")
     [(1) '<br>']
-
-
 
 Again, let's see which elements were selected in our ASCII tree
 representation:
@@ -1457,8 +1026,6 @@ or ``child::node()``. (But we may be getting ahead of ourselves with *node tests
           Apparently.
         ']
 
-
-
 Nodes before and after, in document order
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
@@ -1486,8 +1053,6 @@ the tree hierarchy, but work on the document order of nodes.
      (3) '<meta content="text/html; charset=utf-8" http-equiv="content-type">'
      (4) '<p>This is a paragraph.</p>']
 
-
-
 .. code:: pycon
 
     >>> paragraph.xpath("following::*")
@@ -1498,7 +1063,6 @@ the tree hierarchy, but work on the document order of nodes.
           <!-- And this comment -->
         </div>'
      (3) '<a href="page3.html">other link</a>']
-
 
 This is what these axes select in our ASCII-tree representation:
 
@@ -1564,82 +1128,16 @@ To reach them, use the ``attribute`` axis explicitly:
 
 .. xpathdemo:: //a/attribute::href
 
-    <html>
-    <head>
-      <title>This is a title</title>
-      <meta content="text/html; charset=utf-8" http-equiv="content-type" />
-    </head>
-    <body>
-      <div>
-        <div>
-          <p>This is a paragraph.</p>
-          <p>Is this <a href="page2.html">a link</a>?</p>
-          <br />
-          Apparently.
-        </div>
-        <div class="second">
-          Nothing to add.
-          Except maybe this <a href="page3.html">other link</a>.
-          <!-- And this comment -->
-        </div>
-      </div>
-    </body>
-    </html>
-
 Because selecting attributes is so common, the ``attribute::`` axis has a
 short form: the ``@`` sign. So ``//a/@href`` means exactly the same thing as
 ``//a/attribute::href``:
 
 .. xpathdemo:: //a/@href
 
-    <html>
-    <head>
-      <title>This is a title</title>
-      <meta content="text/html; charset=utf-8" http-equiv="content-type" />
-    </head>
-    <body>
-      <div>
-        <div>
-          <p>This is a paragraph.</p>
-          <p>Is this <a href="page2.html">a link</a>?</p>
-          <br />
-          Apparently.
-        </div>
-        <div class="second">
-          Nothing to add.
-          Except maybe this <a href="page3.html">other link</a>.
-          <!-- And this comment -->
-        </div>
-      </div>
-    </body>
-    </html>
-
 You can select **every** attribute of an element with ``@*``, and every
 attribute in the whole document with ``//@*``:
 
 .. xpathdemo:: //@*
-
-    <html>
-    <head>
-      <title>This is a title</title>
-      <meta content="text/html; charset=utf-8" http-equiv="content-type" />
-    </head>
-    <body>
-      <div>
-        <div>
-          <p>This is a paragraph.</p>
-          <p>Is this <a href="page2.html">a link</a>?</p>
-          <br />
-          Apparently.
-        </div>
-        <div class="second">
-          Nothing to add.
-          Except maybe this <a href="page3.html">other link</a>.
-          <!-- And this comment -->
-        </div>
-      </div>
-    </body>
-    </html>
 
 .. note::
     An attribute node has a *name* and a *string value*. When you extract an
@@ -1657,28 +1155,6 @@ lot in the `Predicates`_ section below. As a taste, ``//div[@class]`` selects
 the ``<div>`` elements that have a ``class`` attribute, whatever its value:
 
 .. xpathdemo:: //div[@class]
-
-    <html>
-    <head>
-      <title>This is a title</title>
-      <meta content="text/html; charset=utf-8" http-equiv="content-type" />
-    </head>
-    <body>
-      <div>
-        <div>
-          <p>This is a paragraph.</p>
-          <p>Is this <a href="page2.html">a link</a>?</p>
-          <br />
-          Apparently.
-        </div>
-        <div class="second">
-          Nothing to add.
-          Except maybe this <a href="page3.html">other link</a>.
-          <!-- And this comment -->
-        </div>
-      </div>
-    </body>
-    </html>
 
 Node tests
 ----------
@@ -1852,30 +1328,7 @@ earlier:
 Let's say that we are not interested in the two paragraphs but only
 the first one. You would use ``[1]`` as predicate:
 
-
 .. xpathdemo:: //body/div/div/p[1]
-
-    <html>
-    <head>
-      <title>This is a title</title>
-      <meta content="text/html; charset=utf-8" http-equiv="content-type" />
-    </head>
-    <body>
-      <div>
-        <div>
-          <p>This is a paragraph.</p>
-          <p>Is this <a href="page2.html">a link</a>?</p>
-          <br />
-          Apparently.
-        </div>
-        <div class="second">
-          Nothing to add.
-          Except maybe this <a href="page3.html">other link</a>.
-          <!-- And this comment -->
-        </div>
-      </div>
-    </body>
-    </html>
 
 .. warning::
     Positions in XPath start from 1, not 0.
@@ -1883,29 +1336,6 @@ the first one. You would use ``[1]`` as predicate:
 If you want the last node in a node-set, you can use ``last()``:
 
 .. xpathdemo:: //body/div/div[last()]
-
-    <html>
-    <head>
-      <title>This is a title</title>
-      <meta content="text/html; charset=utf-8" http-equiv="content-type" />
-    </head>
-    <body>
-      <div>
-        <div>
-          <p>This is a paragraph.</p>
-          <p>Is this <a href="page2.html">a link</a>?</p>
-          <br />
-          Apparently.
-        </div>
-        <div class="second">
-          Nothing to add.
-          Except maybe this <a href="page3.html">other link</a>.
-          <!-- And this comment -->
-        </div>
-      </div>
-    </body>
-    </html>
-
 
 .. warning::
     Because location paths work step by step, from left to right,
@@ -1919,28 +1349,6 @@ If you want the last node in a node-set, you can use ``last()``:
 
     .. xpathdemo:: //body//div[1]
 
-        <html>
-        <head>
-          <title>This is a title</title>
-          <meta content="text/html; charset=utf-8" http-equiv="content-type" />
-        </head>
-        <body>
-          <div>
-            <div>
-              <p>This is a paragraph.</p>
-              <p>Is this <a href="page2.html">a link</a>?</p>
-              <br />
-              Apparently.
-            </div>
-            <div class="second">
-              Nothing to add.
-              Except maybe this <a href="page3.html">other link</a>.
-              <!-- And this comment -->
-            </div>
-          </div>
-        </body>
-        </html>
-
     This becomes more apparent when you expand the expression to its
     full syntax::
 
@@ -1952,7 +1360,6 @@ If you want the last node in a node-set, you can use ``last()``:
                     # first child of this parent
                     /child::div[1]
 
-
     You can however select the first ``<div>`` (in document order)
     in a ``<body>`` using parentheses to group nodes into a new node-set:
 
@@ -1961,28 +1368,6 @@ If you want the last node in a node-set, you can use ``last()``:
     - and finally select the first one -- ``( //body//div ) [1]``,
 
     .. xpathdemo:: ( //body//div ) [1]
-
-        <html>
-        <head>
-          <title>This is a title</title>
-          <meta content="text/html; charset=utf-8" http-equiv="content-type" />
-        </head>
-        <body>
-          <div>
-            <div>
-              <p>This is a paragraph.</p>
-              <p>Is this <a href="page2.html">a link</a>?</p>
-              <br />
-              Apparently.
-            </div>
-            <div class="second">
-              Nothing to add.
-              Except maybe this <a href="page3.html">other link</a>.
-              <!-- And this comment -->
-            </div>
-          </div>
-        </body>
-        </html>
 
 Position ranges
 ^^^^^^^^^^^^^^^
@@ -1994,7 +1379,6 @@ with the ``position()`` function that returns the node's position.
 Let's change our sample HTML document a bit to include a list of five items.
 Say we need all but the 1st and last one.
 You can use ``[position()>1 and position()<last()]``:
-
 
 .. xpathdemo:: //body//div//li[position()>1 and position()<last()]
 
@@ -2063,7 +1447,6 @@ information on children or parent nodes, text values, position, etc.
 A simple example could be selecting a ``<table>`` that has a specific
 number of rows, say, 5. You can simply count the number of rows:
 
-
 .. xpathdemo:: //table[ count(tr)=5 ]
 
     <html>
@@ -2088,7 +1471,6 @@ number of rows, say, 5. You can simply count the number of rows:
       </div>
     </body>
     </html>
-
 
 Special case of string value tests
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -2210,58 +1592,12 @@ can have predicates. So it's possible to end up with nested predicates.
           Apparently.
         </div>']
 
-
-
 In fact, the above is equivalent to ``//div[p/a/@href="page2.html"]``
 with no nesting:
 
     .. xpathdemo:: //div[p  [a/@href="page2.html"]  ]
 
-        <html>
-        <head>
-          <title>This is a title</title>
-          <meta content="text/html; charset=utf-8" http-equiv="content-type" />
-        </head>
-        <body>
-          <div>
-            <div>
-              <p>This is a paragraph.</p>
-              <p>Is this <a href="page2.html">a link</a>?</p>
-              <br />
-              Apparently.
-            </div>
-            <div class="second">
-              Nothing to add.
-              Except maybe this <a href="page3.html">other link</a>.
-              <!-- And this comment -->
-            </div>
-          </div>
-        </body>
-        </html>
-
     .. xpathdemo:: //div[p/a/@href="page2.html"]
-
-        <html>
-        <head>
-          <title>This is a title</title>
-          <meta content="text/html; charset=utf-8" http-equiv="content-type" />
-        </head>
-        <body>
-          <div>
-            <div>
-              <p>This is a paragraph.</p>
-              <p>Is this <a href="page2.html">a link</a>?</p>
-              <br />
-              Apparently.
-            </div>
-            <div class="second">
-              Nothing to add.
-              Except maybe this <a href="page3.html">other link</a>.
-              <!-- And this comment -->
-            </div>
-          </div>
-        </body>
-        </html>
 
 Order of predicates is important
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -2285,52 +1621,7 @@ See for yourself:
 
 .. xpathdemo:: //div[2][@class="second"]
 
-    <html>
-    <head>
-      <title>This is a title</title>
-      <meta content="text/html; charset=utf-8" http-equiv="content-type" />
-    </head>
-    <body>
-      <div>
-        <div>
-          <p>This is a paragraph.</p>
-          <p>Is this <a href="page2.html">a link</a>?</p>
-          <br />
-          Apparently.
-        </div>
-        <div class="second">
-          Nothing to add.
-          Except maybe this <a href="page3.html">other link</a>.
-          <!-- And this comment -->
-        </div>
-      </div>
-    </body>
-    </html>
-
 .. xpathdemo:: //div[@class="second"][2]
-
-    <html>
-    <head>
-      <title>This is a title</title>
-      <meta content="text/html; charset=utf-8" http-equiv="content-type" />
-    </head>
-    <body>
-      <div>
-        <div>
-          <p>This is a paragraph.</p>
-          <p>Is this <a href="page2.html">a link</a>?</p>
-          <br />
-          Apparently.
-        </div>
-        <div class="second">
-          Nothing to add.
-          Except maybe this <a href="page3.html">other link</a>.
-          <!-- And this comment -->
-        </div>
-      </div>
-    </body>
-    </html>
-
 
 The second produces nothing indeed. Why is that?
 
@@ -2347,7 +1638,6 @@ On the contrary, ``//div[@class="second"][2]`` will first produce
 (again, there's only one ``div`` with "class" attribute with value
 "second"). So the subsequent ``[2]`` predicate will never match with
 single-node node-sets (you cannot select the 2nd element of a 1-element list)
-
 
 .. warning::
     Beware of ``position()`` in chained predicates.
@@ -2399,28 +1689,6 @@ string, even when it is split by inline tags:
 
 .. xpathdemo:: string(//p[2])
 
-    <html>
-    <head>
-      <title>This is a title</title>
-      <meta content="text/html; charset=utf-8" http-equiv="content-type" />
-    </head>
-    <body>
-      <div>
-        <div>
-          <p>This is a paragraph.</p>
-          <p>Is this <a href="page2.html">a link</a>?</p>
-          <br />
-          Apparently.
-        </div>
-        <div class="second">
-          Nothing to add.
-          Except maybe this <a href="page3.html">other link</a>.
-          <!-- And this comment -->
-        </div>
-      </div>
-    </body>
-    </html>
-
 Compare this with ``//p[2]/text()``, which returns the direct text-node
 children **separately** and skips the text inside ``<a>``:
 
@@ -2455,28 +1723,6 @@ cleaning up extracted text:
 
 .. xpathdemo:: normalize-space(//div[@class="second"])
 
-    <html>
-    <head>
-      <title>This is a title</title>
-      <meta content="text/html; charset=utf-8" http-equiv="content-type" />
-    </head>
-    <body>
-      <div>
-        <div>
-          <p>This is a paragraph.</p>
-          <p>Is this <a href="page2.html">a link</a>?</p>
-          <br />
-          Apparently.
-        </div>
-        <div class="second">
-          Nothing to add.
-          Except maybe this <a href="page3.html">other link</a>.
-          <!-- And this comment -->
-        </div>
-      </div>
-    </body>
-    </html>
-
 Called with no argument, ``normalize-space()`` operates on the string value of
 the context node, which makes it very handy inside a loop:
 
@@ -2499,54 +1745,10 @@ Keep only the links whose ``href`` contains ``page2``:
 
 .. xpathdemo:: //a[contains(@href, "page2")]
 
-    <html>
-    <head>
-      <title>This is a title</title>
-      <meta content="text/html; charset=utf-8" http-equiv="content-type" />
-    </head>
-    <body>
-      <div>
-        <div>
-          <p>This is a paragraph.</p>
-          <p>Is this <a href="page2.html">a link</a>?</p>
-          <br />
-          Apparently.
-        </div>
-        <div class="second">
-          Nothing to add.
-          Except maybe this <a href="page3.html">other link</a>.
-          <!-- And this comment -->
-        </div>
-      </div>
-    </body>
-    </html>
-
 A very common idiom combines ``contains()`` with the string value of an element
 (``.``) to find elements "containing some text":
 
 .. xpathdemo:: //p[contains(., "paragraph")]
-
-    <html>
-    <head>
-      <title>This is a title</title>
-      <meta content="text/html; charset=utf-8" http-equiv="content-type" />
-    </head>
-    <body>
-      <div>
-        <div>
-          <p>This is a paragraph.</p>
-          <p>Is this <a href="page2.html">a link</a>?</p>
-          <br />
-          Apparently.
-        </div>
-        <div class="second">
-          Nothing to add.
-          Except maybe this <a href="page3.html">other link</a>.
-          <!-- And this comment -->
-        </div>
-      </div>
-    </body>
-    </html>
 
 .. tip::
     ``contains(@class, "foo")`` is a classic way to match one class among many,
