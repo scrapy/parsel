@@ -26,8 +26,8 @@ Why learn XPath?
 -  it allows selection and filtering with a fine-grained look at the
    text content
 -  XPath allows complex conditioning with axes
--  XPath is extensible with custom functions (we won’t cover that in
-   this tutorial though)
+-  XPath is extensible with custom functions (we only touch on the bundled
+   EXSLT extension functions, at the end of this tutorial)
 
 XPath data model
 ----------------
@@ -121,7 +121,7 @@ XPath engine, according to the data model:
          |   |   |   +-- #35--<a>
          |   |   |   |   +-- #36--(ATTR): href: 'page3.html'
          |   |   |   |   +-- #37--(TXT): 'other link'
-         |   |   |   +-- #38--(TXT): '. \n      '
+         |   |   |   +-- #38--(TXT): '.\n      '
          |   |   |   +-- #39--(COMM): ' And this comment '
          |   |   |   +-- #40--(TXT): '\n    '
          |   |   +-- #41--(TXT): '\n  '
@@ -154,15 +154,28 @@ which powers Scrapy selectors under the hood.
 It is a Python module written on top of `lxml <http://lxml.de/>`__.
 
 .. note::
+    The in-browser playground evaluates your input with the browser's native
+    engine (``document.evaluate()`` over ``application/xml``), so the **HTML
+    input must be well-formed XHTML**: close every void element (``<br/>``,
+    ``<img/>``, ``<meta/>``, ``<hr/>``) and keep tags balanced, or you will get
+    a parse error. parsel's HTML parser is much more forgiving and happily
+    accepts the sloppy HTML found on real pages (including the sample document
+    above). For the same reason the widget's output is cosmetically slightly
+    different from parsel's: void elements come back self-closed (``<br/>``
+    rather than ``<br>``) and numbers without a trailing ``.0`` (``2`` rather
+    than ``'2.0'``).
+
+.. note::
     lxml itself is built using the C library `libxml2 <http://www.xmlsoft.org/>`__,
     which has a conformant XPath 1.0 engine.
     You should be able to run the same XPath expressions with
     any XPath 1.0 engine, and get the same results.
 
-This tutorial only showcases XPath 1.0. (`XPath has reached version 3
-<https://www.w3.org/TR/xpath-3/>`__, but you can already do a
-lot with XPath 1.0 and Python. And there's no XPath>1.0 implementation
-in Python today.)
+This tutorial only showcases XPath 1.0. lxml's engine -- and therefore parsel
+-- implements XPath 1.0, and that's what we use throughout. (`XPath has reached
+version 3 <https://www.w3.org/TR/xpath-3/>`__, and pure-Python XPath 2.0/3.x
+engines such as `elementpath <https://pypi.org/project/elementpath/>`__ do
+exist, but you can already do a lot with XPath 1.0.)
 
 When showing Python code snippets using Parsel, we assume that we have
 a ``Selector`` -- called ``doc`` -- created with the HTML content, similarly
