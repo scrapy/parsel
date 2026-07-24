@@ -13,12 +13,9 @@ XPath is a language
     (from the `XML Path Language 1.0 <https://www.w3.org/TR/xpath/>`__
     specification)
 
-This abstract from the official specifications says it all:
-
--  *"XPath is a language"*: an XPath expression is a character string...
--  *"for addressing parts of an XML document"*: ...a string that that
-   you pass to an XPath engine acting over an XML (or HTML) document,
-   outputting parts of it, and following the data model explained below.
+In other words: you write an XPath expression as a string, pass it to an XPath
+engine together with an XML (or HTML) document, and get back the parts of that
+document it points to -- following the data model described below.
 
 Why learn XPath?
 ----------------
@@ -237,17 +234,12 @@ on.
 XPath expressions are passed to an XPath engine as strings.
 
 
-Selecting the root node of a document (warning: special case)
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Selecting the root node (a special case)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-The root node is a special node: this is a quote from XPath 1.0 specs:
-
-    *"The root node is the root of the tree. A root node does not occur
-    except as the root of the tree. The element node for the document
-    element is a child of the root node."*
-
-Selecting the root node of a document with XPath is one of the shortest
-XPath expressions: ``"/"`` (a string with only a forward slash).
+One of the shortest XPath expressions, ``"/"`` (a string with only a forward
+slash), selects the *root node* of the document -- the invisible node whose
+only child is the document element (the top-level ``<html>`` element here).
 
 .. xpathdemo:: /
 
@@ -273,16 +265,13 @@ XPath expressions: ``"/"`` (a string with only a forward slash).
     </body>
     </html>
 
-This is very similar to ``cd /`` in a shell within a Unix filesystem
-(going to the root directory).
+This is very similar to ``cd /`` in a Unix shell (going to the root directory).
 
 .. warning::
-    Unfortunately, this ``"/"`` expression does not work as expected
-    with parsel. We get an empty list instead of the root node.
-
-    It is a limitation of lxml apparently, because
-    it works with libxml2 directly. In practice though, this doesn't matter
-    much because the root node is virtually never used directly.
+    This ``"/"`` expression does not work as expected with parsel: you get an
+    empty list instead of the root node. It is an lxml limitation (it works with
+    libxml2 directly). In practice this rarely matters -- the root node is
+    virtually never used directly.
 
 
 Selecting elements
@@ -476,12 +465,12 @@ There are other elements with those two paragraphs under that very
     </html>
 
 .. note::
-    Continuing the filesystem anamogy, ``*`` is similar in effect to what
+    Continuing the filesystem analogy, ``*`` is similar in effect to what
     you can do in a Unix shell to find files or directories without explicit
     full names.
 
-See the ``<br/>`` being selected? It's an empty element (i.e. with node children)
-but it is there nonetheless.
+See the ``<br/>`` being selected? It's an empty element (i.e. with no child
+nodes) but it is there nonetheless.
 
 Selecting text nodes
 ~~~~~~~~~~~~~~~~~~~~
@@ -578,7 +567,7 @@ Selecting nodes without a full, explicit path
 What we did until now is tell the XPath engine how to get to nodes,
 node by node, from parent to child, from root node down to target nodes.
 This assumes that you know the hierarchy of nodes beforehand.
-This *can* be the case, but most often than not,
+This *can* be the case, but more often than not,
 either you do not know or you do not want to indicate all the steps from
 the root node down to the node(s) you are interested in (this can be
 very error prone -- have you put enough ``div/div/div...``?).
@@ -707,7 +696,7 @@ the attribute name:
 
 
 The ``*`` (asterisk) here after ``@`` means the same thing as in ``/*``
-exept that this is for attributes, and not elements: meaning that you
+except that this is for attributes, and not elements: meaning that you
 want any attributes, whatever their name.
 
 
@@ -853,7 +842,7 @@ their parent element):
 Boolean operations
 ~~~~~~~~~~~~~~~~~~
 
-XPath expressions can also return booleans. This is not that usueful
+XPath expressions can also return booleans. This is not that useful
 by itself, but it becomes handy when used in predicates (that we will
 cover a bit later).
 
@@ -1115,51 +1104,14 @@ but we will see later when this can be handy.)
 
 
 
-If you chain ``self::`` steps, you'll stay on the same context node:
-
-.. code:: pycon
-
-    >>> first_div.xpath("self::*/self::*/self::*")
-    [(1) '<div>
-        <div>
-          <p>This is a paragraph.</p>
-          <p>Is this <a href="page2.html">a link</a>?</p>
-          <br>
-          Apparently.
-        </div>
-        <div class="second">
-          Nothing to add.
-          Except maybe this <a href="page3.html">other link</a>.
-          <!-- And this comment -->
-        </div>
-      </div>']
-
-
-
-``self::`` is usually seen in abbreviated form, i.e. in '.' (one dot)
-which means ``self::node()``.
-So you could also use:
+``self::`` is usually seen in its abbreviated form, ``.`` (one dot), which
+means ``self::node()``. Chaining ``self`` steps (``self::*/self::*`` or
+``././.``) just keeps you on the same context node, so ``.`` is a compact way
+of saying "right here":
 
 .. code:: pycon
 
     >>> first_div.xpath(".")
-    [(1) '<div>
-        <div>
-          <p>This is a paragraph.</p>
-          <p>Is this <a href="page2.html">a link</a>?</p>
-          <br>
-          Apparently.
-        </div>
-        <div class="second">
-          Nothing to add.
-          Except maybe this <a href="page3.html">other link</a>.
-          <!-- And this comment -->
-        </div>
-      </div>']
-
-.. code:: pycon
-
-    >>> first_div.xpath("././.")
     [(1) '<div>
         <div>
           <p>This is a paragraph.</p>
@@ -2075,7 +2027,7 @@ Location paths as predicates
 
 Location paths can also serve as predicates within a parent location path.
 
-It can happen that your HTML mamrkup does not distinguish the elements
+It can happen that your HTML markup does not distinguish the elements
 you are after with any "class" or "id" attributes, but maybe these
 elements have a structural feature that you can use to identify them.
 
@@ -2237,7 +2189,7 @@ One example is testing different kind of lists, ordered or unordered:
 
 .. note::
     Here we saw that predicates can also appear in the middle of the location
-    path. Indeed, predicates are (a optional) part of each location step.
+    path. Indeed, predicates are an (optional) part of each location step.
 
 Nested predicates
 ~~~~~~~~~~~~~~~~~
