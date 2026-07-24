@@ -12,6 +12,10 @@ from sybil.parsers.skip import skip
 
 from parsel import Selector
 
+# The Sphinx extensions under _ext require Sphinx/docutils, which are not part
+# of the test environment. Skip them during pytest's --doctest-modules pass.
+collect_ignore_glob = ["_ext/*"]
+
 
 def load_selector(filename, **kwargs):
     input_path = Path(__file__).parent / "_static" / filename
