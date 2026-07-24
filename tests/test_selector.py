@@ -226,7 +226,7 @@ class TestSelector:
         assert sel.xpath("//ul/li[position()>1]/text()")[0].get() == "2"
 
     def test_selector_getall_alias(self) -> None:
-        """Test if get() returns extracted value on a Selector"""
+        """Test if getall() returns extracted value on a Selector"""
         body = '<ul><li id="1">1</li><li id="2">2</li><li id="3">3</li></ul>'
         sel = self.sscls(text=body)
 

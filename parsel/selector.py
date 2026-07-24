@@ -190,7 +190,7 @@ class SelectorList(list[_SelectorType]):
         their results flattened, as a list of strings.
 
         By default, character entity references are replaced by their
-        corresponding character (except for ``&amp;`` and ``&lt;``.
+        corresponding character (except for ``&amp;`` and ``&lt;``).
         Passing ``replace_entities`` as ``False`` switches off these
         replacements.
         """
@@ -222,12 +222,12 @@ class SelectorList(list[_SelectorType]):
     ) -> str | None:
         """
         Call the ``.re()`` method for the first element in this list and
-        return the result in an string. If the list is empty or the
+        return the result as a string. If the list is empty or the
         regex doesn't match anything, return the default value (``None`` if
         the argument is not provided).
 
         By default, character entity references are replaced by their
-        corresponding character (except for ``&amp;`` and ``&lt;``.
+        corresponding character (except for ``&amp;`` and ``&lt;``).
         Passing ``replace_entities`` as ``False`` switches off these
         replacements.
         """
@@ -239,7 +239,7 @@ class SelectorList(list[_SelectorType]):
 
     def getall(self) -> list[str]:
         """
-        Call the ``.get()`` method for each element is this list and return
+        Call the ``.get()`` method for each element in this list and return
         their results flattened, as a list of strings.
         """
         return [x.get() for x in self]
@@ -377,11 +377,11 @@ class Selector:
 
     ``text`` is an ``str`` object.
 
-    ``body`` is a ``bytes`` object. It can be used together with the
+    ``body`` is a ``bytes`` or ``bytearray`` object. It can be used together with the
     ``encoding`` argument instead of the ``text`` argument.
 
     ``type`` defines the selector type. It can be ``"html"`` (default),
-    ``"json"``, or ``"xml"``.
+    ``"json"``, ``"xml"`` or ``"text"``.
 
     ``base_url`` allows setting a URL for the document. This is needed when looking up external entities with relative paths.
     See the documentation for :func:`lxml.etree.fromstring` for more information.
@@ -434,13 +434,6 @@ class Selector:
         self.root: Any
         if type not in ("html", "json", "text", "xml", None):
             raise ValueError(f"Invalid type: {type}")
-
-        if text is None and not body and root is _NOT_SET:
-            raise ValueError("Selector needs text, body, or root arguments")
-
-        if text is not None and not isinstance(text, str):
-            msg = f"text argument should be of type str, got {text.__class__}"
-            raise TypeError(msg)
 
         if text is not None:
             if root is not _NOT_SET:
@@ -691,8 +684,7 @@ class Selector:
         """
         Serialize and return the matched nodes.
 
-        For HTML and XML, the result is always a string, and percent-encoded
-        content is unquoted.
+        For HTML and XML, the result is always a string.
         """
         if self.type in ("text", "json"):
             return self.root
@@ -768,7 +760,7 @@ class Selector:
             else:
                 typing.cast("html.HtmlElement", self.root).drop_tree()
         except (AttributeError, AssertionError):
-            # 'NoneType' object has no attribute 'drop'
+            # 'NoneType' object has no attribute 'drop_tree'
             raise CannotDropElementWithoutParent(
                 "The node you're trying to remove has no parent, "
                 "are you trying to remove a root element?"
