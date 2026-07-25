@@ -126,6 +126,10 @@ disable = [
 addopts = [
     "--doctest-modules",
 ]
+markers = [
+    "thread_unsafe: mark a test as unsafe to run concurrently in multiple threads (used by pytest-run-parallel)",
+]
+timeout = 300
 
 [tool.ruff.lint]
 extend-select = [
