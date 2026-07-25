@@ -87,6 +87,8 @@ def test_has_class_tab() -> None:
     assert [x.extract() for x in sel.xpath('//p[has-class("foo")]/text()')] == ["First"]
 
 
+# Registers and unregisters a fixed name in the global function namespace.
+@pytest.mark.thread_unsafe
 def test_set_xpathfunc() -> None:
     def myfunc(ctx: Any) -> None:
         myfunc.call_count += 1  # type: ignore[attr-defined]

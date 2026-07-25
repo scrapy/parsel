@@ -935,6 +935,8 @@ class TestSelector:
         sel.css("body").drop()
         assert sel.get() == "<html></html>"
 
+    # warnings.catch_warnings() mutates process-global state.
+    @pytest.mark.thread_unsafe
     def test_deep_nesting(self) -> None:
         content = """
         <html>
@@ -1042,6 +1044,8 @@ class TestSelector:
         assert selector.root is None
         assert selector.type == "json"
 
+    # warnings.catch_warnings() mutates process-global state.
+    @pytest.mark.thread_unsafe
     def test_text_and_root_warning(self) -> None:
         with warnings.catch_warnings(record=True) as w:
             Selector(text="a", root="b")
