@@ -3,6 +3,13 @@
 History
 -------
 
+1.12.0 (unreleased)
+~~~~~~~~~~~~~~~~~~~
+
+* Fixed return type annotations for ``Selector.get()``, ``Selector.getall()``,
+  ``SelectorList.get()``, and ``SelectorList.getall()`` to account for
+  non-string JSON values.
+
 1.11.0 (2026-01-29)
 ~~~~~~~~~~~~~~~~~~~
 

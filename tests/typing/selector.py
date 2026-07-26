@@ -11,9 +11,11 @@ def correct() -> None:
         text="<html><body><ul><li>1</li><li>2</li><li>3</li></ul></body></html>"
     )
 
-    li_values: list[str] = selector.css("li").getall()
+    li_values: list[object] = selector.css("li").getall()
+    li_value: object = selector.css("li").get()
+    age: object = Selector(text='{"age": 18}', type="json").jmespath("age").get()
     selector.re_first(re.compile(r"[32]"), "").strip()
-    xpath_values: list[str] = selector.xpath(
+    xpath_values: list[object] = selector.xpath(
         "//somens:a/text()", namespaces={"somens": "http://scrapy.org"}
     ).extract()
 
@@ -38,7 +40,10 @@ def incorrect() -> None:
     # Wrong query type in css.
     selector.css(5).getall()  # type: ignore[arg-type]
 
-    # Cannot assign a list of str to an int.
+    # Selector results are objects because JSON selectors can return any value.
+    string_values: list[str] = selector.css("li").getall()  # type: ignore[assignment]
+
+    # Cannot assign a list of objects to an int.
     li_values: int = selector.css("li").getall()  # type: ignore[assignment]
 
     # Cannot use a string to define namespaces in xpath.
