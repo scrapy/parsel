@@ -405,6 +405,17 @@ This is the proper way to do it (note the dot prefixing the ``.//p`` XPath)::
     >>> for p in divs.xpath('.//p'):  # extracts all <p> inside
     ...     print(p.get())
 
+Parsel emits a :class:`UserWarning` when an absolute XPath is used on a nested
+selector. If the absolute query is intentional, the warning can be disabled
+with Python's :mod:`warnings` API::
+
+    import warnings
+
+    warnings.filterwarnings(
+        "ignore",
+        message=r"Absolute XPath .* used on a nested selector",
+    )
+
 Another common case would be to extract all direct ``<p>`` children::
 
     >>> for p in divs.xpath('p'):

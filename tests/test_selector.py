@@ -359,7 +359,9 @@ class TestSelector:
 
         x = self.sscls(text=body)
         divtwo = x.xpath('//div[@class="two"]')
-        assert divtwo.xpath("//li").extract() == [
+        with pytest.warns(UserWarning, match="Absolute XPath.*nested selector"):
+            absolute_items = divtwo.xpath("//li")
+        assert absolute_items.extract() == [
             "<li>one</li>",
             "<li>two</li>",
             "<li>four</li>",
@@ -395,7 +397,9 @@ class TestSelector:
 
         x = self.sscls(text=body)
         divtwo = x.xpath('//div[@class="two"]')
-        assert divtwo.xpath("//li").getall() == [
+        with pytest.warns(UserWarning, match="Absolute XPath.*nested selector"):
+            absolute_items = divtwo.xpath("//li")
+        assert absolute_items.getall() == [
             "<li>one</li>",
             "<li>two</li>",
             "<li>four</li>",
@@ -673,6 +677,14 @@ class TestSelector:
         xpath = "//test[@foo='\\u0431ar]"
         with pytest.raises(ValueError, match=re.escape(xpath)):
             x.xpath(xpath)
+
+    def test_absolute_xpath_on_nested_selector_warns(self) -> None:
+        selector = self.sscls(text="<div><p>text</p></div>").xpath("//div")[0]
+
+        with pytest.warns(UserWarning, match="Absolute XPath.*nested selector"):
+            result = selector.xpath("//p")
+
+        assert result.get() == "<p>text</p>"
 
     def test_http_header_encoding_precedence(self) -> None:
         # '\xa3'     = pound symbol in unicode
