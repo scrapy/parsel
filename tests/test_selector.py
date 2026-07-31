@@ -1079,6 +1079,10 @@ class TestSelector:
         with pytest.raises(ValueError, match="object as root"):
             Selector(root=selector.root, type="json")
 
+    def test_text_type_unparsable_root(self) -> None:
+        selector = self.sscls(root=1, type="text")
+        assert selector.xpath("//*").getall() == []
+
     def test_json_selector_representation(self) -> None:
         selector = Selector(text="true")
         assert repr(selector) == "<Selector query=None data='True'>"
