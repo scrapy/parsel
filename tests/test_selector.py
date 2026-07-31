@@ -1013,6 +1013,10 @@ class TestSelector:
         selector = self.sscls('{"a": "b"}', type=type_)
         assert selector.type == type_
 
+    def test_explicit_text_type_beats_json_root(self) -> None:
+        selector = self.sscls(root='{"a": "b"}', type="text")
+        assert selector.type == "text"
+
     def test_html_root(self) -> None:
         root = etree.fromstring("<html/>")
         selector = self.sscls(root=root)

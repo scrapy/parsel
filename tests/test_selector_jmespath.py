@@ -187,4 +187,5 @@ class TestJMESPath:
 
         selector = Selector(text=text, root=_NOT_SET)
         assert selector.type == "html"
-        assert selector.xpath("//body/text()").get() == text
+        # libxml2 may or may not wrap the text into a <p> element.
+        assert selector.xpath("string(//body)").get() == text
