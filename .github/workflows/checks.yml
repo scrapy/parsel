@@ -1,4 +1,8 @@
 name: Checks
+
+permissions:
+  contents: read
+
 on: [push, pull_request]
 
 jobs:
@@ -8,27 +12,29 @@ jobs:
       fail-fast: false
       matrix:
         include:
-        - python-version: "3.12"
+        - python-version: "3.14"
           env:
             TOXENV: pre-commit
-        - python-version: "3.12"
+        - python-version: "3.14"
           env:
             TOXENV: pylint
-        - python-version: "3.12"
+        - python-version: "3.14"  # Keep in sync with .readthedocs.yml
           env:
             TOXENV: docs
-        - python-version: "3.12"
+        - python-version: "3.14"
           env:
             TOXENV: typing
-        - python-version: "3.12"
+        - python-version: "3.14"
           env:
             TOXENV: twinecheck
 
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      with:
+        persist-credentials: false
 
     - name: Set up Python ${{ matrix.python-version }}
-      uses: actions/setup-python@v5
+      uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6.3.0
       with:
         python-version: ${{ matrix.python-version }}
 

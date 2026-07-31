@@ -449,6 +449,17 @@ Example removing an ad from a blog post:
     >>> sel.xpath('//div//text()').getall()
     ['Content paragraph...', 'More content...']
 
+On a selector of type ``text``, such as one from :meth:`Selector.jmespath
+<parsel.selector.Selector.jmespath>`, elements are dropped from the tree that
+CSS and XPath queries use, while :meth:`Selector.get
+<parsel.selector.Selector.get>` still returns the original text:
+
+    >>> sel = Selector(text='{"post": "<p>Content...</p><style>p{}</style>"}')
+    >>> post = sel.jmespath('post')
+    >>> post.css('style').drop()
+    >>> post.xpath('string(.)').getall()
+    ['Content...']
+
 
 Using EXSLT extensions
 ----------------------
@@ -602,13 +613,6 @@ Parsel also defines a sorely missed XPath extension function ``has-class`` that
 returns ``True`` for nodes that have all of the specified HTML classes::
 
     >>> from parsel import Selector
-    >>> sel = Selector("""
-    ...         <p class="foo bar-baz">First</p>
-    ...         <p class="foo">Second</p>
-    ...         <p class="bar">Third</p>
-    ...         <p>Fourth</p>
-    ... """)
-    ...
     >>> sel = Selector("""
     ...         <p class="foo bar-baz">First</p>
     ...         <p class="foo">Second</p>

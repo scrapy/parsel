@@ -29,6 +29,7 @@ pip-log.txt
 nosetests.xml
 htmlcov
 .pytest_cache
+*.junit.xml
 
 # Translations
 *.mo
@@ -44,3 +45,7 @@ output/*/index.html
 
 # Sphinx
 docs/_build
+
+.idea/
+.vscode/
+.venv/
