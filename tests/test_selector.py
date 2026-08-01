@@ -1261,3 +1261,52 @@ class TestSelectorBytes(TestSelector):
 
 class TestExsltBytes(TestExslt):
     sscls = SelectorBytesInput  # type: ignore[assignment]
+
+def test_absolute_xpath_on_nested_selector_warns():
+    """Absolute XPath on a nested selector should warn (issue #323)."""
+    sel = Selector(text="<div><p>a</p></div><p>b</p>")
+    nested = sel.xpath("//div")[0]
+    with warnings.catch_warnings(record=True) as w:
+        warnings.simplefilter("always")
+        result = nested.xpath("//p")
+        absolute_warns = [
+            x
+            for x in w
+            if issubclass(x.category, UserWarning)
+            and "Absolute XPath" in str(x.message)
+        ]
+    assert absolute_warns, "expected UserWarning for absolute XPath on nested selector"
+    assert "did you mean" in str(absolute_warns[0].message)
+    # Still returns document-absolute results (existing behavior)
+    assert len(result) == 2
+
+
+def test_relative_xpath_on_nested_selector_no_warn():
+    sel = Selector(text="<div><p>a</p></div><p>b</p>")
+    nested = sel.xpath("//div")[0]
+    with warnings.catch_warnings(record=True) as w:
+        warnings.simplefilter("always")
+        result = nested.xpath(".//p")
+        absolute_warns = [
+            x
+            for x in w
+            if issubclass(x.category, UserWarning)
+            and "Absolute XPath" in str(x.message)
+        ]
+    assert not absolute_warns
+    assert len(result) == 1
+
+
+def test_absolute_xpath_on_root_selector_no_warn():
+    sel = Selector(text="<div><p>a</p></div>")
+    with warnings.catch_warnings(record=True) as w:
+        warnings.simplefilter("always")
+        sel.xpath("//p")
+        absolute_warns = [
+            x
+            for x in w
+            if issubclass(x.category, UserWarning)
+            and "Absolute XPath" in str(x.message)
+        ]
+    assert not absolute_warns
+

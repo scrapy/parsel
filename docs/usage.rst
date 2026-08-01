@@ -421,6 +421,24 @@ Another common case would be to extract all direct ``<p>`` children::
     >>> for p in divs.xpath('p'):
     ...     print(p.get())
 
+When an absolute XPath (starting with ``/`` but not ``./``) is used on a
+*nested* selector — one produced by a prior ``.xpath()`` / ``.css()`` query —
+parsel emits a :class:`UserWarning` suggesting a relative form such as
+``.//p``. Root selectors (created directly from text/HTML) do not warn.
+
+To silence the warning intentionally (for example when you truly want a
+document-absolute query from a nested selector), use the standard
+:mod:`warnings` filters::
+
+    import warnings
+
+    warnings.filterwarnings(
+        "ignore",
+        message=r"Absolute XPath .* used on a nested selector",
+        category=UserWarning,
+        module=r"parsel\.selector",
+    )
+
 For more details about relative XPaths see the `Location Paths`_ section in the
 XPath specification.
 
