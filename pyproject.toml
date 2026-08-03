@@ -251,9 +251,6 @@ ignore = [
     "RUF012",
     # Use of `assert` detected
     "S101",
-
-    # pending: https://github.com/scrapy/parsel/issues/312
-    "B019",
 ]
 
 [tool.ruff.lint.isort]

@@ -4,6 +4,9 @@ Selector tests for cssselect backend
 
 from __future__ import annotations
 
+import gc
+import pickle
+import weakref
 from abc import ABC, abstractmethod
 from typing import Any
 
@@ -159,6 +162,28 @@ class TestHTMLTranslator(TestTranslatorBase):
 
 class TestGenericTranslator(TestTranslatorBase):
     tr_cls = GenericTranslator
+
+
+@pytest.mark.parametrize("tr_cls", [GenericTranslator, HTMLTranslator])
+class TestTranslatorCache:
+    def test_cache(self, tr_cls: type[GenericTranslator | HTMLTranslator]) -> None:
+        tr = tr_cls()
+        assert tr.css_to_xpath("a::text") == tr.css_to_xpath("a::text")
+        assert tr._cache.cache_info().hits == 1
+
+    def test_garbage_collection(
+        self, tr_cls: type[GenericTranslator | HTMLTranslator]
+    ) -> None:
+        tr = tr_cls()
+        tr.css_to_xpath("a::text")
+        ref = weakref.ref(tr)
+        del tr
+        gc.collect()
+        assert ref() is None
+
+    def test_pickle(self, tr_cls: type[GenericTranslator | HTMLTranslator]) -> None:
+        tr = pickle.loads(pickle.dumps(tr_cls()))  # noqa: S301
+        assert tr.css_to_xpath("a::text") == "descendant-or-self::a/text()"
 
 
 def test_css2xpath() -> None:
