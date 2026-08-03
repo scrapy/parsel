@@ -1008,6 +1008,15 @@ class TestSelector:
         assert selector.root == obj
         assert selector.type == "json"
 
+    @pytest.mark.parametrize("type_", ["html", "xml", "text"])
+    def test_explicit_type_beats_json(self, type_: str) -> None:
+        selector = self.sscls('{"a": "b"}', type=type_)
+        assert selector.type == type_
+
+    def test_explicit_text_type_beats_json_root(self) -> None:
+        selector = self.sscls(root='{"a": "b"}', type="text")
+        assert selector.type == "text"
+
     def test_html_root(self) -> None:
         root = etree.fromstring("<html/>")
         selector = self.sscls(root=root)
@@ -1055,12 +1064,12 @@ class TestSelector:
             Selector(root=selector.root, type="json")
 
     def test_json_selector_representation(self) -> None:
-        selector = Selector(text="true")
+        selector = Selector(text="true", type="json")
         assert repr(selector) == "<Selector query=None data='True'>"
         assert str(selector) == "True"
-        selector = Selector(text="1")
-        assert repr(selector) == "<Selector query=None data='1'>"
-        assert str(selector) == "1"
+        selector = Selector(text="[1]")
+        assert repr(selector) == "<Selector query=None data='[1]'>"
+        assert str(selector) == "[1]"
 
     def test_body_bytearray_support(self) -> None:
         selector = Selector(body=bytearray("<h1>Hello World</h1>", "utf-8"))

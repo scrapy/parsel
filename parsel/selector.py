@@ -298,12 +298,12 @@ def _get_root_and_type_from_bytes(
 ) -> tuple[Any, str]:
     if input_type == "text":
         return body.decode(encoding), input_type
-    if encoding == "utf-8":
+    if input_type in ("json", None) and encoding == "utf-8":
         try:
             data = json.load(BytesIO(body))
         except ValueError:
             data = _NOT_SET
-        if data is not _NOT_SET:
+        if data is not _NOT_SET and (input_type == "json" or _is_json_document(data)):
             return data, "json"
     if input_type == "json":
         return None, "json"
@@ -324,12 +324,13 @@ def _get_root_and_type_from_text(
 ) -> tuple[Any, str]:
     if input_type == "text":
         return text, input_type
-    try:
-        data = json.loads(text)
-    except ValueError:
-        data = _NOT_SET
-    if data is not _NOT_SET:
-        return data, "json"
+    if input_type in ("json", None):
+        try:
+            data = json.loads(text)
+        except ValueError:
+            data = _NOT_SET
+        if data is not _NOT_SET and (input_type == "json" or _is_json_document(data)):
+            return data, "json"
     if input_type == "json":
         return None, "json"
     assert input_type in ("html", "xml", None)  # nosec
@@ -346,17 +347,21 @@ def _get_root_type(root: Any, *, input_type: str | None) -> str:
                 f"and {input_type!r} as type."
             )
         return _xml_or_html(input_type)
-    if isinstance(root, (dict, list)) or _is_valid_json(root):
+    if input_type in {"json", "text"}:
+        return input_type
+    if _is_json_document(root) or _is_json_document(_load_json_or_none(root)):
         return "json"
     return input_type or "json"
 
 
-def _is_valid_json(text: str) -> bool:
-    try:
-        json.loads(text)
-    except (TypeError, ValueError):
-        return False
-    return True
+def _is_json_document(data: Any) -> bool:
+    """Return whether *data* is a JSON object or array.
+
+    Scalar JSON values are valid JSON documents as well, but they are also
+    valid text and HTML, which is what they usually are when type detection
+    gets to see them, so type detection ignores them.
+    """
+    return isinstance(data, (dict, list))
 
 
 def _load_json_or_none(text: str) -> Any:
@@ -380,8 +385,9 @@ class Selector:
     ``body`` is a ``bytes`` or ``bytearray`` object. It can be used together with the
     ``encoding`` argument instead of the ``text`` argument.
 
-    ``type`` defines the selector type. It can be ``"html"`` (default),
-    ``"json"``, ``"xml"`` or ``"text"``.
+    ``type`` defines the selector type. It can be ``"html"``, ``"json"``,
+    ``"xml"`` or ``"text"``. If not specified, the input is handled as
+    ``"json"`` if it is a JSON object or array, and as ``"html"`` otherwise.
 
     ``base_url`` allows setting a URL for the document. This is needed when looking up external entities with relative paths.
     See the documentation for :func:`lxml.etree.fromstring` for more information.
