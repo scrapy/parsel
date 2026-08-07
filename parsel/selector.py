@@ -3,6 +3,7 @@ packages."""
 
 from __future__ import annotations
 
+import codecs
 import json
 import typing
 import warnings
@@ -82,6 +83,31 @@ def _xml_or_html(type_: str | None) -> str:
     return "xml" if type_ == "xml" else "html"
 
 
+_ENCODING_ERROR_TYPES = frozenset(
+    {etree.ErrorTypes.ERR_INVALID_CHAR, etree.ErrorTypes.ERR_INVALID_ENCODING}
+)
+
+
+def _has_encoding_error(parser: _ParserType) -> bool:
+    return any(error.type in _ENCODING_ERROR_TYPES for error in parser.error_log)
+
+
+def _root_from_decoded_body(
+    body: bytes,
+    parser_cls: type[_ParserType],
+    base_url: str | None,
+    huge_tree: bool,
+    encoding: str,
+) -> etree._Element:
+    """Create a root node from *body*, with undecodable bytes replaced."""
+    return create_root_node(
+        body.decode(encoding, errors="replace"),
+        parser_cls,
+        base_url=base_url,
+        huge_tree=huge_tree,
+    )
+
+
 def create_root_node(
     text: str,
     parser_cls: type[_ParserType],
@@ -91,13 +117,29 @@ def create_root_node(
     encoding: str = "utf-8",
 ) -> etree._Element:
     """Create root node for text using given parser class."""
-    if not text:
-        body = body.replace(b"\x00", b"").strip()
-    else:
+    if text:
         body = text.strip().replace("\x00", "").encode(encoding) or b"<html/>"
+    elif codecs.lookup(encoding).name != "utf-8":
+        # lxml handles bytes that the declared encoding cannot decode by
+        # truncating the document there, and characters that span several
+        # bytes, as in UTF-16, are broken by the null and whitespace stripping
+        # below. Only UTF-8 bytes are passed as is, since lxml does report
+        # invalid UTF-8, and it covers most input.
+        return _root_from_decoded_body(body, parser_cls, base_url, huge_tree, encoding)
+    else:
+        body = body.replace(b"\x00", b"").strip() or b"<html/>"
 
     parser = parser_cls(recover=True, encoding=encoding, huge_tree=huge_tree)
-    root = etree.fromstring(body, parser=parser, base_url=base_url)
+    root = None
+    try:
+        root = etree.fromstring(body, parser=parser, base_url=base_url)
+    except etree.XMLSyntaxError:
+        if text or not _has_encoding_error(parser):
+            raise
+    if not text and _has_encoding_error(parser):
+        # Invalid bytes reach the tree as is, and reading them raises
+        # UnicodeDecodeError from lxml.
+        return _root_from_decoded_body(body, parser_cls, base_url, huge_tree, encoding)
     if not huge_tree:
         for error in parser.error_log:
             if "use XML_PARSE_HUGE option" in error.message:
@@ -298,7 +340,7 @@ def _get_root_and_type_from_bytes(
 ) -> tuple[Any, str]:
     if input_type == "text":
         return body.decode(encoding), input_type
-    if input_type in ("json", None) and encoding == "utf-8":
+    if input_type in ("json", None) and codecs.lookup(encoding).name == "utf-8":
         try:
             data = json.load(BytesIO(body))
         except ValueError:
