@@ -1051,6 +1051,18 @@ class TestSelector:
         assert selector.root is None
         assert selector.type == "json"
 
+    def test_unsupported_declared_encoding(self) -> None:
+        """A syntax error other than an invalid byte sequence reaches the
+        caller. Only some libxml2 versions consider an unsupported encoding
+        declaration one."""
+        text = '<?xml version="1.0" encoding="bogus"?><a/>'
+        try:
+            selector = self.sscls(text, type="xml")
+        except etree.XMLSyntaxError:
+            pass
+        else:
+            assert selector.get() == "<a/>"
+
     def test_text_and_root_warning(self) -> None:
         with warnings.catch_warnings(record=True) as w:
             Selector(text="a", root="b")
