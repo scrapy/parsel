@@ -316,8 +316,8 @@ too. Here's an example::
 Extracting text
 ---------------
 
-``::text`` and ``text()`` select text nodes, and an element that contains child
-elements has more than one:
+``::text`` and ``text()`` select text nodes, so an element that contains child
+elements has more than one, and an empty element has none:
 
 .. code-block:: pycon
 
@@ -325,9 +325,12 @@ elements has more than one:
     >>> sel = Selector(text="""<h2>
     ...     This is the <em>new</em>
     ...     trend!
-    ... </h2>""")
+    ... </h2>
+    ... <h3></h3>""")
     >>> sel.css("h2::text").getall()
     ['\n    This is the ', '\n    trend!\n']
+    >>> sel.css("h3::text").getall()
+    []
 
 To get all the text of an element as a single string, convert the element node
 to a string with the XPath ``string()`` function, or with ``normalize-space()``
@@ -340,6 +343,8 @@ space:
     '\n    This is the new\n    trend!\n'
     >>> sel.css("h2").xpath("normalize-space(.)").get()
     'This is the new trend!'
+    >>> sel.css("h3").xpath("string(.)").get()
+    ''
 
 Both functions take a single node, so mind the difference between ``.``, the
 element node, and ``.//text()``, a node-set of which they would only use the
