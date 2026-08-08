@@ -26,7 +26,7 @@ It supports:
 
 -   CSS_ and XPath_ expressions for HTML and XML documents
 
--   JMESPath_ expressions for JSON documents
+-   JMESPath_ and JSONPath_ expressions for JSON documents
 
 -   `Regular expressions`_
 
@@ -67,6 +67,7 @@ Example (`open online demo`_):
 .. _HTML: https://en.wikipedia.org/wiki/HTML
 .. _JMESPath: https://jmespath.org/
 .. _JSON: https://en.wikipedia.org/wiki/JSON
+.. _JSONPath: https://datatracker.ietf.org/doc/html/rfc9535
 .. _open online demo: https://colab.research.google.com/drive/149VFa6Px3wg7S3SEnUqk--TyBrKplxCN#forceEdit=true&sandboxMode=true
 .. _Python: https://www.python.org/
 .. _regular expressions: https://docs.python.org/library/re.html

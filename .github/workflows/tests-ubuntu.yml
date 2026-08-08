@@ -33,6 +33,12 @@ jobs:
         - python-version: "3.10"
           env:
             TOXENV: min-deps
+        - python-version: "3.10"
+          env:
+            TOXENV: min-deps-jsonpath-rfc9535
+        - python-version: "3.13"
+          env:
+            TOXENV: jsonpath-rfc9535
 
     steps:
     - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
