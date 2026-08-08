@@ -416,6 +416,28 @@ XPath specification.
 .. _Location Paths: https://www.w3.org/TR/xpath#location-paths
 
 
+Getting the XPath of a selector
+-------------------------------
+
+To find out where in the document the element of a selector is, ask its
+underlying lxml element tree for the XPath that locates it::
+
+    >>> image = selector.css('img')[2]
+    >>> image.root.getroottree().getpath(image.root)
+    '/html/body/div/a[3]/img'
+
+The result is an absolute XPath, so it works on the root selector regardless of
+which selector you got it from::
+
+    >>> selector.xpath('/html/body/div/a[3]/img').get()
+    '<img src="image3_thumb.jpg">'
+
+Only selectors that point to an element have such an XPath. For selectors that
+point to text or to an attribute value, such as those from
+``//title/text()`` or ``a::attr(href)``, ``root`` is a string, and there is no
+element to locate.
+
+
 Removing elements
 -----------------
 
