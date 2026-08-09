@@ -74,6 +74,14 @@ class TestTranslatorBase(ABC):
                 "descendant-or-self::a/descendant-or-self::*/@img",
             ),
             ("a > ::attr(class)", "descendant-or-self::a/*/@class"),
+            (
+                r"a::attr(\:foo)",
+                "descendant-or-self::a/attribute::*[name() = ':foo']",
+            ),
+            (
+                r"a::attr(foo\:bar)",
+                "descendant-or-self::a/attribute::*[name() = 'foo:bar']",
+            ),
         ],
     )
     def test_attr_function(self, css: str, xpath: str) -> None:
