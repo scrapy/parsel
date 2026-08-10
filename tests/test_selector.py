@@ -1002,6 +1002,32 @@ class TestSelector:
         selector = self.sscls(text)
         assert selector.type == "html"
 
+    @pytest.mark.parametrize(
+        ("text", "type_"),
+        [
+            ('<?xml version="1.0"?><Doc/>', "xml"),
+            ('\n <?xml version="1.0"?><Doc/>', "xml"),
+            ('﻿<?xml version="1.0"?><Doc/>', "xml"),
+            # Only the XML declaration is a strong enough hint.
+            ("<?xml-stylesheet?><Doc/>", "html"),
+            ("<Doc/>", "html"),
+            ('<html><?xml version="1.0"?></html>', "html"),
+        ],
+    )
+    def test_detected_type(self, text: str, type_: str) -> None:
+        assert self.sscls(text).type == type_
+        assert self.sscls(body=text.encode()).type == type_
+        assert self.sscls(body=text.encode("utf-16"), encoding="utf-16").type == type_
+
+    def test_detected_xml_type_parsing(self) -> None:
+        selector = self.sscls('<?xml version="1.0"?><Doc><Title>Hi</Title></Doc>')
+        assert selector.xpath("//Title/text()").get() == "Hi"
+        assert selector.css("Title").get() == "<Title>Hi</Title>"
+
+    def test_explicit_type_beats_xml_declaration(self) -> None:
+        selector = self.sscls('<?xml version="1.0"?><Doc/>', type="html")
+        assert selector.type == "html"
+
     def test_json_type(self) -> None:
         obj = 1
         selector = self.sscls(str(obj), type="json")
