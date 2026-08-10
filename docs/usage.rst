@@ -895,18 +895,9 @@ elements::
 Command-Line Interface Tools
 ============================
 
-There are third-party tools that allow using Parsel from the command line:
-
--   `Parsel CLI <https://github.com/rmax/parsel-cli>`_ allows applying
-    Parsel selectors to the standard input. For example, you can apply a Parsel
-    selector to the output of cURL_.
-
--   `parselcli
-    <https://github.com/Granitosaurus/parsel-cli>`_ provides an interactive
-    shell that allows applying Parsel selectors to a remote URL or a local
-    file.
-
-.. _cURL: https://curl.haxx.se/
+`parselcli <https://github.com/Granitosaurus/parsel-cli>`_ is a third-party
+tool that provides an interactive shell that allows applying Parsel selectors
+to a remote URL or a local file.
 
 
 .. _selector-examples-html:
