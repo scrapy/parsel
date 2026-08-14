@@ -3,6 +3,13 @@
 History
 -------
 
+1.12.0 (unreleased)
+~~~~~~~~~~~~~~~~~~~
+
+* Fixed type hints for ``Selector.getall()``, ``SelectorList.get()`` and
+  ``SelectorList.getall()``. They no longer claim a ``str`` result, which is
+  wrong for JMESPath selectors (#325).
+
 1.11.0 (2026-01-29)
 ~~~~~~~~~~~~~~~~~~~
 

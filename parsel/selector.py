@@ -237,24 +237,27 @@ class SelectorList(list[_SelectorType]):
             return typing.cast("str", el)
         return default
 
-    def getall(self) -> list[str]:
+    def getall(self) -> list[Any]:
         """
         Call the ``.get()`` method for each element in this list and return
-        their results flattened, as a list of strings.
+        their results flattened, as a list.
+
+        For HTML and XML this is a list of strings. JMESPath selectors may
+        return other JSON types.
         """
         return [x.get() for x in self]
 
     extract = getall
 
     @typing.overload
-    def get(self, default: None = None) -> str | None:
+    def get(self, default: None = None) -> Any | None:
         pass
 
     @typing.overload
-    def get(self, default: str) -> str:
+    def get(self, default: Any) -> Any:
         pass
 
-    def get(self, default: str | None = None) -> Any:
+    def get(self, default: Any | None = None) -> Any:
         """
         Return the result of ``.get()`` for the first element in this list.
         If the list is empty, return the default value.
@@ -710,9 +713,12 @@ class Selector:
 
     extract = get
 
-    def getall(self) -> list[str]:
+    def getall(self) -> list[Any]:
         """
-        Serialize and return the matched node in a 1-element list of strings.
+        Serialize and return the matched node in a 1-element list.
+
+        For HTML and XML the list contains a string. JMESPath selectors may
+        return other JSON types.
         """
         return [self.get()]
 

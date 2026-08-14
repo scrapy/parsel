@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import re
+from typing import Any
 
 from parsel import Selector
 
@@ -11,11 +12,16 @@ def correct() -> None:
         text="<html><body><ul><li>1</li><li>2</li><li>3</li></ul></body></html>"
     )
 
-    li_values: list[str] = selector.css("li").getall()
+    # get()/getall() are Any because JMESPath can return non-strings.
+    li_values: list[Any] = selector.css("li").getall()
+    first_li: Any | None = selector.css("li").get()
     selector.re_first(re.compile(r"[32]"), "").strip()
-    xpath_values: list[str] = selector.xpath(
+    xpath_values: list[Any] = selector.xpath(
         "//somens:a/text()", namespaces={"somens": "http://scrapy.org"}
     ).extract()
+
+    json_selector = Selector(text='{"n": 1}', type="json")
+    n: Any = json_selector.jmespath("n").get()
 
     class MySelector(Selector):
         def my_own_func(self) -> int:
@@ -38,7 +44,7 @@ def incorrect() -> None:
     # Wrong query type in css.
     selector.css(5).getall()  # type: ignore[arg-type]
 
-    # Cannot assign a list of str to an int.
+    # Cannot assign a list to an int.
     li_values: int = selector.css("li").getall()  # type: ignore[assignment]
 
     # Cannot use a string to define namespaces in xpath.
