@@ -354,6 +354,27 @@ ID, or when selecting an unique element on a page)::
     >>> selector.css('foo').attrib
     {}
 
+Extracting links
+----------------
+
+HTML selectors are built on top of `lxml.html`_, so the underlying element,
+available as ``.root``, provides `iterlinks()`_, which yields every link in the
+document, whatever the element and attribute where it is defined, as
+``(element, attribute, link, position)`` tuples::
+
+    >>> from parsel import Selector
+    >>> doc = """
+    ... <a href="a.html">A</a>
+    ... <a href="javascript:alert(1)">B</a>
+    ... <img src="i.png">
+    ... """
+    >>> sel = Selector(text=doc)
+    >>> [(element.tag, attribute, link) for element, attribute, link, _ in sel.root.iterlinks()]
+    [('a', 'href', 'a.html'), ('a', 'href', 'javascript:alert(1)'), ('img', 'src', 'i.png')]
+
+Links are yielded as they appear in the document, so they may be relative, and
+they may use schemes such as ``javascript:``.
+
 Using selectors with regular expressions
 ----------------------------------------
 
@@ -1196,6 +1217,8 @@ selecting markup documents.
 
 
 .. _BeautifulSoup: https://www.crummy.com/software/BeautifulSoup/
+.. _iterlinks(): https://lxml.de/lxmlhtml.html#working-with-links
 .. _lxml: https://lxml.de/
+.. _lxml.html: https://lxml.de/lxmlhtml.html
 .. _PyQuery: https://pypi.python.org/pypi/pyquery
 .. _ElementTree: https://docs.python.org/2/library/xml.etree.elementtree.html
