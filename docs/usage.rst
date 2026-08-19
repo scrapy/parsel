@@ -364,6 +364,27 @@ ID, or when selecting an unique element on a page)::
     >>> selector.css('foo').attrib
     {}
 
+Extracting links
+----------------
+
+HTML selectors are built on top of `lxml.html`_, so the underlying element,
+available as ``.root``, provides `iterlinks()`_, which yields every link in the
+document, whatever the element and attribute where it is defined, as
+``(element, attribute, link, position)`` tuples::
+
+    >>> from parsel import Selector
+    >>> doc = """
+    ... <a href="a.html">A</a>
+    ... <a href="javascript:alert(1)">B</a>
+    ... <img src="i.png">
+    ... """
+    >>> sel = Selector(text=doc)
+    >>> [(element.tag, attribute, link) for element, attribute, link, _ in sel.root.iterlinks()]
+    [('a', 'href', 'a.html'), ('a', 'href', 'javascript:alert(1)'), ('img', 'src', 'i.png')]
+
+Links are yielded as they appear in the document, so they may be relative, and
+they may use schemes such as ``javascript:``.
+
 Using selectors with regular expressions
 ----------------------------------------
 
@@ -424,6 +445,28 @@ For more details about relative XPaths see the `Location Paths`_ section in the
 XPath specification.
 
 .. _Location Paths: https://www.w3.org/TR/xpath#location-paths
+
+
+Getting the XPath of a selector
+-------------------------------
+
+To find out where in the document the element of a selector is, ask its
+underlying lxml element tree for the XPath that locates it::
+
+    >>> image = selector.css('img')[2]
+    >>> image.root.getroottree().getpath(image.root)
+    '/html/body/div/a[3]/img'
+
+The result is an absolute XPath, so it works on the root selector regardless of
+which selector you got it from::
+
+    >>> selector.xpath('/html/body/div/a[3]/img').get()
+    '<img src="image3_thumb.jpg">'
+
+Only selectors that point to an element have such an XPath. For selectors that
+point to text or to an attribute value, such as those from
+``//title/text()`` or ``a::attr(href)``, ``root`` is a string, and there is no
+element to locate.
 
 
 Removing elements
@@ -905,18 +948,9 @@ elements::
 Command-Line Interface Tools
 ============================
 
-There are third-party tools that allow using Parsel from the command line:
-
--   `Parsel CLI <https://github.com/rmax/parsel-cli>`_ allows applying
-    Parsel selectors to the standard input. For example, you can apply a Parsel
-    selector to the output of cURL_.
-
--   `parselcli
-    <https://github.com/Granitosaurus/parsel-cli>`_ provides an interactive
-    shell that allows applying Parsel selectors to a remote URL or a local
-    file.
-
-.. _cURL: https://curl.haxx.se/
+`parselcli <https://github.com/Granitosaurus/parsel-cli>`_ is a third-party
+tool that provides an interactive shell that allows applying Parsel selectors
+to a remote URL or a local file.
 
 
 .. _selector-examples-html:
@@ -1193,6 +1227,8 @@ selecting markup documents.
 
 
 .. _BeautifulSoup: https://www.crummy.com/software/BeautifulSoup/
+.. _iterlinks(): https://lxml.de/lxmlhtml.html#working-with-links
 .. _lxml: https://lxml.de/
+.. _lxml.html: https://lxml.de/lxmlhtml.html
 .. _PyQuery: https://pypi.python.org/pypi/pyquery
 .. _ElementTree: https://docs.python.org/2/library/xml.etree.elementtree.html
