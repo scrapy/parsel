@@ -108,8 +108,9 @@ So, let's download that page and create a selector for it:
 
    selector = load_selector('selectors-sample1.html')
 
-We don't need to specify the `type` argument: Selector detects JSON input, and
-falls back to HTML otherwise.
+We don't need to specify the `type` argument: Selector detects JSON input and
+XML input that starts with an XML declaration, and falls back to HTML
+otherwise.
 
 So, by looking at the :ref:`HTML code <topics-selectors-htmlcode>` of that
 page, let's construct an XPath for selecting the text inside the title tag::
