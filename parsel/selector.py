@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import codecs
 import json
+import re
 import typing
 import warnings
 from io import BytesIO
@@ -106,6 +107,13 @@ def _root_from_decoded_body(
         base_url=base_url,
         huge_tree=huge_tree,
     )
+
+
+_XML_DECLARATION = re.compile(r"[\s\ufeff]*<\?xml\s")
+
+
+def _detect_xml_or_html(text: str) -> str:
+    return "xml" if _XML_DECLARATION.match(text) else "html"
 
 
 def create_root_node(
@@ -350,7 +358,7 @@ def _get_root_and_type_from_bytes(
     if input_type == "json":
         return None, "json"
     assert input_type in ("html", "xml", None)  # nosec
-    type_ = _xml_or_html(input_type)
+    type_ = input_type or _detect_xml_or_html(body[:256].decode(encoding, "ignore"))
     root = create_root_node(
         text="",
         body=body,
@@ -376,7 +384,7 @@ def _get_root_and_type_from_text(
     if input_type == "json":
         return None, "json"
     assert input_type in ("html", "xml", None)  # nosec
-    type_ = _xml_or_html(input_type)
+    type_ = input_type or _detect_xml_or_html(text)
     root = _get_root_from_text(text, type_=type_, **lxml_kwargs)
     return root, type_
 
@@ -429,7 +437,8 @@ class Selector:
 
     ``type`` defines the selector type. It can be ``"html"``, ``"json"``,
     ``"xml"`` or ``"text"``. If not specified, the input is handled as
-    ``"json"`` if it is a JSON object or array, and as ``"html"`` otherwise.
+    ``"json"`` if it is a JSON object or array, as ``"xml"`` if it starts with
+    an XML declaration, and as ``"html"`` otherwise.
 
     ``base_url`` allows setting a URL for the document. This is needed when looking up external entities with relative paths.
     See the documentation for :func:`lxml.etree.fromstring` for more information.
