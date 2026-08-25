@@ -706,10 +706,12 @@ class TestSelector:
         # Text node
         x1 = r.xpath("//text()")
         assert x1.extract() == ["some text"]
+        assert x1.xpath(".").extract() == ["some text"]
         assert x1.xpath(".//b").extract() == []
         # Tag attribute
         x1 = r.xpath("//span/@class")
         assert x1.extract() == ["big"]
+        assert x1.xpath(".").extract() == ["big"]
         assert x1.xpath(".//text()").extract() == []
 
     def test_select_on_text_nodes(self) -> None:

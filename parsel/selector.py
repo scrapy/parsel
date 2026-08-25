@@ -587,6 +587,20 @@ class Selector:
             try:
                 xpathev = self.root.xpath
             except AttributeError:
+                if isinstance(self.root, str) and query.strip() == ".":
+                    return typing.cast(
+                        "SelectorList[Self]",
+                        self.selectorlist_cls(
+                            [
+                                self.__class__(
+                                    root=self.root,
+                                    _expr=query,
+                                    namespaces=self.namespaces,
+                                    type=self.type,
+                                )
+                            ]
+                        ),
+                    )
                 return typing.cast("SelectorList[Self]", self.selectorlist_cls([]))
         else:
             try:
