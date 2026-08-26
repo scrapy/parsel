@@ -24,6 +24,7 @@ def correct() -> None:
     my_selector = MySelector()
     res: int = my_selector.my_own_func()
     sub_res: int = my_selector.xpath("//somens:a/text()")[0].my_own_func()
+    jsonpath_res: int = my_selector.jsonpath("$.a")[0].my_own_func()
 
 
 # Negative checks: all the code lines below have typing errors.

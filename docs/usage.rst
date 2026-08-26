@@ -16,12 +16,14 @@ For HTML or XML, use `CSS`_ or `XPath`_ expressions to select data::
     >>> html_selector.xpath('//h1')  # the same, but now with XPath
     [<Selector query='//h1' data='<h1>Hello, Parsel!</h1>'>]
 
-For JSON, use `JMESPath`_ expressions to select data::
+For JSON, use `JMESPath`_ or `JSONPath`_ expressions to select data::
 
     >>> json_text = '{"title":"Hello, Parsel!"}'
     >>> json_selector = Selector(text=json_text)
     >>> json_selector.jmespath('title')
     [<Selector query='title' data='Hello, Parsel!'>]
+    >>> json_selector.jsonpath('$.title')
+    [<Selector query='$.title' data='Hello, Parsel!'>]
 
 And extract data from those elements::
 
@@ -33,6 +35,7 @@ And extract data from those elements::
 .. _CSS: https://www.w3.org/TR/selectors
 .. _XPath: https://www.w3.org/TR/xpath
 .. _JMESPath: https://jmespath.org/
+.. _JSONPath: https://datatracker.ietf.org/doc/html/rfc9535
 
 Learning expression languages
 =============================
@@ -60,12 +63,18 @@ used with HTML. Resources to learn XPath_ include:
 For HTML and XML input, you can use either CSS_ or XPath_. CSS_ is usually
 more readable, but some things can only be done with XPath_.
 
-JMESPath_ allows you to declaratively specify how to extract elements from
-a JSON document. Resources to learn JMESPath_ include:
+JMESPath_ and JSONPath_ both allow you to declaratively specify how to extract
+elements from a JSON document. Resources to learn them include:
 
 -   `JMESPath Tutorial`_
 
 -   `JMESPath Specification`_
+
+-   `JSONPath Specification`_
+
+For JSON input, you can use either JMESPath_ or JSONPath_. JMESPath_ is usually
+more readable, but some things can only be done with JSONPath_, such as
+searching at any depth (``$..price``).
 
 .. _CSS selectors in the MDN: https://developer.mozilla.org/en-US/docs/Learn/CSS/Building_blocks/Selectors
 .. _XPath cheatsheet: https://devhints.io/xpath
@@ -73,6 +82,7 @@ a JSON document. Resources to learn JMESPath_ include:
 .. _XPath/CSS Equivalents in Wikibooks: https://en.wikibooks.org/wiki/XPath/CSS_Equivalents
 .. _JMESPath Tutorial: https://jmespath.org/tutorial.html
 .. _JMESPath Specification: https://jmespath.org/specification.html
+.. _JSONPath Specification: https://datatracker.ietf.org/doc/html/rfc9535
 
 
 Using selectors

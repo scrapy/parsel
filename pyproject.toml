@@ -42,6 +42,14 @@ dependencies = [
 requires-python = ">=3.10"
 dynamic = ["version"]
 
+[project.optional-dependencies]
+jsonpath-rfc9535 = [
+    "jsonpath-rfc9535>=0.1.0",
+]
+python-jsonpath = [
+    "python-jsonpath>=2.0.0",
+]
+
 [project.urls]
 Homepage = "https://github.com/scrapy/parsel"
 Documentation = "https://parsel.readthedocs.io/en/latest/"

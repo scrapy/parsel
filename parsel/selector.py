@@ -7,6 +7,7 @@ import json
 import re
 import typing
 import warnings
+from functools import lru_cache
 from io import BytesIO
 from typing import (
     TYPE_CHECKING,
@@ -156,6 +157,17 @@ class SelectorList(list[_SelectorType]):
             selector.jmespath('author.name', options=jmespath.Options(dict_cls=collections.OrderedDict))
         """
         return self.__class__(flatten([x.jmespath(query, **kwargs) for x in self]))
+
+    def jsonpath(self, query: str) -> SelectorList[_SelectorType]:
+        """
+        Call the ``.jsonpath()`` method for each element in this list and return
+        their results flattened as another :class:`SelectorList`.
+
+        .. versionadded:: VERSION
+
+        ``query`` is the same argument as the one in :meth:`Selector.jsonpath`.
+        """
+        return self.__class__(flatten([x.jsonpath(query) for x in self]))
 
     def xpath(
         self,
@@ -381,12 +393,69 @@ def _load_json_or_none(text: str) -> Any:
     return None
 
 
+class JSONPathError(ValueError):
+    """Raised when a JSONPath query is invalid or cannot be evaluated.
+
+    .. versionadded:: VERSION
+    """
+
+
+@lru_cache(maxsize=1)
+def _jsonpath_backend() -> tuple[Any, Any, type[Exception]]:
+    """Return a query compiler, a function that runs a compiled query on data,
+    and the base error class of the underlying JSONPath package."""
+    try:
+        import jsonpath_rfc9535  # noqa: PLC0415
+    except ImportError:
+        pass
+    else:
+        rfc9535_env = jsonpath_rfc9535.JSONPathEnvironment()
+        return (
+            rfc9535_env.compile,
+            lambda compiled, data: compiled.find(data).values(),
+            jsonpath_rfc9535.JSONPathError,
+        )
+    try:
+        import jsonpath  # noqa: PLC0415
+    except ImportError:
+        raise ImportError(
+            "You need to install jsonpath-rfc9535 or python-jsonpath, e.g. "
+            "pip install parsel[jsonpath-rfc9535], to use JSONPath "
+            "expressions."
+        )
+    # strict mode restricts the syntax to RFC 9535, leaving out the extensions
+    # that python-jsonpath enables by default.
+    jsonpath_env = jsonpath.JSONPathEnvironment(strict=True)
+    return (
+        jsonpath_env.compile,
+        lambda compiled, data: compiled.findall(data),
+        jsonpath.JSONPathError,
+    )
+
+
+@lru_cache(maxsize=512)
+def _compile_jsonpath(query: str) -> Any:
+    compile_query, run_query, backend_error = _jsonpath_backend()
+    try:
+        compiled = compile_query(query)
+    except backend_error as error:
+        raise JSONPathError(str(error))
+
+    def find(data: Any) -> Any:
+        try:
+            return run_query(compiled, data)
+        except backend_error as error:
+            raise JSONPathError(str(error))
+
+    return find
+
+
 class Selector:
     """Wrapper for input data in HTML, JSON, or XML format, that allows
     selecting parts of it using selection expressions.
 
     You can write selection expressions in CSS or XPath for HTML and XML
-    inputs, or in JMESPath for JSON inputs.
+    inputs, or in JMESPath or JSONPath for JSON inputs.
 
     ``text`` is an ``str`` object.
 
@@ -516,6 +585,26 @@ class Selector:
             huge_tree=huge_tree,
         )
 
+    def _json_data(self) -> Any:
+        if self.type == "json":
+            if isinstance(self.root, str):
+                # Selector received a JSON string as root.
+                return _load_json_or_none(self.root)
+            return self.root
+        assert self.type in {"html", "xml"}  # nosec
+        return _load_json_or_none(self.root.text)
+
+    def _json_selector_list(self, values: Any, query: str) -> SelectorList[Self]:
+        def make_selector(x: Any) -> Selector:  # closure function
+            if isinstance(x, str):
+                return self.__class__(text=x, _expr=query, type="text")
+            return self.__class__(root=x, _expr=query)
+
+        return typing.cast(
+            "SelectorList[Self]",
+            self.selectorlist_cls([make_selector(x) for x in values]),
+        )
+
     def jmespath(
         self,
         query: str,
@@ -534,29 +623,30 @@ class Selector:
 
             selector.jmespath('author.name', options=jmespath.Options(dict_cls=collections.OrderedDict))
         """
-        if self.type == "json":
-            if isinstance(self.root, str):
-                # Selector received a JSON string as root.
-                data = _load_json_or_none(self.root)
-            else:
-                data = self.root
-        else:
-            assert self.type in {"html", "xml"}  # nosec
-            data = _load_json_or_none(self.root.text)
-
-        result = jmespath.search(query, data, **kwargs)
+        result = jmespath.search(query, self._json_data(), **kwargs)
         if result is None:
             result = []
         elif not isinstance(result, list):
             result = [result]
+        return self._json_selector_list(result, query)
 
-        def make_selector(x: Any) -> Selector:  # closure function
-            if isinstance(x, str):
-                return self.__class__(text=x, _expr=query, type="text")
-            return self.__class__(root=x, _expr=query)
+    def jsonpath(self, query: str) -> SelectorList[Self]:
+        """
+        Find objects matching the JSONPath ``query`` and return the result as a
+        :class:`SelectorList` instance with all elements flattened. List
+        elements implement :class:`Selector` interface too.
 
-        result = [make_selector(x) for x in result]
-        return typing.cast("SelectorList[Self]", self.selectorlist_cls(result))
+        .. versionadded:: VERSION
+
+        ``query`` is a string containing the `JSONPath
+        <https://datatracker.ietf.org/doc/html/rfc9535>`_ query to apply.
+        Invalid queries raise :class:`JSONPathError`.
+
+        Requires a JSONPath package, see :ref:`jsonpath-install`.
+        """
+        return self._json_selector_list(
+            _compile_jsonpath(query)(self._json_data()), query
+        )
 
     def xpath(
         self,
