@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import html
 import pickle
 import re
 import typing
@@ -850,6 +851,33 @@ class TestSelector:
         sel = self.sscls(text=malicious_xml, type="xml")
 
         assert sel.extract() == "<foo>&xxe;</foo>"
+
+    def test_html_c1_character_references(self) -> None:
+        """HTML maps numeric references in the C1 range through the CP1252 table.
+
+        ``&#133;`` is an ellipsis rather than U+0085, which is what browsers show
+        and what the HTML standard requires. ``html.unescape`` implements the same
+        table, so it is used as the reference. See #76.
+        """
+        for code_point in range(0x80, 0xA0):
+            reference = f"&#{code_point};"
+            expected = html.unescape(reference)
+            sel = self.sscls(text=f"<p>{reference}</p>")
+            assert sel.css("p::text").get() == expected, reference
+            assert sel.xpath("//p/text()").get() == expected, reference
+
+    def test_html_c1_character_references_hex_and_named(self) -> None:
+        assert self.sscls(text="<p>&#x85;</p>").css("p::text").get() == "\u2026"
+        assert self.sscls(text="<p>&hellip;</p>").css("p::text").get() == "\u2026"
+
+    def test_xml_keeps_c1_character_references_literal(self) -> None:
+        """XML has no CP1252 remapping, so ``&#133;`` really is U+0085 there.
+
+        This is the behaviour in the original report of #76. It is correct for the
+        XML parser and only the HTML path applies the replacement table.
+        """
+        sel = self.sscls(text="<p>&#133;</p>", type="xml")
+        assert sel.xpath("//p/text()").get() == "\x85"
 
     def test_configure_base_url(self) -> None:
         sel = self.sscls(text="nothing", base_url="http://example.com")
