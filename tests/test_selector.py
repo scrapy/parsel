@@ -1079,6 +1079,18 @@ class TestSelector:
         assert selector.root is None
         assert selector.type == "json"
 
+    def test_unsupported_declared_encoding(self) -> None:
+        """A syntax error other than an invalid byte sequence reaches the
+        caller. Only some libxml2 versions consider an unsupported encoding
+        declaration one."""
+        text = '<?xml version="1.0" encoding="bogus"?><a/>'
+        try:
+            selector = self.sscls(text, type="xml")
+        except etree.XMLSyntaxError:
+            pass
+        else:
+            assert selector.get() == "<a/>"
+
     def test_text_and_root_warning(self) -> None:
         with warnings.catch_warnings(record=True) as w:
             Selector(text="a", root="b")
@@ -1282,6 +1294,34 @@ class TestSelectorBytes(TestSelector):
     def test_check_text_argument_type(self) -> None:
         with pytest.raises(TypeError, match="body argument should be of type"):
             self.sscls(body="<html/>")  # type: ignore[arg-type]
+
+    @pytest.mark.parametrize("type_", ["html", "xml", None])
+    @pytest.mark.parametrize(
+        "encoding",
+        ["utf-8", "UTF8", "utf-16", "utf-16-le", "utf-16-be", "iso-8859-1"],
+    )
+    def test_encodings(self, encoding: str, type_: str | None) -> None:
+        text = "<a><b>oh\xa1</b></a>"
+        selector = Selector(body=text.encode(encoding), encoding=encoding, type=type_)
+        assert selector.css("b::text").get() == "oh\xa1"
+
+    @pytest.mark.parametrize("type_", ["html", "xml", None])
+    @pytest.mark.parametrize("encoding", ["utf-8", "ascii", "shift_jis"])
+    def test_undecodable_bytes(self, encoding: str, type_: str | None) -> None:
+        """Bytes that *encoding* cannot decode become replacement characters,
+        and the rest of the document is still parsed."""
+        body = b"<a><b>oh\x80</b></a>"
+        selector = Selector(body=body, encoding=encoding, type=type_)
+        assert selector.css("b::text").get() == "oh�"
+
+    @pytest.mark.parametrize("body", [b"\x00", b"  "])
+    def test_blank_body(self, body: bytes) -> None:
+        assert Selector(body=body, type="xml").get() == "<html/>"
+
+    @pytest.mark.parametrize("encoding", ["utf-8", "UTF8", "utf_8"])
+    def test_json_detection_encodings(self, encoding: str) -> None:
+        selector = Selector(body=b'{"a": "b"}', encoding=encoding)
+        assert selector.type == "json"
 
 
 class TestExsltBytes(TestExslt):
