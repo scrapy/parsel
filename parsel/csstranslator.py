@@ -6,7 +6,7 @@ from typing import TYPE_CHECKING, Any, Protocol
 from cssselect import GenericTranslator as OriginalGenericTranslator
 from cssselect import HTMLTranslator as OriginalHTMLTranslator
 from cssselect.parser import Element, FunctionalPseudoElement, PseudoElement
-from cssselect.xpath import ExpressionError
+from cssselect.xpath import ExpressionError, is_safe_name
 from cssselect.xpath import XPathExpr as OriginalXPathExpr
 
 if TYPE_CHECKING:
@@ -43,7 +43,11 @@ class XPathExpr(OriginalXPathExpr):
         if self.attribute is not None:
             if path.endswith("::*/*"):
                 path = path[:-2]
-            path += f"/@{self.attribute}"
+            if is_safe_name(self.attribute):
+                path += f"/@{self.attribute}"
+            else:
+                literal = OriginalGenericTranslator.xpath_literal(self.attribute)
+                path += f"/attribute::*[name() = {literal}]"
 
         return path
 
