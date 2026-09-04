@@ -583,6 +583,18 @@ class Selector:
         """
         if self.type not in ("html", "xml", "text"):
             raise ValueError(f"Cannot use xpath on a Selector of type {self.type!r}")
+        # Nested selectors + absolute XPath often mean a missing leading '.'
+        # (issue #323). Warn when this Selector was produced by a prior query.
+        if (
+            self._expr is not None
+            and query.startswith("/")
+            and not query.startswith("./")
+        ):
+            warnings.warn(
+                f"Absolute XPath {query!r} used on a nested selector "
+                f"(created by {self._expr!r}); did you mean '.{query}'?",
+                stacklevel=2,
+            )
         if self.type in ("html", "xml"):
             try:
                 xpathev = self.root.xpath
