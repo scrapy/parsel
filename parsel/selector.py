@@ -415,6 +415,7 @@ class Selector:
         "_expr",
         "_huge_tree",
         "_text",
+        "_text_root",
         "body",
         "namespaces",
         "root",
@@ -494,6 +495,7 @@ class Selector:
         self._expr = _expr
         self._huge_tree = huge_tree
         self._text = text
+        self._text_root: etree._Element | None = None
 
     def __getstate__(self) -> Any:
         raise TypeError("can't pickle Selector objects")
@@ -603,10 +605,14 @@ class Selector:
                     )
                 return typing.cast("SelectorList[Self]", self.selectorlist_cls([]))
         else:
-            try:
-                xpathev = self._get_root(self._text or "", type_="html").xpath
-            except AttributeError:
-                return typing.cast("SelectorList[Self]", self.selectorlist_cls([]))
+            # Keep the parsed tree around, so that changes to it, such as
+            # dropped elements, affect later queries on this selector.
+            if self._text_root is None:
+                try:
+                    self._text_root = self._get_root(self.root or "", type_="html")
+                except AttributeError:
+                    return typing.cast("SelectorList[Self]", self.selectorlist_cls([]))
+            xpathev = self._text_root.xpath
 
         nsp = dict(self.namespaces)
         if namespaces is not None:

@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import json
 import pickle
 import re
 import typing
@@ -895,6 +896,30 @@ class TestSelector:
         self.assertIsSelectorList(sel.css("li"))
         assert sel.css("li::text").getall() == ["2", "3"]
 
+    def test_remove_selector_from_html_in_text(self) -> None:
+        html = (
+            "<html><body><style>p{color:red;}</style><p>hello world</p></body></html>"
+        )
+        sel = self.sscls(text=html, type="text")
+        sel.css("style").drop()
+        assert sel.css("style").getall() == []
+        assert sel.xpath("string(.)").get() == "hello world"
+        # get() returns the text of the selector, which drop() does not modify.
+        assert sel.get() == html
+        assert sel.type == "text"
+
+    def test_remove_selector_from_html_in_json(self) -> None:
+        html = (
+            "<html><body><style>p{color:red;}</style><p>hello world</p></body></html>"
+        )
+        sel = self.sscls(text=json.dumps({"body": html}))
+        html_sel = sel.jmespath("body")[0]
+        assert html_sel.type == "text"
+        html_sel.css("style").drop()
+        assert html_sel.xpath("string(.)").get() == "hello world"
+        assert html_sel.get() == html
+        assert html_sel.type == "text"
+
     def test_remove_pseudo_element_selector_list(self) -> None:
         sel = self.sscls(
             text="<html><body><ul><li>1</li><li>2</li><li>3</li></ul></body></html>"
@@ -1090,6 +1115,10 @@ class TestSelector:
             Selector(root=selector.root, type="text")
         with pytest.raises(ValueError, match="object as root"):
             Selector(root=selector.root, type="json")
+
+    def test_text_type_unparsable_root(self) -> None:
+        selector = self.sscls(root=1, type="text")
+        assert selector.xpath("//*").getall() == []
 
     def test_json_selector_representation(self) -> None:
         selector = Selector(text="true", type="json")

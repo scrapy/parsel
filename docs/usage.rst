@@ -584,6 +584,17 @@ Example removing an ad from a blog post:
     >>> sel.xpath('//div//text()').getall()
     ['Content paragraph...', 'More content...']
 
+On a selector of type ``text``, such as one from :meth:`Selector.jmespath
+<parsel.selector.Selector.jmespath>`, elements are dropped from the tree that
+CSS and XPath queries use, while :meth:`Selector.get
+<parsel.selector.Selector.get>` still returns the original text:
+
+    >>> sel = Selector(text='{"post": "<p>Content...</p><style>p{}</style>"}')
+    >>> post = sel.jmespath('post')
+    >>> post.css('style').drop()
+    >>> post.xpath('string(.)').getall()
+    ['Content...']
+
 
 Using EXSLT extensions
 ----------------------
