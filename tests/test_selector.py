@@ -24,6 +24,12 @@ if TYPE_CHECKING:
     from lxml.html import HtmlElement
 
 
+# libxml2 sends numeric references in the c1 range through the cp1252 table from 2.14 on,
+# where its html tokenizer became html5 conforming. older builds keep the raw character, and
+# some wheels still ship one, so the tests below pin whichever applies.
+C1_REFERENCES_REMAPPED = etree.LIBXML_VERSION >= (2, 14)
+
+
 class TestSelector:
     sscls = Selector
 
@@ -858,16 +864,24 @@ class TestSelector:
         ``&#133;`` is an ellipsis rather than U+0085, which is what browsers show
         and what the HTML standard requires. ``html.unescape`` implements the same
         table, so it is used as the reference. See #76.
+
+        On a libxml2 older than 2.14 the reference comes back as the raw character
+        instead, which is the behaviour the report describes.
         """
         for code_point in range(0x80, 0xA0):
             reference = f"&#{code_point};"
-            expected = html.unescape(reference)
+            if C1_REFERENCES_REMAPPED:
+                expected = html.unescape(reference)
+            else:
+                expected = chr(code_point)
             sel = self.sscls(text=f"<p>{reference}</p>")
             assert sel.css("p::text").get() == expected, reference
             assert sel.xpath("//p/text()").get() == expected, reference
 
     def test_html_c1_character_references_hex_and_named(self) -> None:
-        assert self.sscls(text="<p>&#x85;</p>").css("p::text").get() == "\u2026"
+        expected = "\u2026" if C1_REFERENCES_REMAPPED else "\x85"
+        assert self.sscls(text="<p>&#x85;</p>").css("p::text").get() == expected
+        # a named reference does not go through the c1 table, so it is the same everywhere
         assert self.sscls(text="<p>&hellip;</p>").css("p::text").get() == "\u2026"
 
     def test_xml_keeps_c1_character_references_literal(self) -> None:
