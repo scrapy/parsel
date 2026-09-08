@@ -25,9 +25,12 @@ if TYPE_CHECKING:
 
 
 # libxml2 sends numeric references in the c1 range through the cp1252 table from 2.14 on,
-# where its html tokenizer became html5 conforming. older builds keep the raw character, and
-# some wheels still ship one, so the tests below pin whichever applies.
-C1_REFERENCES_REMAPPED = etree.LIBXML_VERSION >= (2, 14)
+# where its html tokenizer became html5 conforming. older builds keep the raw character and
+# some wheels still ship one, so the tests that need the mapping do not run there.
+needs_c1_remapping = pytest.mark.skipif(
+    etree.LIBXML_VERSION < (2, 14),
+    reason=f"libxml2 {etree.LIBXML_VERSION} does not map c1 character references, needs 2.14",
+)
 
 
 class TestSelector:
@@ -858,29 +861,26 @@ class TestSelector:
 
         assert sel.extract() == "<foo>&xxe;</foo>"
 
+    @needs_c1_remapping
     def test_html_c1_character_references(self) -> None:
         """HTML maps numeric references in the C1 range through the CP1252 table.
 
         ``&#133;`` is an ellipsis rather than U+0085, which is what browsers show
         and what the HTML standard requires. ``html.unescape`` implements the same
         table, so it is used as the reference. See #76.
-
-        On a libxml2 older than 2.14 the reference comes back as the raw character
-        instead, which is the behaviour the report describes.
         """
         for code_point in range(0x80, 0xA0):
             reference = f"&#{code_point};"
-            if C1_REFERENCES_REMAPPED:
-                expected = html.unescape(reference)
-            else:
-                expected = chr(code_point)
+            expected = html.unescape(reference)
             sel = self.sscls(text=f"<p>{reference}</p>")
             assert sel.css("p::text").get() == expected, reference
             assert sel.xpath("//p/text()").get() == expected, reference
 
-    def test_html_c1_character_references_hex_and_named(self) -> None:
-        expected = "\u2026" if C1_REFERENCES_REMAPPED else "\x85"
-        assert self.sscls(text="<p>&#x85;</p>").css("p::text").get() == expected
+    @needs_c1_remapping
+    def test_html_c1_character_reference_hex(self) -> None:
+        assert self.sscls(text="<p>&#x85;</p>").css("p::text").get() == "\u2026"
+
+    def test_html_named_character_reference(self) -> None:
         # a named reference does not go through the c1 table, so it is the same everywhere
         assert self.sscls(text="<p>&hellip;</p>").css("p::text").get() == "\u2026"
 
