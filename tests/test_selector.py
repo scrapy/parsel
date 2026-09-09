@@ -937,6 +937,16 @@ class TestSelector:
         sel.css("body").drop()
         assert sel.get() == "<html></html>"
 
+    def test_remove_root_element_selector_xml(self) -> None:
+        sel = self.sscls(text="<a><b>1</b></a>", type="xml")
+        with pytest.raises(CannotRemoveElementWithoutParent):
+            sel.drop()
+
+        with pytest.raises(CannotRemoveElementWithoutParent):
+            sel.xpath("/a").drop()
+
+        assert sel.xpath("//b/text()").getall() == ["1"]
+
     def test_deep_nesting(self) -> None:
         content = """
         <html>
