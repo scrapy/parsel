@@ -567,22 +567,22 @@ Example removing an ad from a blog post:
     >>> from parsel import Selector
     >>> doc = """
     ... <article>
-    ...     <div class="row">Content paragraph...</div>
+    ...     <div class="row">Content paragraph</div>
     ...     <div class="row">
     ...         <div class="ad">
-    ...             Ad content...
-    ...             <a href="http://...">Link</a>
+    ...             Ad content
+    ...             <a href="http://link">Link</a>
     ...         </div>
     ...     </div>
-    ...     <div class="row">More content...</div>
+    ...     <div class="row">More content</div>
     ... </article>
     ... """
     >>> sel = Selector(text=doc)
     >>> sel.xpath('//div/text()').getall()
-    ['Content paragraph...', '\n        ', '\n            Ad content...\n            ', '\n        ', '\n    ', 'More content...']
+    ['Content paragraph', '\n        ', '\n            Ad content...\n            ', '\n        ', '\n    ', 'More content']
     >>> sel.xpath('//div[@class="ad"]').drop()
     >>> sel.xpath('//div//text()').getall()
-    ['Content paragraph...', 'More content...']
+    ['Content paragraph', '\n        \n    ', 'More content']
 
 
 Using EXSLT extensions
