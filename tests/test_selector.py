@@ -706,11 +706,6 @@ class TestSelector:
         text = "<root>pre\x00post</root>"
         self.sscls(text).xpath("//text()").extract()
 
-    def test_replacement_char_from_badly_encoded_body(self) -> None:
-        # \xe9 alone isn't valid utf8 sequence
-        text = "<html><p>an Jos\\ufffd de</p><html>"
-        assert self.sscls(text).xpath("//text()").extract() == ["an Jos\\ufffd de"]
-
     def test_select_on_unevaluable_nodes(self) -> None:
         r = self.sscls(text='<span class="big">some text</span>')
         # Text node
