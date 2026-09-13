@@ -823,19 +823,20 @@ class Selector:
                 "'//li' instead of '//li/text()', for example."
             )
 
+        no_parent_message = (
+            "The node you're trying to remove has no parent, "
+            "are you trying to remove a root element?"
+        )
         try:
             if self.type == "xml":
                 if parent is None:
-                    raise ValueError("This node has no parent")
+                    raise CannotDropElementWithoutParent(no_parent_message)
                 parent.remove(self.root)
             else:
                 typing.cast("html.HtmlElement", self.root).drop_tree()
         except (AttributeError, AssertionError):
             # 'NoneType' object has no attribute 'drop_tree'
-            raise CannotDropElementWithoutParent(
-                "The node you're trying to remove has no parent, "
-                "are you trying to remove a root element?"
-            )
+            raise CannotDropElementWithoutParent(no_parent_message)
 
     @property
     def attrib(self) -> dict[str, str]:
