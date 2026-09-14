@@ -271,8 +271,8 @@ class SelectorList(list[_SelectorType]):
         replace_entities: bool = True,
     ) -> str | None:
         """
-        Call the ``.re()`` method for the first element in this list and
-        return the result as a string. If the list is empty or the
+        Call the ``.re()`` method for elements in this list and return the
+        first matching result as a string. If the list is empty or the
         regex doesn't match anything, return the default value (``None`` if
         the argument is not provided).
 

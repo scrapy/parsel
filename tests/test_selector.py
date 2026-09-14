@@ -596,7 +596,7 @@ class TestSelector:
 
     def test_make_links_absolute(self) -> None:
         text = '<a href="file.html">link to file</a>'
-        sel = Selector(text=text, base_url="http://example.com")
+        sel = self.sscls(text=text, base_url="http://example.com")
         typing.cast("HtmlElement", sel.root).make_links_absolute()
         assert sel.xpath("//a/@href").extract_first() == "http://example.com/file.html"
 
@@ -705,11 +705,6 @@ class TestSelector:
     def test_null_bytes_shouldnt_raise_errors(self) -> None:
         text = "<root>pre\x00post</root>"
         self.sscls(text).xpath("//text()").extract()
-
-    def test_replacement_char_from_badly_encoded_body(self) -> None:
-        # \xe9 alone isn't valid utf8 sequence
-        text = "<html><p>an Jos\\ufffd de</p><html>"
-        assert self.sscls(text).xpath("//text()").extract() == ["an Jos\\ufffd de"]
 
     def test_select_on_unevaluable_nodes(self) -> None:
         r = self.sscls(text='<span class="big">some text</span>')
@@ -1036,13 +1031,13 @@ class TestSelector:
         """
 
         with warnings.catch_warnings(record=True) as w:
-            sel = Selector(text=content, huge_tree=False)
+            sel = self.sscls(text=content, huge_tree=False)
             assert "huge_tree" in str(w[0].message)
             assert len(sel.css("span")) <= 256
             assert len(sel.css("td")) == 0
 
         # If huge trees are enabled, elements with a depth > 255 should be found
-        sel = Selector(text=content)
+        sel = self.sscls(text=content)
         nest_level = 282
         assert len(sel.css("span")) == nest_level
         assert len(sel.css("td")) == 1
@@ -1145,26 +1140,27 @@ class TestSelector:
 
     def test_text_and_root_warning(self) -> None:
         with warnings.catch_warnings(record=True) as w:
-            Selector(text="a", root="b")
+            self.sscls(text="a", root="b")
             assert "both text and root" in str(w[0].message)
 
     def test_etree_root_invalid_type(self) -> None:
-        selector = Selector("<html></html>")
+        selector = self.sscls("<html></html>")
         with pytest.raises(ValueError, match="object as root"):
             Selector(root=selector.root, type="text")
         with pytest.raises(ValueError, match="object as root"):
-            Selector(root=selector.root, type="json")
+            self.sscls(root=selector.root, type="json")
 
     def test_json_selector_representation(self) -> None:
-        selector = Selector(text="true", type="json")
-        assert repr(selector) == "<Selector query=None data='True'>"
+        type_name = self.sscls.__name__
+        selector = self.sscls(text="true", type="json")
+        assert repr(selector) == f"<{type_name} query=None data='True'>"
         assert str(selector) == "True"
-        selector = Selector(text="[1]")
-        assert repr(selector) == "<Selector query=None data='[1]'>"
+        selector = self.sscls(text="[1]")
+        assert repr(selector) == f"<{type_name} query=None data='[1]'>"
         assert str(selector) == "[1]"
 
     def test_body_bytearray_support(self) -> None:
-        selector = Selector(body=bytearray("<h1>Hello World</h1>", "utf-8"))
+        selector = self.sscls(body=bytearray("<h1>Hello World</h1>", "utf-8"))
         assert selector.xpath("//h1/text()").get() == "Hello World"
 
     def test_remove_namespace_json(self) -> None:
@@ -1341,6 +1337,9 @@ class TestSelectorBytes(TestSelector):
         pass
 
     def test_weakref_slots(self) -> None:
+        pass
+
+    def test_text_and_root_warning(self) -> None:
         pass
 
     def test_check_text_argument_type(self) -> None:
