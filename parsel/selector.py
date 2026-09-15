@@ -397,10 +397,6 @@ def _get_root_type(root: Any, *, input_type: str | None) -> str:
                 f"and {input_type!r} as type."
             )
         return _xml_or_html(input_type)
-    if input_type in {"json", "text"}:
-        return input_type
-    if _is_json_document(root) or _is_json_document(_load_json_or_none(root)):
-        return "json"
     return input_type or "json"
 
 
@@ -576,12 +572,10 @@ class Selector:
 
             selector.jmespath('author.name', options=jmespath.Options(dict_cls=collections.OrderedDict))
         """
-        if self.type == "json":
-            if isinstance(self.root, str):
-                # Selector received a JSON string as root.
-                data = _load_json_or_none(self.root)
-            else:
-                data = self.root
+        if isinstance(self.root, str):
+            data = _load_json_or_none(self.root)
+        elif self.type == "json":
+            data = self.root
         else:
             assert self.type in {"html", "xml"}  # nosec
             data = _load_json_or_none(self.root.text)
