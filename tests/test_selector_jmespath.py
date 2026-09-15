@@ -90,6 +90,11 @@ class TestJMESPath:
         ]
         assert cast("int", sel.xpath("//div/content").jmespath("total").get()) == 4
 
+    def test_html_without_json(self) -> None:
+        sel = Selector(text="<div><content>not json</content><empty/></div>")
+        assert sel.xpath("//content/text()").jmespath("a").getall() == []
+        assert sel.xpath("//empty").jmespath("a").getall() == []
+
     def test_jmestpath_with_re(self) -> None:
         html_text = """
             <div>

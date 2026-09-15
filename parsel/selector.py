@@ -410,13 +410,11 @@ def _is_json_document(data: Any) -> bool:
     return isinstance(data, (dict, list))
 
 
-def _load_json_or_none(text: str) -> Any:
-    if isinstance(text, (str, bytes, bytearray)):
-        try:
-            return json.loads(text)
-        except ValueError:
-            return None
-    return None
+def _load_json_or_none(text: str | None) -> Any:
+    try:
+        return json.loads(text)  # type: ignore[arg-type]
+    except (TypeError, ValueError):
+        return None
 
 
 class Selector:
