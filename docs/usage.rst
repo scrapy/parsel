@@ -118,8 +118,9 @@ So, let's download that page and create a selector for it:
 
    selector = load_selector('selectors-sample1.html')
 
-We don't need to specify the `type` argument: Selector detects JSON input, and
-falls back to HTML otherwise.
+We don't need to specify the `type` argument: Selector detects JSON input and
+XML input that starts with an XML declaration, and falls back to HTML
+otherwise.
 
 So, by looking at the :ref:`HTML code <topics-selectors-htmlcode>` of that
 page, let's construct an XPath for selecting the text inside the title tag::
@@ -290,7 +291,7 @@ Examples:
     are string values already and do not have children nodes.
 
 .. note::
-    See also: :ref:`selecting-attributes`.
+    See also: :ref:`extracting-text` and :ref:`selecting-attributes`.
 
 
 .. _CSS Selectors: https://www.w3.org/TR/css3-selectors/#selectors
@@ -320,6 +321,97 @@ too. Here's an example::
     Link number 2 points to url 'image3.html' and image 'image3_thumb.jpg'
     Link number 3 points to url 'image4.html' and image 'image4_thumb.jpg'
     Link number 4 points to url 'image5.html' and image 'image5_thumb.jpg'
+
+.. _extracting-text:
+
+Extracting text
+---------------
+
+``::text`` and ``text()`` select text nodes, so an element that contains child
+elements has more than one, and an empty element has none:
+
+.. code-block:: pycon
+
+    >>> from parsel import Selector
+    >>> sel = Selector(text="""<h2>
+    ...     This is the <em>new</em>
+    ...     trend!
+    ... </h2>
+    ... <h3></h3>""")
+    >>> sel.css("h2::text").getall()
+    ['\n    This is the ', '\n    trend!\n']
+    >>> sel.css("h3::text").getall()
+    []
+
+To get all the text of an element as a single string, convert the element node
+to a string with the XPath ``string()`` function, or with ``normalize-space()``
+to also strip the result and collapse each run of whitespace into a single
+space:
+
+.. code-block:: pycon
+
+    >>> sel.css("h2").xpath("string(.)").get()
+    '\n    This is the new\n    trend!\n'
+    >>> sel.css("h2").xpath("normalize-space(.)").get()
+    'This is the new trend!'
+    >>> sel.css("h3").xpath("string(.)").get()
+    ''
+
+Both functions take a single node, so mind the difference between ``.``, the
+element node, and ``.//text()``, a node-set of which they would only use the
+first node; see :ref:`text-nodes-in-conditions`.
+
+The resulting string is the concatenation of the text nodes underneath, which
+gets you neither whitespace where markup implies a line break nor the removal
+of text that a browser does not render:
+
+.. code-block:: pycon
+
+    >>> sel = Selector(text="""<html><body>
+    ...     <p class="post_info">Published by newbie<br>on Sept 17</p>
+    ...     <script>var tracker = 1;</script>
+    ... </body></html>""")
+    >>> sel.css(".post_info").xpath("normalize-space(.)").get()
+    'Published by newbieon Sept 17'
+    >>> sel.css("body").xpath("normalize-space(.)").get()
+    'Published by newbieon Sept 17 var tracker = 1;'
+
+Text of a whole page
+~~~~~~~~~~~~~~~~~~~~
+
+`html-text`_ builds the text of an HTML tree the way a browser would render it:
+it inserts line breaks where block-level tags imply them, guesses missing
+spaces around inline tags, and ignores invisible content, such as ``<script>``
+and ``<style>`` elements. It reads parsel selectors:
+
+.. skip: start
+
+.. code-block:: pycon
+
+    >>> import html_text
+    >>> sel = html_text.cleaned_selector(html)
+    >>> html_text.selector_to_text(sel.css(".post_info"))
+    'Published by newbie\non Sept 17'
+
+.. skip: end
+
+`trafilatura`_ and `jusText`_ additionally discard boilerplate, such as
+navigation menus or footers, keeping only the main content of a page. They read
+the underlying `lxml`_ tree, which is the ``root`` attribute of a selector:
+
+.. skip: start
+
+.. code-block:: pycon
+
+    >>> import trafilatura
+    >>> trafilatura.extract(sel.root)
+    '…'
+
+.. skip: end
+
+.. _html-text: https://github.com/zytedata/html-text
+.. _jusText: https://github.com/miso-belica/jusText
+.. _trafilatura: https://trafilatura.readthedocs.io/
 
 .. _selecting-attributes:
 
@@ -485,22 +577,22 @@ Example removing an ad from a blog post:
     >>> from parsel import Selector
     >>> doc = """
     ... <article>
-    ...     <div class="row">Content paragraph...</div>
+    ...     <div class="row">Content paragraph</div>
     ...     <div class="row">
     ...         <div class="ad">
-    ...             Ad content...
-    ...             <a href="http://...">Link</a>
+    ...             Ad content
+    ...             <a href="http://link">Link</a>
     ...         </div>
     ...     </div>
-    ...     <div class="row">More content...</div>
+    ...     <div class="row">More content</div>
     ... </article>
     ... """
     >>> sel = Selector(text=doc)
     >>> sel.xpath('//div/text()').getall()
-    ['Content paragraph...', '\n        ', '\n            Ad content...\n            ', '\n        ', '\n    ', 'More content...']
+    ['Content paragraph', '\n        ', '\n            Ad content...\n            ', '\n        ', '\n    ', 'More content']
     >>> sel.xpath('//div[@class="ad"]').drop()
     >>> sel.xpath('//div//text()').getall()
-    ['Content paragraph...', 'More content...']
+    ['Content paragraph', '\n        \n    ', 'More content']
 
 
 Using EXSLT extensions
@@ -695,6 +787,8 @@ you may want to take a look first at this `XPath tutorial`_.
 .. _`XPath tutorial`: http://www.zvon.org/comp/r/tut-XPath_1.html
 .. _`this post from Zyte's blog`: https://www.zyte.com/blog/xpath-tips-from-the-web-scraping-trenches/
 
+
+.. _text-nodes-in-conditions:
 
 Using text nodes in a condition
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

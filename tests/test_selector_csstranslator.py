@@ -10,11 +10,9 @@ import weakref
 from abc import ABC, abstractmethod
 from typing import Any
 
-import cssselect
 import pytest
 from cssselect.parser import SelectorSyntaxError
 from cssselect.xpath import ExpressionError
-from packaging.version import Version
 
 from parsel import Selector, css2xpath
 from parsel.csstranslator import GenericTranslator, HTMLTranslator, TranslatorProtocol
@@ -74,6 +72,14 @@ class TestTranslatorBase(ABC):
                 "descendant-or-self::a/descendant-or-self::*/@img",
             ),
             ("a > ::attr(class)", "descendant-or-self::a/*/@class"),
+            (
+                r"a::attr(\:foo)",
+                "descendant-or-self::a/attribute::*[name() = ':foo']",
+            ),
+            (
+                r"a::attr(foo\:bar)",
+                "descendant-or-self::a/attribute::*[name() = 'foo:bar']",
+            ),
         ],
     )
     def test_attr_function(self, css: str, xpath: str) -> None:
@@ -228,10 +234,6 @@ class TestCSSSelector:
             '<area shape="default" id="area-nohref">'
         ]
 
-    @pytest.mark.xfail(
-        Version(cssselect.__version__) < Version("1.2.0"),
-        reason="Support added in cssselect 1.2.0",
-    )
     def test_pseudoclass_has(self) -> None:
         assert self.x("p:has(b)::text") == ["lorem ipsum text"]
 

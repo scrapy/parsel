@@ -3,7 +3,9 @@ packages."""
 
 from __future__ import annotations
 
+import codecs
 import json
+import re
 import typing
 import warnings
 from functools import lru_cache
@@ -83,6 +85,38 @@ def _xml_or_html(type_: str | None) -> str:
     return "xml" if type_ == "xml" else "html"
 
 
+_ENCODING_ERROR_TYPES = frozenset(
+    {etree.ErrorTypes.ERR_INVALID_CHAR, etree.ErrorTypes.ERR_INVALID_ENCODING}
+)
+
+
+def _has_encoding_error(parser: _ParserType) -> bool:
+    return any(error.type in _ENCODING_ERROR_TYPES for error in parser.error_log)
+
+
+def _root_from_decoded_body(
+    body: bytes,
+    parser_cls: type[_ParserType],
+    base_url: str | None,
+    huge_tree: bool,
+    encoding: str,
+) -> etree._Element:
+    """Create a root node from *body*, with undecodable bytes replaced."""
+    return create_root_node(
+        body.decode(encoding, errors="replace"),
+        parser_cls,
+        base_url=base_url,
+        huge_tree=huge_tree,
+    )
+
+
+_XML_DECLARATION = re.compile(r"[\s\ufeff]*<\?xml\s")
+
+
+def _detect_xml_or_html(text: str) -> str:
+    return "xml" if _XML_DECLARATION.match(text) else "html"
+
+
 def create_root_node(
     text: str,
     parser_cls: type[_ParserType],
@@ -92,13 +126,29 @@ def create_root_node(
     encoding: str = "utf-8",
 ) -> etree._Element:
     """Create root node for text using given parser class."""
-    if not text:
-        body = body.replace(b"\x00", b"").strip()
-    else:
+    if text:
         body = text.strip().replace("\x00", "").encode(encoding) or b"<html/>"
+    elif codecs.lookup(encoding).name != "utf-8":
+        # lxml handles bytes that the declared encoding cannot decode by
+        # truncating the document there, and characters that span several
+        # bytes, as in UTF-16, are broken by the null and whitespace stripping
+        # below. Only UTF-8 bytes are passed as is, since lxml does report
+        # invalid UTF-8, and it covers most input.
+        return _root_from_decoded_body(body, parser_cls, base_url, huge_tree, encoding)
+    else:
+        body = body.replace(b"\x00", b"").strip() or b"<html/>"
 
     parser = parser_cls(recover=True, encoding=encoding, huge_tree=huge_tree)
-    root = etree.fromstring(body, parser=parser, base_url=base_url)
+    root = None
+    try:
+        root = etree.fromstring(body, parser=parser, base_url=base_url)
+    except etree.XMLSyntaxError:
+        if text or not _has_encoding_error(parser):
+            raise
+    if not text and _has_encoding_error(parser):
+        # Invalid bytes reach the tree as is, and reading them raises
+        # UnicodeDecodeError from lxml.
+        return _root_from_decoded_body(body, parser_cls, base_url, huge_tree, encoding)
     if not huge_tree:
         for error in parser.error_log:
             if "use XML_PARSE_HUGE option" in error.message:
@@ -233,8 +283,8 @@ class SelectorList(list[_SelectorType]):
         replace_entities: bool = True,
     ) -> str | None:
         """
-        Call the ``.re()`` method for the first element in this list and
-        return the result as a string. If the list is empty or the
+        Call the ``.re()`` method for elements in this list and return the
+        first matching result as a string. If the list is empty or the
         regex doesn't match anything, return the default value (``None`` if
         the argument is not provided).
 
@@ -310,7 +360,7 @@ def _get_root_and_type_from_bytes(
 ) -> tuple[Any, str]:
     if input_type == "text":
         return body.decode(encoding), input_type
-    if input_type in ("json", None) and encoding == "utf-8":
+    if input_type in ("json", None) and codecs.lookup(encoding).name == "utf-8":
         try:
             data = json.load(BytesIO(body))
         except ValueError:
@@ -320,7 +370,7 @@ def _get_root_and_type_from_bytes(
     if input_type == "json":
         return None, "json"
     assert input_type in ("html", "xml", None)  # nosec
-    type_ = _xml_or_html(input_type)
+    type_ = input_type or _detect_xml_or_html(body[:256].decode(encoding, "ignore"))
     root = create_root_node(
         text="",
         body=body,
@@ -346,7 +396,7 @@ def _get_root_and_type_from_text(
     if input_type == "json":
         return None, "json"
     assert input_type in ("html", "xml", None)  # nosec
-    type_ = _xml_or_html(input_type)
+    type_ = input_type or _detect_xml_or_html(text)
     root = _get_root_from_text(text, type_=type_, **lxml_kwargs)
     return root, type_
 
@@ -456,7 +506,8 @@ class Selector:
 
     ``type`` defines the selector type. It can be ``"html"``, ``"json"``,
     ``"xml"`` or ``"text"``. If not specified, the input is handled as
-    ``"json"`` if it is a JSON object or array, and as ``"html"`` otherwise.
+    ``"json"`` if it is a JSON object or array, as ``"xml"`` if it starts with
+    an XML declaration, and as ``"html"`` otherwise.
 
     ``base_url`` allows setting a URL for the document. This is needed when looking up external entities with relative paths.
     See the documentation for :func:`lxml.etree.fromstring` for more information.
@@ -668,6 +719,20 @@ class Selector:
             try:
                 xpathev = self.root.xpath
             except AttributeError:
+                if isinstance(self.root, str) and query.strip() == ".":
+                    return typing.cast(
+                        "SelectorList[Self]",
+                        self.selectorlist_cls(
+                            [
+                                self.__class__(
+                                    root=self.root,
+                                    _expr=query,
+                                    namespaces=self.namespaces,
+                                    type=self.type,
+                                )
+                            ]
+                        ),
+                    )
                 return typing.cast("SelectorList[Self]", self.selectorlist_cls([]))
         else:
             try:
@@ -848,19 +913,20 @@ class Selector:
                 "'//li' instead of '//li/text()', for example."
             )
 
+        no_parent_message = (
+            "The node you're trying to remove has no parent, "
+            "are you trying to remove a root element?"
+        )
         try:
             if self.type == "xml":
                 if parent is None:
-                    raise ValueError("This node has no parent")
+                    raise CannotDropElementWithoutParent(no_parent_message)
                 parent.remove(self.root)
             else:
                 typing.cast("html.HtmlElement", self.root).drop_tree()
         except (AttributeError, AssertionError):
             # 'NoneType' object has no attribute 'drop_tree'
-            raise CannotDropElementWithoutParent(
-                "The node you're trying to remove has no parent, "
-                "are you trying to remove a root element?"
-            )
+            raise CannotDropElementWithoutParent(no_parent_message)
 
     @property
     def attrib(self) -> dict[str, str]:
