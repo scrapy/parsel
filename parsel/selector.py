@@ -8,6 +8,7 @@ import json
 import re
 import typing
 import warnings
+from functools import lru_cache
 from io import BytesIO
 from typing import (
     TYPE_CHECKING,
@@ -389,6 +390,13 @@ def _get_root_and_type_from_text(
     return root, type_
 
 
+@lru_cache(maxsize=2048)
+def _compile_xpath(
+    query: str, namespaces: tuple[tuple[str, str], ...], smart_strings: bool
+) -> etree.XPath:
+    return etree.XPath(query, namespaces=dict(namespaces), smart_strings=smart_strings)
+
+
 def _get_root_type(root: Any, *, input_type: str | None) -> str:
     if isinstance(root, etree._Element):
         if input_type in {"json", "text"}:
@@ -618,10 +626,9 @@ class Selector:
         if self.type not in ("html", "xml", "text"):
             raise ValueError(f"Cannot use xpath on a Selector of type {self.type!r}")
         if self.type in ("html", "xml"):
-            try:
-                xpathev = self.root.xpath
-            except AttributeError:
-                if isinstance(self.root, str) and query.strip() == ".":
+            root = self.root
+            if not hasattr(root, "xpath"):
+                if isinstance(root, str) and query.strip() == ".":
                     return typing.cast(
                         "SelectorList[Self]",
                         self.selectorlist_cls(
@@ -637,21 +644,16 @@ class Selector:
                     )
                 return typing.cast("SelectorList[Self]", self.selectorlist_cls([]))
         else:
-            try:
-                xpathev = self._get_root(self._text or "", type_="html").xpath
-            except AttributeError:
-                return typing.cast("SelectorList[Self]", self.selectorlist_cls([]))
+            root = self._get_root(self._text or "", type_="html")
 
         nsp = dict(self.namespaces)
         if namespaces is not None:
             nsp.update(namespaces)
         try:
-            result = xpathev(
-                query,
-                namespaces=nsp,
-                smart_strings=self._lxml_smart_strings,
-                **kwargs,
+            xpathev = _compile_xpath(
+                query, tuple(sorted(nsp.items())), self._lxml_smart_strings
             )
+            result = xpathev(root, **kwargs)
         except etree.XPathError as exc:
             raise ValueError(f"XPath error: {exc} in {query}")
 
