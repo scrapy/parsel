@@ -10,7 +10,7 @@ from typing import TYPE_CHECKING, Any, cast
 import pytest
 from lxml import etree
 
-from parsel import Selector, SelectorList
+from parsel import AbsoluteXPathWarning, Selector, SelectorList
 from parsel.selector import (
     _NOT_SET,
     CannotRemoveElementWithoutParent,
@@ -359,7 +359,9 @@ class TestSelector:
 
         x = self.sscls(text=body)
         divtwo = x.xpath('//div[@class="two"]')
-        with pytest.warns(UserWarning, match="Absolute XPath.*nested selector"):
+        with pytest.warns(
+            AbsoluteXPathWarning, match="Absolute XPath.*nested selector"
+        ):
             absolute_items = divtwo.xpath("//li")
         assert absolute_items.extract() == [
             "<li>one</li>",
@@ -397,7 +399,9 @@ class TestSelector:
 
         x = self.sscls(text=body)
         divtwo = x.xpath('//div[@class="two"]')
-        with pytest.warns(UserWarning, match="Absolute XPath.*nested selector"):
+        with pytest.warns(
+            AbsoluteXPathWarning, match="Absolute XPath.*nested selector"
+        ):
             absolute_items = divtwo.xpath("//li")
         assert absolute_items.getall() == [
             "<li>one</li>",
@@ -681,10 +685,36 @@ class TestSelector:
     def test_absolute_xpath_on_nested_selector_warns(self) -> None:
         selector = self.sscls(text="<div><p>text</p></div>").xpath("//div")[0]
 
-        with pytest.warns(UserWarning, match="Absolute XPath.*nested selector"):
+        with pytest.warns(
+            AbsoluteXPathWarning, match="Absolute XPath.*nested selector"
+        ):
             result = selector.xpath("//p")
 
         assert result.get() == "<p>text</p>"
+
+    def test_absolute_xpath_via_selectorlist_points_at_user_code(self) -> None:
+        # SelectorList.xpath must not attribute the warning to parsel/selector.py
+        sel = self.sscls(text="<div><p>a</p></div><p>b</p>")
+        nested = sel.xpath("//div")
+        with warnings.catch_warnings(record=True) as caught:
+            warnings.simplefilter("always")
+            nested.xpath("//p")
+        abs_warns = [w for w in caught if issubclass(w.category, AbsoluteXPathWarning)]
+        assert abs_warns
+        assert "parsel/selector.py" not in abs_warns[0].filename
+        assert "did you mean" not in str(abs_warns[0].message)
+
+    def test_absolute_xpath_on_css_nested_selector_warns(self) -> None:
+        # Nested via css() must not leak the translated XPath into the message
+        nested = self.sscls(text="<div><p>a</p></div>").css("div")[0]
+        with warnings.catch_warnings(record=True) as caught:
+            warnings.simplefilter("always")
+            nested.xpath("//p")
+        abs_warns = [w for w in caught if issubclass(w.category, AbsoluteXPathWarning)]
+        assert abs_warns
+        msg = str(abs_warns[0].message)
+        assert "descendant-or-self" not in msg
+        assert "did you mean" not in msg
 
     def test_http_header_encoding_precedence(self) -> None:
         # '\xa3'     = pound symbol in unicode
@@ -1261,52 +1291,3 @@ class TestSelectorBytes(TestSelector):
 
 class TestExsltBytes(TestExslt):
     sscls = SelectorBytesInput  # type: ignore[assignment]
-
-def test_absolute_xpath_on_nested_selector_warns():
-    """Absolute XPath on a nested selector should warn (issue #323)."""
-    sel = Selector(text="<div><p>a</p></div><p>b</p>")
-    nested = sel.xpath("//div")[0]
-    with warnings.catch_warnings(record=True) as w:
-        warnings.simplefilter("always")
-        result = nested.xpath("//p")
-        absolute_warns = [
-            x
-            for x in w
-            if issubclass(x.category, UserWarning)
-            and "Absolute XPath" in str(x.message)
-        ]
-    assert absolute_warns, "expected UserWarning for absolute XPath on nested selector"
-    assert "did you mean" in str(absolute_warns[0].message)
-    # Still returns document-absolute results (existing behavior)
-    assert len(result) == 2
-
-
-def test_relative_xpath_on_nested_selector_no_warn():
-    sel = Selector(text="<div><p>a</p></div><p>b</p>")
-    nested = sel.xpath("//div")[0]
-    with warnings.catch_warnings(record=True) as w:
-        warnings.simplefilter("always")
-        result = nested.xpath(".//p")
-        absolute_warns = [
-            x
-            for x in w
-            if issubclass(x.category, UserWarning)
-            and "Absolute XPath" in str(x.message)
-        ]
-    assert not absolute_warns
-    assert len(result) == 1
-
-
-def test_absolute_xpath_on_root_selector_no_warn():
-    sel = Selector(text="<div><p>a</p></div>")
-    with warnings.catch_warnings(record=True) as w:
-        warnings.simplefilter("always")
-        sel.xpath("//p")
-        absolute_warns = [
-            x
-            for x in w
-            if issubclass(x.category, UserWarning)
-            and "Absolute XPath" in str(x.message)
-        ]
-    assert not absolute_warns
-

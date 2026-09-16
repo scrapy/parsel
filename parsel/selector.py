@@ -52,6 +52,10 @@ class CannotDropElementWithoutParent(CannotRemoveElementWithoutParent):
     pass
 
 
+class AbsoluteXPathWarning(UserWarning):
+    """Emitted when an absolute XPath is used on a nested selector."""
+
+
 class SafeXMLParser(etree.XMLParser):
     def __init__(self, *args: Any, **kwargs: Any) -> None:
         kwargs.setdefault("resolve_entities", False)
@@ -171,8 +175,29 @@ class SelectorList(list[_SelectorType]):
 
             selector.xpath('//a[href=$url]', url="http://www.example.com")
         """
+        if (
+            self
+            and self[0]._expr is not None
+            and xpath.startswith("/")
+            and not xpath.startswith("./")
+        ):
+            warnings.warn(
+                f"Absolute XPath {xpath!r} used on a nested selector",
+                AbsoluteXPathWarning,
+                stacklevel=2,
+            )
         return self.__class__(
-            flatten([x.xpath(xpath, namespaces=namespaces, **kwargs) for x in self])
+            flatten(
+                [
+                    x.xpath(
+                        xpath,
+                        namespaces=namespaces,
+                        _parsel_skip_abs_xpath_warn=True,
+                        **kwargs,
+                    )
+                    for x in self
+                ]
+            )
         )
 
     def css(self, query: str) -> SelectorList[_SelectorType]:
@@ -570,14 +595,16 @@ class Selector:
             raise ValueError(f"Cannot use xpath on a Selector of type {self.type!r}")
         # Nested selectors + absolute XPath often mean a missing leading '.'
         # (issue #323). Warn when this Selector was produced by a prior query.
+        _skip_abs_warn = kwargs.pop("_parsel_skip_abs_xpath_warn", False)
         if (
-            self._expr is not None
+            not _skip_abs_warn
+            and self._expr is not None
             and query.startswith("/")
             and not query.startswith("./")
         ):
             warnings.warn(
-                f"Absolute XPath {query!r} used on a nested selector "
-                f"(created by {self._expr!r}); did you mean '.{query}'?",
+                f"Absolute XPath {query!r} used on a nested selector",
+                AbsoluteXPathWarning,
                 stacklevel=2,
             )
         if self.type in ("html", "xml"):
