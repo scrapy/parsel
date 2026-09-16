@@ -1303,6 +1303,21 @@ class TestExslt:
         el.drop()
         assert sel.get() == "<a><c/></a>"
 
+    @pytest.mark.parametrize(
+        ("xml", "expected"),
+        [
+            ("<a><b/>tail<c/></a>", "<a>tail<c/></a>"),
+            ("<a>text<b/>tail<c/></a>", "<a>texttail<c/></a>"),
+            ("<a><c/>previous<b/>tail</a>", "<a><c/>previoustail</a>"),
+            ("<a><!--comment--><b/>tail</a>", "<a><!--comment-->tail</a>"),
+            ("<a><b/>tail<b/>tail2</a>", "<a>tailtail2</a>"),
+        ],
+    )
+    def test_drop_keeps_tail_with_xml_type(self, xml: str, expected: str) -> None:
+        sel = self.sscls(text=xml, type="xml")
+        sel.xpath("//b").drop()
+        assert sel.get() == expected
+
 
 class SelectorBytesInput(Selector):
     def __init__(
