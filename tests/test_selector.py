@@ -1088,9 +1088,15 @@ class TestSelector:
         selector = self.sscls('{"a": "b"}', type=type_)
         assert selector.type == type_
 
-    def test_explicit_text_type_beats_json_root(self) -> None:
-        selector = self.sscls(root='{"a": "b"}', type="text")
-        assert selector.type == "text"
+    @pytest.mark.parametrize("type_", ["html", "xml", "text"])
+    def test_explicit_type_beats_json_root(self, type_: str) -> None:
+        selector = self.sscls(root='{"a": "b"}', type=type_)
+        assert selector.type == type_
+
+    def test_json_like_text_result_keeps_type(self) -> None:
+        selector = self.sscls(text='<span>{"a": 1}</span>').css("span::text")[0]
+        assert selector.type == "html"
+        assert selector.xpath(".").get() == '{"a": 1}'
 
     def test_html_root(self) -> None:
         root = etree.fromstring("<html/>")
