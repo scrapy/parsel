@@ -405,7 +405,7 @@ This is the proper way to do it (note the dot prefixing the ``.//p`` XPath)::
     >>> for p in divs.xpath('.//p'):  # extracts all <p> inside
     ...     print(p.get())
 
-When an absolute XPath (starting with ``/`` but not ``./``) is used on a
+When an absolute XPath (starting with ``/``) is used on a
 *nested* selector - one produced by a prior ``xpath()`` / ``css()`` query -
 parsel emits an :class:`~parsel.selector.AbsoluteXPathWarning`. Root selectors
 (created directly from text/HTML) do not warn. To silence the warning

@@ -702,19 +702,14 @@ class TestSelector:
         abs_warns = [w for w in caught if issubclass(w.category, AbsoluteXPathWarning)]
         assert abs_warns
         assert "parsel/selector.py" not in abs_warns[0].filename
-        assert "did you mean" not in str(abs_warns[0].message)
 
     def test_absolute_xpath_on_css_nested_selector_warns(self) -> None:
-        # Nested via css() must not leak the translated XPath into the message
         nested = self.sscls(text="<div><p>a</p></div>").css("div")[0]
-        with warnings.catch_warnings(record=True) as caught:
-            warnings.simplefilter("always")
-            nested.xpath("//p")
-        abs_warns = [w for w in caught if issubclass(w.category, AbsoluteXPathWarning)]
-        assert abs_warns
-        msg = str(abs_warns[0].message)
-        assert "descendant-or-self" not in msg
-        assert "did you mean" not in msg
+        with pytest.warns(
+            AbsoluteXPathWarning,
+            match=r"Absolute XPath '//p' used on a nested selector",
+        ):
+            assert nested.xpath("//p").get() == "<p>a</p>"
 
     def test_http_header_encoding_precedence(self) -> None:
         # '\xa3'     = pound symbol in unicode

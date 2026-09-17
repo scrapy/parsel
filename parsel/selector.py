@@ -175,29 +175,10 @@ class SelectorList(list[_SelectorType]):
 
             selector.xpath('//a[href=$url]', url="http://www.example.com")
         """
-        if (
-            self
-            and self[0]._expr is not None
-            and xpath.startswith("/")
-            and not xpath.startswith("./")
-        ):
-            warnings.warn(
-                f"Absolute XPath {xpath!r} used on a nested selector",
-                AbsoluteXPathWarning,
-                stacklevel=2,
-            )
+        if self:
+            self[0]._warn_absolute_xpath_on_nested(xpath, stacklevel=2)
         return self.__class__(
-            flatten(
-                [
-                    x.xpath(
-                        xpath,
-                        namespaces=namespaces,
-                        _parsel_skip_abs_xpath_warn=True,
-                        **kwargs,
-                    )
-                    for x in self
-                ]
-            )
+            flatten([x._xpath(xpath, namespaces=namespaces, **kwargs) for x in self])
         )
 
     def css(self, query: str) -> SelectorList[_SelectorType]:
@@ -594,19 +575,30 @@ class Selector:
         if self.type not in ("html", "xml", "text"):
             raise ValueError(f"Cannot use xpath on a Selector of type {self.type!r}")
         # Nested selectors + absolute XPath often mean a missing leading '.'
-        # (issue #323). Warn when this Selector was produced by a prior query.
-        _skip_abs_warn = kwargs.pop("_parsel_skip_abs_xpath_warn", False)
+        # (issue #323). Warn when this Selector's root is nested in a larger tree.
+        self._warn_absolute_xpath_on_nested(query, stacklevel=2)
+        return self._xpath(query, namespaces=namespaces, **kwargs)
+
+    def _warn_absolute_xpath_on_nested(self, xpath: str, *, stacklevel: int) -> None:
         if (
-            not _skip_abs_warn
-            and self._expr is not None
-            and query.startswith("/")
-            and not query.startswith("./")
+            isinstance(self.root, etree._Element)
+            and self.root.getparent() is not None
+            and xpath.startswith("/")
         ):
             warnings.warn(
-                f"Absolute XPath {query!r} used on a nested selector",
+                f"Absolute XPath {xpath!r} used on a nested selector",
                 AbsoluteXPathWarning,
-                stacklevel=2,
+                stacklevel=stacklevel + 1,
             )
+
+    def _xpath(
+        self,
+        query: str,
+        namespaces: Mapping[str, str] | None = None,
+        **kwargs: Any,
+    ) -> SelectorList[Self]:
+        if self.type not in ("html", "xml", "text"):
+            raise ValueError(f"Cannot use xpath on a Selector of type {self.type!r}")
         if self.type in ("html", "xml"):
             try:
                 xpathev = self.root.xpath
