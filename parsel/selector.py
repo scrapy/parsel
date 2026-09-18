@@ -175,8 +175,9 @@ class SelectorList(list[_SelectorType]):
 
             selector.xpath('//a[href=$url]', url="http://www.example.com")
         """
-        if self:
-            self[0]._warn_absolute_xpath_on_nested(xpath, stacklevel=2)
+        for sel in self:
+            if sel._warn_absolute_xpath_on_nested(xpath, stacklevel=3):
+                break
         return self.__class__(
             flatten([x._xpath(xpath, namespaces=namespaces, **kwargs) for x in self])
         )
@@ -572,14 +573,10 @@ class Selector:
 
             selector.xpath('//a[href=$url]', url="http://www.example.com")
         """
-        if self.type not in ("html", "xml", "text"):
-            raise ValueError(f"Cannot use xpath on a Selector of type {self.type!r}")
-        # Nested selectors + absolute XPath often mean a missing leading '.'
-        # (issue #323). Warn when this Selector's root is nested in a larger tree.
-        self._warn_absolute_xpath_on_nested(query, stacklevel=2)
+        self._warn_absolute_xpath_on_nested(query, stacklevel=3)
         return self._xpath(query, namespaces=namespaces, **kwargs)
 
-    def _warn_absolute_xpath_on_nested(self, xpath: str, *, stacklevel: int) -> None:
+    def _warn_absolute_xpath_on_nested(self, xpath: str, *, stacklevel: int) -> bool:
         if (
             isinstance(self.root, etree._Element)
             and self.root.getparent() is not None
@@ -588,8 +585,10 @@ class Selector:
             warnings.warn(
                 f"Absolute XPath {xpath!r} used on a nested selector",
                 AbsoluteXPathWarning,
-                stacklevel=stacklevel + 1,
+                stacklevel=stacklevel,
             )
+            return True
+        return False
 
     def _xpath(
         self,

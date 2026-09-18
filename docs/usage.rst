@@ -393,23 +393,20 @@ elements. First, you would get all ``<div>`` elements::
 
     >>> divs = selector.xpath('//div')
 
-At first, you may be tempted to use the following approach, which is wrong, as
-it actually extracts all ``<p>`` elements from the document, not only those
-inside ``<div>`` elements::
-
-    >>> for p in divs.xpath('//p'):  # this is wrong - gets all <p> from the whole document
-    ...     print(p.get())
+At first, you may be tempted to use ``divs.xpath('//p')``, which is wrong: an
+absolute path extracts all ``<p>`` elements from the document, not only those
+inside ``<div>`` elements, and also emits
+:class:`~parsel.AbsoluteXPathWarning`.
 
 This is the proper way to do it (note the dot prefixing the ``.//p`` XPath)::
 
     >>> for p in divs.xpath('.//p'):  # extracts all <p> inside
     ...     print(p.get())
 
-When an absolute XPath (starting with ``/``) is used on a
-*nested* selector - one produced by a prior ``xpath()`` / ``css()`` query -
-parsel emits an :class:`~parsel.selector.AbsoluteXPathWarning`. Root selectors
-(created directly from text/HTML) do not warn. To silence the warning
-intentionally, filter on that category::
+When an absolute XPath (starting with ``/``) is used on a *nested* selector -
+one produced by a prior ``xpath()`` / ``css()`` query - parsel emits an
+:class:`~parsel.AbsoluteXPathWarning`. To silence the warning intentionally,
+filter on that category::
 
     import warnings
     from parsel import AbsoluteXPathWarning
