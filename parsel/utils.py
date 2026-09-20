@@ -34,7 +34,7 @@ def iflatten(x: Iterable[Any]) -> Iterator[Any]:
     """
     for el in x:
         if _is_listlike(el):
-            yield from flatten(el)
+            yield from iflatten(el)
         else:
             yield el
 
