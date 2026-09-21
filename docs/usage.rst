@@ -508,8 +508,7 @@ elements. First, you would get all ``<div>`` elements::
 
 At first, you may be tempted to use ``divs.xpath('//p')``, which is wrong: an
 absolute path extracts all ``<p>`` elements from the document, not only those
-inside ``<div>`` elements, and also emits
-:class:`~parsel.AbsoluteXPathWarning`.
+inside ``<div>`` elements.
 
 This is the proper way to do it (note the dot prefixing the ``.//p`` XPath)::
 
@@ -518,8 +517,8 @@ This is the proper way to do it (note the dot prefixing the ``.//p`` XPath)::
 
 When an absolute XPath (starting with ``/``) is used on a *nested* selector -
 one produced by a prior ``xpath()`` / ``css()`` query - parsel emits an
-:class:`~parsel.AbsoluteXPathWarning`. To silence the warning intentionally,
-filter on that category::
+:class:`~parsel.selector.AbsoluteXPathWarning`. To silence the warning
+intentionally, filter on that category::
 
     import warnings
     from parsel import AbsoluteXPathWarning

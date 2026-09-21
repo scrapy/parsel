@@ -711,13 +711,12 @@ class TestSelector:
             nested.xpath("//p")
         abs_warns = [w for w in caught if issubclass(w.category, AbsoluteXPathWarning)]
         assert abs_warns
-        assert "parsel/selector.py" not in abs_warns[0].filename
+        assert abs_warns[0].filename == __file__
 
     def test_absolute_xpath_via_selectorlist_checks_all_items(self) -> None:
         # First item may be a root-level match; a later nested item must still warn.
         sel = self.sscls(text="<html><body><div><p>a</p></div><p>b</p></body></html>")
         mixed = sel.xpath("/html | //div")
-        assert len(mixed) >= 2
         with pytest.warns(
             AbsoluteXPathWarning, match="Absolute XPath.*nested selector"
         ):

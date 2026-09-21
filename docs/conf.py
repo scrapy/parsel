@@ -128,12 +128,18 @@ intersphinx_mapping = {
 
 # --- Nitpicking options ------------------------------------------------------
 
-# nitpicky = True  # https://github.com/scrapy/cssselect/pull/110
+autodoc_preserve_defaults = True
+nitpicky = True
 nitpick_ignore = [
     ("py:class", "ExpressionError"),
+    ("py:class", "OriginalXPathExpr"),
     ("py:class", "SelectorSyntaxError"),
+    ("py:class", "cssselect.parser.Element"),
     ("py:class", "cssselect.xpath.GenericTranslator"),
     ("py:class", "cssselect.xpath.HTMLTranslator"),
     ("py:class", "cssselect.xpath.XPathExpr"),
     ("py:class", "lxml.etree.XMLParser"),
+]
+nitpick_ignore_regex = [
+    ("py:.*", r"(parsel\.selector\.)?_SelectorType"),
 ]
