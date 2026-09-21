@@ -4,14 +4,15 @@ Selector tests for cssselect backend
 
 from __future__ import annotations
 
+import gc
+import pickle
+import weakref
 from abc import ABC, abstractmethod
 from typing import Any
 
-import cssselect
 import pytest
 from cssselect.parser import SelectorSyntaxError
 from cssselect.xpath import ExpressionError
-from packaging.version import Version
 
 from parsel import Selector, css2xpath
 from parsel.csstranslator import GenericTranslator, HTMLTranslator, TranslatorProtocol
@@ -71,6 +72,14 @@ class TestTranslatorBase(ABC):
                 "descendant-or-self::a/descendant-or-self::*/@img",
             ),
             ("a > ::attr(class)", "descendant-or-self::a/*/@class"),
+            (
+                r"a::attr(\:foo)",
+                "descendant-or-self::a/attribute::*[name() = ':foo']",
+            ),
+            (
+                r"a::attr(foo\:bar)",
+                "descendant-or-self::a/attribute::*[name() = 'foo:bar']",
+            ),
         ],
     )
     def test_attr_function(self, css: str, xpath: str) -> None:
@@ -161,6 +170,28 @@ class TestGenericTranslator(TestTranslatorBase):
     tr_cls = GenericTranslator
 
 
+@pytest.mark.parametrize("tr_cls", [GenericTranslator, HTMLTranslator])
+class TestTranslatorCache:
+    def test_cache(self, tr_cls: type[GenericTranslator | HTMLTranslator]) -> None:
+        tr = tr_cls()
+        assert tr.css_to_xpath("a::text") == tr.css_to_xpath("a::text")
+        assert tr._cache.cache_info().hits == 1
+
+    def test_garbage_collection(
+        self, tr_cls: type[GenericTranslator | HTMLTranslator]
+    ) -> None:
+        tr = tr_cls()
+        tr.css_to_xpath("a::text")
+        ref = weakref.ref(tr)
+        del tr
+        gc.collect()
+        assert ref() is None
+
+    def test_pickle(self, tr_cls: type[GenericTranslator | HTMLTranslator]) -> None:
+        tr = pickle.loads(pickle.dumps(tr_cls()))  # noqa: S301
+        assert tr.css_to_xpath("a::text") == "descendant-or-self::a/text()"
+
+
 def test_css2xpath() -> None:
     expected_xpath = (
         "descendant-or-self::*[@class and contains("
@@ -203,10 +234,6 @@ class TestCSSSelector:
             '<area shape="default" id="area-nohref">'
         ]
 
-    @pytest.mark.xfail(
-        Version(cssselect.__version__) < Version("1.2.0"),
-        reason="Support added in cssselect 1.2.0",
-    )
     def test_pseudoclass_has(self) -> None:
         assert self.x("p:has(b)::text") == ["lorem ipsum text"]
 

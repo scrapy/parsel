@@ -6,7 +6,7 @@ from typing import TYPE_CHECKING, Any, Protocol
 from cssselect import GenericTranslator as OriginalGenericTranslator
 from cssselect import HTMLTranslator as OriginalHTMLTranslator
 from cssselect.parser import Element, FunctionalPseudoElement, PseudoElement
-from cssselect.xpath import ExpressionError
+from cssselect.xpath import ExpressionError, is_safe_name
 from cssselect.xpath import XPathExpr as OriginalXPathExpr
 
 if TYPE_CHECKING:
@@ -43,7 +43,11 @@ class XPathExpr(OriginalXPathExpr):
         if self.attribute is not None:
             if path.endswith("::*/*"):
                 path = path[:-2]
-            path += f"/@{self.attribute}"
+            if is_safe_name(self.attribute):
+                path += f"/@{self.attribute}"
+            else:
+                literal = OriginalGenericTranslator.xpath_literal(self.attribute)
+                path += f"/attribute::*[name() = {literal}]"
 
         return path
 
@@ -56,7 +60,7 @@ class XPathExpr(OriginalXPathExpr):
     ) -> Self:
         if not isinstance(other, XPathExpr):
             raise ValueError(
-                f"Expressions of type {__name__}.XPathExpr can ony join expressions"
+                f"Expressions of type {__name__}.XPathExpr can only join expressions"
                 f" of the same type (or its descendants), got {type(other)}"
             )
         super().join(combiner, other, *args, **kwargs)
@@ -79,6 +83,31 @@ class TranslatorMixin:
 
     Currently supported pseudo-elements are ``::text`` and ``::attr(ATTR_NAME)``.
     """
+
+    def __init__(self, *args: Any, **kwargs: Any):
+        super().__init__(*args, **kwargs)
+        self._build_cache()
+
+    # The cache is per instance because translation depends on instance state,
+    # and because a cache shared by all instances, keyed on the instance, keeps
+    # every translator ever used alive.
+    def _build_cache(self) -> None:
+        self._cache = lru_cache(maxsize=256)(self._translate)
+
+    def _translate(self, css: str, prefix: str) -> str:
+        # https://github.com/python/mypy/issues/14757
+        return super().css_to_xpath(css, prefix)  # type: ignore[misc,no-any-return]
+
+    def css_to_xpath(self, css: str, prefix: str = "descendant-or-self::") -> str:
+        return self._cache(css, prefix)
+
+    # The cache holds a reference to a bound method, which cannot be pickled.
+    def __getstate__(self) -> dict[str, Any]:
+        return {k: v for k, v in self.__dict__.items() if k != "_cache"}
+
+    def __setstate__(self, state: dict[str, Any]) -> None:
+        self.__dict__.update(state)
+        self._build_cache()
 
     def xpath_element(self: TranslatorProtocol, selector: Element) -> XPathExpr:
         # https://github.com/python/mypy/issues/14757
@@ -127,15 +156,11 @@ class TranslatorMixin:
 
 
 class GenericTranslator(TranslatorMixin, OriginalGenericTranslator):
-    @lru_cache(maxsize=256)
-    def css_to_xpath(self, css: str, prefix: str = "descendant-or-self::") -> str:
-        return super().css_to_xpath(css, prefix)
+    pass
 
 
 class HTMLTranslator(TranslatorMixin, OriginalHTMLTranslator):
-    @lru_cache(maxsize=256)
-    def css_to_xpath(self, css: str, prefix: str = "descendant-or-self::") -> str:
-        return super().css_to_xpath(css, prefix)
+    pass
 
 
 _translator = HTMLTranslator()

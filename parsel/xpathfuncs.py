@@ -6,6 +6,8 @@ from typing import TYPE_CHECKING, Any
 from lxml import etree
 from w3lib.html import HTML5_WHITESPACE
 
+from .selector import _compile_xpath
+
 if TYPE_CHECKING:
     from collections.abc import Callable
 
@@ -32,6 +34,9 @@ def set_xpathfunc(fname: str, func: Callable | None) -> None:  # type: ignore[ty
         ns_fns[fname] = func
     else:
         del ns_fns[fname]
+        # Compiled expressions keep resolving functions that were registered
+        # when they were first evaluated.
+        _compile_xpath.cache_clear()
 
 
 def setup() -> None:

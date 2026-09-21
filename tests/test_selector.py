@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import html
 import pickle
 import re
 import typing
@@ -21,6 +22,15 @@ if TYPE_CHECKING:
     from collections.abc import Mapping
 
     from lxml.html import HtmlElement
+
+
+# libxml2 sends numeric references in the c1 range through the cp1252 table from 2.14 on,
+# where its html tokenizer became html5 conforming. older builds keep the raw character and
+# some wheels still ship one, so the tests that need the mapping do not run there.
+needs_c1_remapping = pytest.mark.skipif(
+    etree.LIBXML_VERSION < (2, 14),
+    reason=f"libxml2 {etree.LIBXML_VERSION} does not map c1 character references, needs 2.14",
+)
 
 
 class TestSelector:
@@ -594,7 +604,7 @@ class TestSelector:
 
     def test_make_links_absolute(self) -> None:
         text = '<a href="file.html">link to file</a>'
-        sel = Selector(text=text, base_url="http://example.com")
+        sel = self.sscls(text=text, base_url="http://example.com")
         typing.cast("HtmlElement", sel.root).make_links_absolute()
         assert sel.xpath("//a/@href").extract_first() == "http://example.com/file.html"
 
@@ -743,20 +753,17 @@ class TestSelector:
         text = "<root>pre\x00post</root>"
         self.sscls(text).xpath("//text()").extract()
 
-    def test_replacement_char_from_badly_encoded_body(self) -> None:
-        # \xe9 alone isn't valid utf8 sequence
-        text = "<html><p>an Jos\\ufffd de</p><html>"
-        assert self.sscls(text).xpath("//text()").extract() == ["an Jos\\ufffd de"]
-
     def test_select_on_unevaluable_nodes(self) -> None:
         r = self.sscls(text='<span class="big">some text</span>')
         # Text node
         x1 = r.xpath("//text()")
         assert x1.extract() == ["some text"]
+        assert x1.xpath(".").extract() == ["some text"]
         assert x1.xpath(".//b").extract() == []
         # Tag attribute
         x1 = r.xpath("//span/@class")
         assert x1.extract() == ["big"]
+        assert x1.xpath(".").extract() == ["big"]
         assert x1.xpath(".//text()").extract() == []
 
     def test_select_on_text_nodes(self) -> None:
@@ -896,6 +903,38 @@ class TestSelector:
 
         assert sel.extract() == "<foo>&xxe;</foo>"
 
+    @needs_c1_remapping
+    def test_html_c1_character_references(self) -> None:
+        """HTML maps numeric references in the C1 range through the CP1252 table.
+
+        ``&#133;`` is an ellipsis rather than U+0085, which is what browsers show
+        and what the HTML standard requires. ``html.unescape`` implements the same
+        table, so it is used as the reference. See #76.
+        """
+        for code_point in range(0x80, 0xA0):
+            reference = f"&#{code_point};"
+            expected = html.unescape(reference)
+            sel = self.sscls(text=f"<p>{reference}</p>")
+            assert sel.css("p::text").get() == expected, reference
+            assert sel.xpath("//p/text()").get() == expected, reference
+
+    @needs_c1_remapping
+    def test_html_c1_character_reference_hex(self) -> None:
+        assert self.sscls(text="<p>&#x85;</p>").css("p::text").get() == "\u2026"
+
+    def test_html_named_character_reference(self) -> None:
+        # a named reference does not go through the c1 table, so it is the same everywhere
+        assert self.sscls(text="<p>&hellip;</p>").css("p::text").get() == "\u2026"
+
+    def test_xml_keeps_c1_character_references_literal(self) -> None:
+        """XML has no CP1252 remapping, so ``&#133;`` really is U+0085 there.
+
+        This is the behaviour in the original report of #76. It is correct for the
+        XML parser and only the HTML path applies the replacement table.
+        """
+        sel = self.sscls(text="<p>&#133;</p>", type="xml")
+        assert sel.xpath("//p/text()").get() == "\x85"
+
     def test_configure_base_url(self) -> None:
         sel = self.sscls(text="nothing", base_url="http://example.com")
         assert sel.root.base == "http://example.com"
@@ -982,6 +1021,16 @@ class TestSelector:
         sel.css("body").drop()
         assert sel.get() == "<html></html>"
 
+    def test_remove_root_element_selector_xml(self) -> None:
+        sel = self.sscls(text="<a><b>1</b></a>", type="xml")
+        with pytest.raises(CannotRemoveElementWithoutParent):
+            sel.drop()
+
+        with pytest.raises(CannotRemoveElementWithoutParent):
+            sel.xpath("/a").drop()
+
+        assert sel.xpath("//b/text()").getall() == ["1"]
+
     def test_deep_nesting(self) -> None:
         content = """
         <html>
@@ -1029,13 +1078,13 @@ class TestSelector:
         """
 
         with warnings.catch_warnings(record=True) as w:
-            sel = Selector(text=content, huge_tree=False)
+            sel = self.sscls(text=content, huge_tree=False)
             assert "huge_tree" in str(w[0].message)
             assert len(sel.css("span")) <= 256
             assert len(sel.css("td")) == 0
 
         # If huge trees are enabled, elements with a depth > 255 should be found
-        sel = Selector(text=content)
+        sel = self.sscls(text=content)
         nest_level = 282
         assert len(sel.css("span")) == nest_level
         assert len(sel.css("td")) == 1
@@ -1049,11 +1098,52 @@ class TestSelector:
         selector = self.sscls(text)
         assert selector.type == "html"
 
+    @pytest.mark.parametrize(
+        ("text", "type_"),
+        [
+            ('<?xml version="1.0"?><Doc/>', "xml"),
+            ('\n <?xml version="1.0"?><Doc/>', "xml"),
+            ('﻿<?xml version="1.0"?><Doc/>', "xml"),
+            # Only the XML declaration is a strong enough hint.
+            ("<?xml-stylesheet?><Doc/>", "html"),
+            ("<Doc/>", "html"),
+            ('<html><?xml version="1.0"?></html>', "html"),
+        ],
+    )
+    def test_detected_type(self, text: str, type_: str) -> None:
+        assert self.sscls(text).type == type_
+        assert self.sscls(body=text.encode()).type == type_
+        assert self.sscls(body=text.encode("utf-16"), encoding="utf-16").type == type_
+
+    def test_detected_xml_type_parsing(self) -> None:
+        selector = self.sscls('<?xml version="1.0"?><Doc><Title>Hi</Title></Doc>')
+        assert selector.xpath("//Title/text()").get() == "Hi"
+        assert selector.css("Title").get() == "<Title>Hi</Title>"
+
+    def test_explicit_type_beats_xml_declaration(self) -> None:
+        selector = self.sscls('<?xml version="1.0"?><Doc/>', type="html")
+        assert selector.type == "html"
+
     def test_json_type(self) -> None:
         obj = 1
         selector = self.sscls(str(obj), type="json")
         assert selector.root == obj
         assert selector.type == "json"
+
+    @pytest.mark.parametrize("type_", ["html", "xml", "text"])
+    def test_explicit_type_beats_json(self, type_: str) -> None:
+        selector = self.sscls('{"a": "b"}', type=type_)
+        assert selector.type == type_
+
+    @pytest.mark.parametrize("type_", ["html", "xml", "text"])
+    def test_explicit_type_beats_json_root(self, type_: str) -> None:
+        selector = self.sscls(root='{"a": "b"}', type=type_)
+        assert selector.type == type_
+
+    def test_json_like_text_result_keeps_type(self) -> None:
+        selector = self.sscls(text='<span>{"a": 1}</span>').css("span::text")[0]
+        assert selector.type == "html"
+        assert selector.xpath(".").get() == '{"a": 1}'
 
     def test_html_root(self) -> None:
         root = etree.fromstring("<html/>")
@@ -1089,28 +1179,41 @@ class TestSelector:
         assert selector.root is None
         assert selector.type == "json"
 
+    def test_unsupported_declared_encoding(self) -> None:
+        """A syntax error other than an invalid byte sequence reaches the
+        caller. Only some libxml2 versions consider an unsupported encoding
+        declaration one."""
+        text = '<?xml version="1.0" encoding="bogus"?><a/>'
+        try:
+            selector = self.sscls(text, type="xml")
+        except etree.XMLSyntaxError:
+            pass
+        else:
+            assert selector.get() == "<a/>"
+
     def test_text_and_root_warning(self) -> None:
         with warnings.catch_warnings(record=True) as w:
-            Selector(text="a", root="b")
+            self.sscls(text="a", root="b")
             assert "both text and root" in str(w[0].message)
 
     def test_etree_root_invalid_type(self) -> None:
-        selector = Selector("<html></html>")
+        selector = self.sscls("<html></html>")
         with pytest.raises(ValueError, match="object as root"):
             Selector(root=selector.root, type="text")
         with pytest.raises(ValueError, match="object as root"):
-            Selector(root=selector.root, type="json")
+            self.sscls(root=selector.root, type="json")
 
     def test_json_selector_representation(self) -> None:
-        selector = Selector(text="true")
-        assert repr(selector) == "<Selector query=None data='True'>"
+        type_name = self.sscls.__name__
+        selector = self.sscls(text="true", type="json")
+        assert repr(selector) == f"<{type_name} query=None data='True'>"
         assert str(selector) == "True"
-        selector = Selector(text="1")
-        assert repr(selector) == "<Selector query=None data='1'>"
-        assert str(selector) == "1"
+        selector = self.sscls(text="[1]")
+        assert repr(selector) == f"<{type_name} query=None data='[1]'>"
+        assert str(selector) == "[1]"
 
     def test_body_bytearray_support(self) -> None:
-        selector = Selector(body=bytearray("<h1>Hello World</h1>", "utf-8"))
+        selector = self.sscls(body=bytearray("<h1>Hello World</h1>", "utf-8"))
         assert selector.xpath("//h1/text()").get() == "Hello World"
 
     def test_remove_namespace_json(self) -> None:
@@ -1247,6 +1350,21 @@ class TestExslt:
         el.drop()
         assert sel.get() == "<a><c/></a>"
 
+    @pytest.mark.parametrize(
+        ("xml", "expected"),
+        [
+            ("<a><b/>tail<c/></a>", "<a>tail<c/></a>"),
+            ("<a>text<b/>tail<c/></a>", "<a>texttail<c/></a>"),
+            ("<a><c/>previous<b/>tail</a>", "<a><c/>previoustail</a>"),
+            ("<a><!--comment--><b/>tail</a>", "<a><!--comment-->tail</a>"),
+            ("<a><b/>tail<b/>tail2</a>", "<a>tailtail2</a>"),
+        ],
+    )
+    def test_drop_keeps_tail_with_xml_type(self, xml: str, expected: str) -> None:
+        sel = self.sscls(text=xml, type="xml")
+        sel.xpath("//b").drop()
+        assert sel.get() == expected
+
 
 class SelectorBytesInput(Selector):
     def __init__(
@@ -1289,9 +1407,40 @@ class TestSelectorBytes(TestSelector):
     def test_weakref_slots(self) -> None:
         pass
 
+    def test_text_and_root_warning(self) -> None:
+        pass
+
     def test_check_text_argument_type(self) -> None:
         with pytest.raises(TypeError, match="body argument should be of type"):
             self.sscls(body="<html/>")  # type: ignore[arg-type]
+
+    @pytest.mark.parametrize("type_", ["html", "xml", None])
+    @pytest.mark.parametrize(
+        "encoding",
+        ["utf-8", "UTF8", "utf-16", "utf-16-le", "utf-16-be", "iso-8859-1"],
+    )
+    def test_encodings(self, encoding: str, type_: str | None) -> None:
+        text = "<a><b>oh\xa1</b></a>"
+        selector = Selector(body=text.encode(encoding), encoding=encoding, type=type_)
+        assert selector.css("b::text").get() == "oh\xa1"
+
+    @pytest.mark.parametrize("type_", ["html", "xml", None])
+    @pytest.mark.parametrize("encoding", ["utf-8", "ascii", "shift_jis"])
+    def test_undecodable_bytes(self, encoding: str, type_: str | None) -> None:
+        """Bytes that *encoding* cannot decode become replacement characters,
+        and the rest of the document is still parsed."""
+        body = b"<a><b>oh\x80</b></a>"
+        selector = Selector(body=body, encoding=encoding, type=type_)
+        assert selector.css("b::text").get() == "oh�"
+
+    @pytest.mark.parametrize("body", [b"\x00", b"  "])
+    def test_blank_body(self, body: bytes) -> None:
+        assert Selector(body=body, type="xml").get() == "<html/>"
+
+    @pytest.mark.parametrize("encoding", ["utf-8", "UTF8", "utf_8"])
+    def test_json_detection_encodings(self, encoding: str) -> None:
+        selector = Selector(body=b'{"a": "b"}', encoding=encoding)
+        assert selector.type == "json"
 
 
 class TestExsltBytes(TestExslt):
