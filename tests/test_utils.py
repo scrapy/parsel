@@ -4,10 +4,27 @@ from typing import TYPE_CHECKING
 
 import pytest
 
-from parsel.utils import extract_regex, shorten
+from parsel.utils import extract_regex, iflatten, shorten
 
 if TYPE_CHECKING:
+    from collections.abc import Iterator
     from re import Pattern
+
+
+def test_iflatten_consumes_nested_iterators_lazily() -> None:
+    consumed = []
+
+    def values() -> Iterator[int]:
+        for value in range(3):
+            consumed.append(value)
+            yield value
+
+    flattened = iflatten([[values()]])
+    assert consumed == []
+    assert next(flattened) == 0
+    assert consumed == [0]
+    assert list(flattened) == [1, 2]
+    assert consumed == [0, 1, 2]
 
 
 @pytest.mark.parametrize(
