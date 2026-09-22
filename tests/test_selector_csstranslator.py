@@ -13,9 +13,15 @@ from typing import Any
 import pytest
 from cssselect.parser import SelectorSyntaxError
 from cssselect.xpath import ExpressionError
+from cssselect.xpath import XPathExpr as OriginalXPathExpr
 
 from parsel import Selector, css2xpath
-from parsel.csstranslator import GenericTranslator, HTMLTranslator, TranslatorProtocol
+from parsel.csstranslator import (
+    GenericTranslator,
+    HTMLTranslator,
+    TranslatorProtocol,
+    XPathExpr,
+)
 
 HTMLBODY = """
 <html>
@@ -198,6 +204,12 @@ def test_css2xpath() -> None:
         "concat(' ', normalize-space(@class), ' '), ' some-class ')]"
     )
     assert css2xpath(".some-class") == expected_xpath
+
+
+def test_xpathexpr_join_wrong_type() -> None:
+    expr = XPathExpr(path="foo")
+    with pytest.raises(ValueError, match="can only join expressions"):
+        expr.join("/", OriginalXPathExpr(path="bar"))
 
 
 class TestCSSSelector:
