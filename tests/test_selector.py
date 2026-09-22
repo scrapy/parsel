@@ -11,6 +11,7 @@ from typing import TYPE_CHECKING, Any, cast
 import pytest
 from lxml import etree
 
+import parsel.selector as selector_module
 from parsel import Selector, SelectorList
 from parsel.selector import (
     _NOT_SET,
@@ -1042,6 +1043,14 @@ class TestSelector:
         assert len(sel.css("span")) == nest_level
         assert len(sel.css("td")) == 1
 
+    def test_huge_tree_warning_skips_other_errors(self) -> None:
+        """Errors unrelated to the huge_tree limit must not stop the scan
+        for the warning-worthy one."""
+        content = '<a x="1" x="2">' + "<b>" * 300 + "hi" + "</b>" * 300 + "</a>"
+        with warnings.catch_warnings(record=True) as w:
+            self.sscls(text=content, type="xml", huge_tree=False)
+            assert "huge_tree" in str(w[0].message)
+
     def test_invalid_type(self) -> None:
         with pytest.raises(ValueError, match="Invalid type: xhtml"):
             self.sscls("", type="xhtml")
@@ -1143,6 +1152,34 @@ class TestSelector:
             pass
         else:
             assert selector.get() == "<a/>"
+
+    def test_xml_syntax_error_reraised(self, monkeypatch: pytest.MonkeyPatch) -> None:
+        def boom(*args: Any, **kwargs: Any) -> None:
+            raise etree.XMLSyntaxError("boom", 0, 1, 1, None)
+
+        monkeypatch.setattr(etree, "fromstring", boom)
+        with pytest.raises(etree.XMLSyntaxError):
+            self.sscls(text="<a/>", type="xml")
+
+    def test_xml_syntax_error_with_encoding_error_recovers(
+        self, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        """A syntax error accompanied by a genuine encoding error is
+        swallowed; the caller gets a tree parsed from the body with
+        undecodable bytes replaced instead."""
+        original_fromstring = etree.fromstring
+        calls: list[None] = []
+
+        def fromstring_once(*args: Any, **kwargs: Any) -> Any:
+            if not calls:
+                calls.append(None)
+                raise etree.XMLSyntaxError("boom", 0, 1, 1, None)
+            return original_fromstring(*args, **kwargs)
+
+        monkeypatch.setattr(etree, "fromstring", fromstring_once)
+        monkeypatch.setattr(selector_module, "_has_encoding_error", lambda parser: True)
+        selector = self.sscls(body=b"<a/>", type="xml")
+        assert selector.get() == "<a/>"
 
     def test_text_and_root_warning(self) -> None:
         with warnings.catch_warnings(record=True) as w:

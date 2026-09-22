@@ -71,11 +71,9 @@ class XPathExpr(OriginalXPathExpr):
 
 # e.g. cssselect.GenericTranslator, cssselect.HTMLTranslator
 class TranslatorProtocol(Protocol):
-    def xpath_element(self, selector: Element) -> OriginalXPathExpr:
-        pass
+    def xpath_element(self, selector: Element) -> OriginalXPathExpr: ...
 
-    def css_to_xpath(self, css: str, prefix: str = ...) -> str:
-        pass
+    def css_to_xpath(self, css: str, prefix: str = ...) -> str: ...
 
 
 class TranslatorMixin:
