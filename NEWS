@@ -25,6 +25,9 @@ History
   multi-byte characters are no longer garbled, and bytes that the encoding
   cannot decode are now replaced with ``U+FFFD`` instead of truncating the
   document.
+* Fixed ``Selector`` raising ``XMLSyntaxError`` for an XML ``body`` that is
+  empty after stripping whitespace and null bytes. It now gets the same empty
+  root as the equivalent ``text``.
 * Improved performance by caching compiled XPath expressions.
 * Fixed CSS-to-XPath translator instances being kept alive by a translation
   cache shared by all instances.
