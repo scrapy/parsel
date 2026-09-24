@@ -29,6 +29,10 @@ History
   empty after stripping whitespace and null bytes. It now gets the same empty
   root as the equivalent ``text``.
 * Improved performance by caching compiled XPath expressions.
+* Additional keyword arguments of ``xpath()`` are now always used as XPath
+  variables. Before, ``extensions`` and ``regexp`` were passed to lxml as
+  evaluation options. To use custom XPath functions, register them with
+  ``parsel.xpathfuncs.set_xpathfunc()`` instead.
 * Fixed CSS-to-XPath translator instances being kept alive by a translation
   cache shared by all instances.
 * ``xpath(".")`` now works on selectors for text nodes and attribute values,
