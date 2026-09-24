@@ -12,7 +12,10 @@ History
   ``"foo"``, is now handled as HTML. Pass ``type="json"`` to get the old
   behavior.
 * An explicit ``type`` is now respected when the input or ``root`` is valid
-  JSON. Before, ``type`` was ignored and the input was handled as JSON.
+  JSON. Before, ``type`` was ignored and the input was handled as JSON. As a
+  result, selectors for text nodes and attribute values whose content is
+  valid JSON, e.g. ``"1"``, now keep the type of their parent selector
+  instead of ``"json"``.
 * When ``type`` is not specified, ``body`` is now detected as JSON for any
   spelling of the UTF-8 encoding name, e.g. ``"UTF-8"`` or ``"utf8"``.
 * When ``type`` is not specified, ``Selector`` now handles input that starts
@@ -27,7 +30,8 @@ History
   cache shared by all instances.
 * ``xpath(".")`` now works on selectors for text nodes and attribute values,
   returning the selector itself instead of an empty list.
-* ``jmespath()`` now works on selectors of type ``"text"``.
+* ``jmespath()`` now works on selectors of type ``"text"`` and on selectors
+  for text nodes and attribute values.
 * Fixed the CSS ``::attr()`` pseudo-element producing an invalid XPath
   expression for attribute names that are not valid XPath names, e.g.
   ``::attr(foo\:bar)``.
