@@ -3,6 +3,44 @@
 History
 -------
 
+1.12.0 (unreleased)
+~~~~~~~~~~~~~~~~~~~
+
+* Added support for Python 3.15.
+* When ``type`` is not specified, ``Selector`` now detects input as JSON only
+  if it is a JSON object or array. Other valid JSON, such as ``123`` or
+  ``"foo"``, is now handled as HTML. Pass ``type="json"`` to get the old
+  behavior.
+* An explicit ``type`` is now respected when the input is valid JSON. Before,
+  ``type`` was ignored and the input was handled as JSON.
+* When ``type`` is not specified, ``Selector`` now handles input that starts
+  with an XML declaration (``<?xml ...?>``) as XML instead of HTML. Pass
+  ``type="html"`` to get the old behavior.
+* Fixed ``body`` handling for UTF-16 and other encodings that are not UTF-8:
+  multi-byte characters are no longer garbled, and bytes that the encoding
+  cannot decode are now replaced with ``U+FFFD`` instead of truncating the
+  document.
+* Improved performance by caching compiled XPath expressions.
+* Fixed CSS-to-XPath translator instances being kept alive by a translation
+  cache shared by all instances.
+* ``xpath(".")`` now works on selectors for text nodes and attribute values,
+  returning the selector itself instead of an empty list.
+* Fixed the CSS ``::attr()`` pseudo-element producing an invalid XPath
+  expression for attribute names that are not valid XPath names, e.g.
+  ``::attr(foo\:bar)``.
+* Fixed ``drop()`` on an XML selector also removing the tail text of the
+  dropped element.
+* Fixed ``drop()`` raising ``ValueError`` instead of
+  ``CannotDropElementWithoutParent`` for the root element of an XML selector.
+* Removed the ``lxml_version``, ``lxml_huge_tree_version`` and
+  ``LXML_SUPPORTS_HUGE_TREE`` constants from ``parsel.selector``. All
+  supported lxml versions support ``huge_tree``.
+* Removed the dependency on ``packaging``.
+* ``parsel.utils.iflatten()`` is now lazy for nested iterables as well.
+* Documented how to extract text, how to use lxml's ``iterlinks()``, and how
+  to get the XPath expression of a selector.
+* Removed the link to the unmaintained ``parsel-cli`` from the documentation.
+
 1.11.0 (2026-01-29)
 ~~~~~~~~~~~~~~~~~~~
 
