@@ -55,6 +55,10 @@ class CannotDropElementWithoutParent(CannotRemoveElementWithoutParent):
     pass
 
 
+class AbsoluteXPathWarning(UserWarning):
+    """Emitted when an absolute XPath is used on a nested selector."""
+
+
 class SafeXMLParser(etree.XMLParser):
     def __init__(self, *args: Any, **kwargs: Any) -> None:
         kwargs.setdefault("resolve_entities", False)
@@ -222,8 +226,12 @@ class SelectorList(list[_SelectorType]):
 
             selector.xpath('//a[href=$url]', url="http://www.example.com")
         """
+        if xpath[:1] == "/":
+            for sel in self:
+                if sel._warn_if_nested(xpath, stacklevel=3):
+                    break
         return self.__class__(
-            flatten([x.xpath(xpath, namespaces=namespaces, **kwargs) for x in self])
+            flatten([x._xpath(xpath, namespaces, kwargs) for x in self])
         )
 
     def css(self, query: str) -> SelectorList[_SelectorType]:
@@ -623,6 +631,26 @@ class Selector:
 
             selector.xpath('//a[href=$url]', url="http://www.example.com")
         """
+        if query[:1] == "/":
+            self._warn_if_nested(query, stacklevel=3)
+        return self._xpath(query, namespaces, kwargs)
+
+    def _warn_if_nested(self, xpath: str, *, stacklevel: int) -> bool:
+        if isinstance(self.root, etree._Element) and self.root.getparent() is not None:
+            warnings.warn(
+                f"Absolute XPath {xpath!r} used on a nested selector",
+                AbsoluteXPathWarning,
+                stacklevel=stacklevel,
+            )
+            return True
+        return False
+
+    def _xpath(
+        self,
+        query: str,
+        namespaces: Mapping[str, str] | None,
+        kwargs: dict[str, Any],
+    ) -> SelectorList[Self]:
         if self.type not in ("html", "xml", "text"):
             raise ValueError(f"Cannot use xpath on a Selector of type {self.type!r}")
         if self.type in ("html", "xml"):

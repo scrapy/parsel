@@ -12,7 +12,7 @@ import pytest
 from lxml import etree
 
 import parsel.selector as selector_module
-from parsel import Selector, SelectorList
+from parsel import AbsoluteXPathWarning, Selector, SelectorList
 from parsel.selector import (
     _NOT_SET,
     CannotRemoveElementWithoutParent,
@@ -370,7 +370,11 @@ class TestSelector:
 
         x = self.sscls(text=body)
         divtwo = x.xpath('//div[@class="two"]')
-        assert divtwo.xpath("//li").extract() == [
+        with pytest.warns(
+            AbsoluteXPathWarning, match="Absolute XPath.*nested selector"
+        ):
+            absolute_items = divtwo.xpath("//li")
+        assert absolute_items.extract() == [
             "<li>one</li>",
             "<li>two</li>",
             "<li>four</li>",
@@ -406,7 +410,11 @@ class TestSelector:
 
         x = self.sscls(text=body)
         divtwo = x.xpath('//div[@class="two"]')
-        assert divtwo.xpath("//li").getall() == [
+        with pytest.warns(
+            AbsoluteXPathWarning, match="Absolute XPath.*nested selector"
+        ):
+            absolute_items = divtwo.xpath("//li")
+        assert absolute_items.getall() == [
             "<li>one</li>",
             "<li>two</li>",
             "<li>four</li>",
@@ -684,6 +692,44 @@ class TestSelector:
         xpath = "//test[@foo='\\u0431ar]"
         with pytest.raises(ValueError, match=re.escape(xpath)):
             x.xpath(xpath)
+
+    def test_absolute_xpath_on_nested_selector_warns(self) -> None:
+        selector = self.sscls(text="<div><p>text</p></div>").xpath("//div")[0]
+
+        with pytest.warns(
+            AbsoluteXPathWarning, match="Absolute XPath.*nested selector"
+        ):
+            result = selector.xpath("//p")
+
+        assert result.get() == "<p>text</p>"
+
+    def test_absolute_xpath_via_selectorlist_points_at_user_code(self) -> None:
+        # SelectorList.xpath must not attribute the warning to parsel/selector.py
+        sel = self.sscls(text="<div><p>a</p></div><p>b</p>")
+        nested = sel.xpath("//div")
+        with warnings.catch_warnings(record=True) as caught:
+            warnings.simplefilter("always")
+            nested.xpath("//p")
+        abs_warns = [w for w in caught if issubclass(w.category, AbsoluteXPathWarning)]
+        assert abs_warns
+        assert abs_warns[0].filename == __file__
+
+    def test_absolute_xpath_via_selectorlist_checks_all_items(self) -> None:
+        # First item may be a root-level match; a later nested item must still warn.
+        sel = self.sscls(text="<html><body><div><p>a</p></div><p>b</p></body></html>")
+        mixed = sel.xpath("/html | //div")
+        with pytest.warns(
+            AbsoluteXPathWarning, match="Absolute XPath.*nested selector"
+        ):
+            mixed.xpath("//p")
+
+    def test_absolute_xpath_on_css_nested_selector_warns(self) -> None:
+        nested = self.sscls(text="<div><p>a</p></div>").css("div")[0]
+        with pytest.warns(
+            AbsoluteXPathWarning,
+            match=r"Absolute XPath '//p' used on a nested selector",
+        ):
+            assert nested.xpath("//p").get() == "<p>a</p>"
 
     def test_http_header_encoding_precedence(self) -> None:
         # '\xa3'     = pound symbol in unicode

@@ -7,6 +7,7 @@ __author__ = "Scrapy project"
 __email__ = "info@scrapy.org"
 __version__ = "1.12.0"
 __all__ = [
+    "AbsoluteXPathWarning",
     "Selector",
     "SelectorList",
     "css2xpath",
@@ -15,6 +16,6 @@ __all__ = [
 
 from parsel import xpathfuncs
 from parsel.csstranslator import css2xpath
-from parsel.selector import Selector, SelectorList
+from parsel.selector import AbsoluteXPathWarning, Selector, SelectorList
 
 xpathfuncs.setup()
