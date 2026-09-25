@@ -467,6 +467,30 @@ document, whatever the element and attribute where it is defined, as
 Links are yielded as they appear in the document, so they may be relative, and
 they may use schemes such as ``javascript:``.
 
+Using a different HTML parser
+-----------------------------
+
+Parsel parses HTML with `lxml.html`_, which favors speed over strict
+compliance with how a browser would parse the same markup, e.g. it
+recovers from unclosed tags differently. To parse with a different,
+lxml-compatible parser, build the tree yourself and pass it as the
+``root`` argument:
+
+.. skip: start
+
+.. code-block:: pycon
+
+    >>> import html5lib
+    >>> root = html5lib.parse(doc, treebuilder="lxml", namespaceHTMLElements=False).getroot()
+    >>> sel = Selector(root=root)
+
+.. skip: end
+
+`html5lib`_ parses HTML the way a browser does, at a large cost: roughly
+25-50x slower than `lxml.html`_, depending on the treebuilder used.
+
+.. _html5lib: https://github.com/html5lib/html5lib-python
+
 Using selectors with regular expressions
 ----------------------------------------
 
