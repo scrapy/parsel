@@ -3,7 +3,6 @@ from __future__ import annotations
 import html
 import pickle
 import re
-import tracemalloc
 import typing
 import warnings
 import weakref
@@ -1439,6 +1438,7 @@ class TestExsltBytes(TestExslt):
 
 
 def test_repeated_queries_do_not_leak_memory() -> None:
+    tracemalloc = pytest.importorskip("tracemalloc")
     text = "<html><body>" + '<p class="a">a</p>' * 20 + "</body></html>"
 
     def run(iterations: int) -> None:
