@@ -3,7 +3,7 @@
 History
 -------
 
-1.12.1 (unreleased)
+1.12.1 (2026-09-28)
 ~~~~~~~~~~~~~~~~~~~
 
 * Fixed memory usage growing with every ``xpath()`` and ``css()`` call when
