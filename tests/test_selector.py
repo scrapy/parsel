@@ -1435,3 +1435,28 @@ class TestSelectorBytes(TestSelector):
 
 class TestExsltBytes(TestExslt):
     sscls = SelectorBytesInput  # type: ignore[assignment]
+
+
+def test_repeated_queries_do_not_leak_memory() -> None:
+    tracemalloc = pytest.importorskip("tracemalloc")
+    text = "<html><body>" + '<p class="a">a</p>' * 20 + "</body></html>"
+
+    def run(iterations: int) -> None:
+        for _ in range(iterations):
+            sel = Selector(text=text, namespaces={"s": "http://exslt.org/strings"})
+            for p in sel.xpath("//p"):
+                p.xpath("string(.)").get()
+                p.xpath('s:padding(3, "x")').get()
+                p.xpath("has-class('a')").get()
+                p.css(".a::text").get()
+            sel.xpath("set:distinct(//p)").getall()
+
+    run(10)
+    tracemalloc.start()
+    try:
+        before = tracemalloc.get_traced_memory()[0]
+        run(100)
+        after = tracemalloc.get_traced_memory()[0]
+    finally:
+        tracemalloc.stop()
+    assert after - before < 50_000

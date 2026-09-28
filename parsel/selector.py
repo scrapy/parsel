@@ -390,11 +390,35 @@ def _get_root_and_type_from_text(
     return root, type_
 
 
+# lxml registers the functions of these namespaces on every call of an
+# evaluator that maps them, and with libxml2 2.13+ every registration after the
+# first adds an entry to the evaluator's error log, which cannot be cleared.
+_EXSLT_NAMESPACES = frozenset(
+    f"http://exslt.org/{name}"
+    for name in ("dates-and-times", "math", "sets", "strings")
+)
+
+
 @lru_cache(maxsize=2048)
 def _compile_xpath(
     query: str, namespaces: tuple[tuple[str, str], ...], smart_strings: bool
 ) -> etree.XPath:
     return etree.XPath(query, namespaces=dict(namespaces), smart_strings=smart_strings)
+
+
+def _get_xpath_evaluator(
+    query: str, namespaces: dict[str, str], smart_strings: bool
+) -> etree.XPath:
+    namespaces = {
+        prefix: uri
+        for prefix, uri in namespaces.items()
+        if uri not in _EXSLT_NAMESPACES
+        or not isinstance(query, str)
+        or f"{prefix}:" in query
+    }
+    if _EXSLT_NAMESPACES.intersection(namespaces.values()):
+        return etree.XPath(query, namespaces=namespaces, smart_strings=smart_strings)
+    return _compile_xpath(query, tuple(sorted(namespaces.items())), smart_strings)
 
 
 def _get_root_type(root: Any, *, input_type: str | None) -> str:
@@ -650,9 +674,7 @@ class Selector:
         if namespaces is not None:
             nsp.update(namespaces)
         try:
-            xpathev = _compile_xpath(
-                query, tuple(sorted(nsp.items())), self._lxml_smart_strings
-            )
+            xpathev = _get_xpath_evaluator(query, nsp, self._lxml_smart_strings)
             result = xpathev(root, **kwargs)
         except etree.XPathError as exc:
             raise ValueError(f"XPath error: {exc} in {query}")

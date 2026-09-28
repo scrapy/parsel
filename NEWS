@@ -3,6 +3,12 @@
 History
 -------
 
+1.12.1 (unreleased)
+~~~~~~~~~~~~~~~~~~~
+
+* Fixed memory usage growing with every ``xpath()`` and ``css()`` call when
+  using lxml 5.4.0 or later.
+
 1.12.0 (2026-09-25)
 ~~~~~~~~~~~~~~~~~~~
 
