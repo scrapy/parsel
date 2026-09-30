@@ -1,3 +1,4 @@
 sphinx
 sphinx-notfound-page
 sphinx_rtd_theme
+sphinx-scrapy==0.13.0
