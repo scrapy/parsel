@@ -1,0 +1,113 @@
+.xpath-demo {
+    --xpath-demo-border: #ccc;
+    --xpath-demo-field-bg: #fff;
+    --xpath-demo-field-fg: #404040;
+    --xpath-demo-output-bg: #f6f6f6;
+    --xpath-demo-result-bg: #fff;
+    --xpath-demo-muted: #808080;
+    --xpath-demo-accent: #2980b9;
+    --xpath-demo-error: #a94442;
+    --xpath-demo-error-bg: #fdf1f1;
+
+    border: 1px solid var(--xpath-demo-border);
+    border-radius: 6px;
+    padding: 12px 16px 16px;
+    margin: 20px 0;
+}
+
+.xpath-demo-label {
+    display: block;
+    margin: 12px 0 4px;
+    font-weight: 700;
+}
+
+.xpath-demo-label:first-child {
+    margin-top: 0;
+}
+
+.xpath-demo-input,
+.xpath-demo-expression {
+    box-sizing: border-box;
+    width: 100%;
+    padding: 6px 8px;
+    font-family: SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+    font-size: 0.85em;
+    color: var(--xpath-demo-field-fg);
+    background-color: var(--xpath-demo-field-bg);
+    border: 1px solid var(--xpath-demo-border);
+    border-radius: 4px;
+}
+
+.xpath-demo-input:focus,
+.xpath-demo-expression:focus {
+    outline: none;
+    border-color: var(--xpath-demo-accent);
+}
+
+.xpath-demo-input {
+    min-height: 12em;
+    resize: vertical;
+    white-space: pre;
+    overflow: auto;
+    tab-size: 2;
+}
+
+.xpath-demo-output {
+    min-height: 2.5em;
+    padding: 8px;
+    background-color: var(--xpath-demo-output-bg);
+    border: 1px solid var(--xpath-demo-border);
+    border-radius: 4px;
+}
+
+.xpath-demo-output--error {
+    color: var(--xpath-demo-error);
+    background-color: var(--xpath-demo-error-bg);
+    border-color: var(--xpath-demo-error);
+}
+
+.xpath-demo-result {
+    padding: 4px 8px;
+    font-family: SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+    font-size: 0.85em;
+    white-space: pre-wrap;
+    word-break: break-word;
+}
+
+.xpath-demo-output--error .xpath-demo-result {
+    background: none;
+    border: none;
+    padding: 0;
+}
+
+.xpath-demo-output:not(.xpath-demo-output--error) .xpath-demo-result {
+    background-color: var(--xpath-demo-result-bg);
+    border: 1px solid var(--xpath-demo-border);
+    border-radius: 4px;
+}
+
+.xpath-demo-result + .xpath-demo-result {
+    margin-top: 6px;
+}
+
+.xpath-demo-scalar::before {
+    content: attr(data-kind) ": ";
+    color: var(--xpath-demo-muted);
+}
+
+.xpath-demo-empty {
+    color: var(--xpath-demo-muted);
+    font-style: italic;
+}
+
+html[data-theme="dark"] .xpath-demo {
+    --xpath-demo-border: #444;
+    --xpath-demo-field-bg: #1a1a1a;
+    --xpath-demo-field-fg: #d0d0d0;
+    --xpath-demo-output-bg: #202020;
+    --xpath-demo-result-bg: #2b2b2b;
+    --xpath-demo-muted: #999;
+    --xpath-demo-accent: #6ab0de;
+    --xpath-demo-error: #e8a0a0;
+    --xpath-demo-error-bg: #3a2323;
+}
