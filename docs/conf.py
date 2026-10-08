@@ -129,6 +129,7 @@ nitpick_ignore = [
 ]
 nitpick_ignore_regex = [
     ("py:.*", r"(parsel\.selector\.)?_SelectorType"),
+]
 
 scrapy_intersphinx_enable = [
     "cssselect",
