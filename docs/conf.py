@@ -19,9 +19,7 @@ import parsel  # noqa: E402
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom ones.
 extensions = [
     "notfound.extension",
-    "sphinx.ext.autodoc",
-    "sphinx.ext.intersphinx",
-    "sphinx.ext.viewcode",
+    "sphinx_scrapy",
 ]
 
 # Add any paths that contain templates here, relative to this directory.
@@ -115,17 +113,6 @@ texinfo_documents = [
     ),
 ]
 
-
-# -- Options for the InterSphinx extension ------------------------------------
-
-intersphinx_mapping = {
-    "cssselect": ("https://cssselect.readthedocs.io/en/latest", None),
-    "python": ("https://docs.python.org/3", None),
-    "requests": ("https://requests.kennethreitz.org/en/latest", None),
-    "lxml": ("https://lxml.de/apidoc/", None),
-}
-
-
 # --- Nitpicking options ------------------------------------------------------
 
 autodoc_preserve_defaults = True
@@ -142,4 +129,9 @@ nitpick_ignore = [
 ]
 nitpick_ignore_regex = [
     ("py:.*", r"(parsel\.selector\.)?_SelectorType"),
+
+scrapy_intersphinx_enable = [
+    "cssselect",
+    "requests",
+    "lxml",
 ]
