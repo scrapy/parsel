@@ -357,9 +357,12 @@ def _get_root_and_type_from_bytes(
 ) -> tuple[Any, str]:
     if input_type == "text":
         return body.decode(encoding), input_type
-    if input_type in ("json", None) and codecs.lookup(encoding).name == "utf-8":
+    if input_type in ("json", None):
         try:
-            data = json.load(BytesIO(body))
+            if codecs.lookup(encoding).name == "utf-8":
+                data = json.load(BytesIO(body))
+            else:
+                data = json.loads(body.decode(encoding))
         except ValueError:
             data = _NOT_SET
         if data is not _NOT_SET and (input_type == "json" or _is_json_document(data)):
