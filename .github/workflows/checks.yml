@@ -23,7 +23,7 @@ jobs:
             TOXENV: docs
         - python-version: "3.14"
           env:
-            TOXENV: typing
+            TOXENV: mypy
         - python-version: "3.14"
           env:
             TOXENV: twinecheck

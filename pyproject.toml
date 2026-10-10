@@ -121,7 +121,7 @@ disable = [
     "wrong-import-position",
 ]
 
-[tool.pytest.ini_options]
+[tool.pytest]
 addopts = [
     "--doctest-modules",
 ]
