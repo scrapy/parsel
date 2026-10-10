@@ -259,6 +259,8 @@ ignore = [
     "RUF012",
     # Use of `assert` detected
     "S101",
+    # Yoda condition detected
+    "SIM300",
 ]
 
 [tool.ruff.lint.isort]
