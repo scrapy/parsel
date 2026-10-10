@@ -31,6 +31,7 @@ classifiers = [
     "Topic :: Text Processing :: Markup",
     "Topic :: Text Processing :: Markup :: HTML",
     "Topic :: Text Processing :: Markup :: XML",
+    "Typing :: Typed",
 ]
 dependencies = [
     "cssselect>=1.2.0",
