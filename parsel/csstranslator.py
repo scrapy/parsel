@@ -59,7 +59,7 @@ class XPathExpr(OriginalXPathExpr):
         **kwargs: Any,
     ) -> Self:
         if not isinstance(other, XPathExpr):
-            raise ValueError(
+            raise ValueError(  # noqa: TRY004
                 f"Expressions of type {__name__}.XPathExpr can only join expressions"
                 f" of the same type (or its descendants), got {type(other)}"
             )
