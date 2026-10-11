@@ -199,11 +199,16 @@ class TestTranslatorCache:
 
 
 def test_css2xpath() -> None:
-    expected_xpath = (
-        "descendant-or-self::*[@class and contains("
-        "concat(' ', normalize-space(@class), ' '), ' some-class ')]"
+    selector = Selector(
+        '<p class="some-class">first</p>'
+        '<p class="some-class-extra">second</p>'
+        '<p class="other some-class">third</p>'
+        "<p>fourth</p>"
     )
-    assert css2xpath(".some-class") == expected_xpath
+    assert selector.xpath(css2xpath(".some-class") + "/text()").getall() == [
+        "first",
+        "third",
+    ]
 
 
 def test_xpathexpr_join_wrong_type() -> None:

@@ -1308,10 +1308,12 @@ On those occasions, use the function :func:`~parsel.css2xpath`:
 ::
 
     >>> from parsel import css2xpath
-    >>> css2xpath('h1.title')
-    "descendant-or-self::h1[@class and contains(concat(' ', normalize-space(@class), ' '), ' title ')]"
-    >>> css2xpath('.profile-data') + '//h2'
-    "descendant-or-self::*[@class and contains(concat(' ', normalize-space(@class), ' '), ' profile-data ')]//h2"
+    >>> query = css2xpath('h1.title')
+    >>> Selector('<h1 class="title">Introduction</h1>').xpath(query + '/text()').get()
+    'Introduction'
+    >>> query = css2xpath('.profile-data') + '//h2/text()'
+    >>> Selector('<div class="profile-data"><h2>Ada</h2></div>').xpath(query).getall()
+    ['Ada']
 
 As you can see from the examples above, it returns the translated CSS query
 into an XPath expression as a string, which you can use as-is or combine to
