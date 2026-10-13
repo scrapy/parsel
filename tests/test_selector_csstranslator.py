@@ -11,9 +11,11 @@ from abc import ABC, abstractmethod
 from typing import Any
 
 import pytest
+from cssselect import __version__ as CSSSELECT_VERSION_STRING
 from cssselect.parser import SelectorSyntaxError
 from cssselect.xpath import ExpressionError
 from cssselect.xpath import XPathExpr as OriginalXPathExpr
+from packaging.version import Version
 
 from parsel import Selector, css2xpath
 from parsel.csstranslator import (
@@ -22,6 +24,8 @@ from parsel.csstranslator import (
     TranslatorProtocol,
     XPathExpr,
 )
+
+CSSSELECT_VERSION = Version(CSSSELECT_VERSION_STRING)
 
 HTMLBODY = """
 <html>
@@ -199,8 +203,13 @@ class TestTranslatorCache:
 
 
 def test_css2xpath() -> None:
+    prefilter = (
+        "contains(@class, 'some-class') and "
+        if CSSSELECT_VERSION >= Version("1.6.0")
+        else ""
+    )
     expected_xpath = (
-        "descendant-or-self::*[@class and contains("
+        f"descendant-or-self::*[@class and {prefilter}contains("
         "concat(' ', normalize-space(@class), ' '), ' some-class ')]"
     )
     assert css2xpath(".some-class") == expected_xpath

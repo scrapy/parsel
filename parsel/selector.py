@@ -14,6 +14,7 @@ from typing import (
     TYPE_CHECKING,
     Any,
     Literal,
+    Self,
     SupportsIndex,
     TypeAlias,
     TypedDict,
@@ -29,9 +30,6 @@ from .utils import extract_regex, flatten, iflatten, shorten
 if TYPE_CHECKING:
     from collections.abc import Mapping
     from re import Pattern
-
-    # typing.Self requires Python 3.11
-    from typing_extensions import Self
 
 
 _SelectorType = TypeVar("_SelectorType", bound="Selector")
