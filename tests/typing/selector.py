@@ -2,8 +2,21 @@
 from __future__ import annotations
 
 import re
+from typing import Any, assert_type
 
 from parsel import Selector
+
+
+def json_results() -> None:
+    selector = Selector(text='{"number": 42}', type="json")
+    results = selector.jmespath("number")
+    assert_type(selector.getall(), list[Any])
+    assert_type(results.get(), Any)
+    assert_type(results.get(default="missing"), Any)
+    assert_type(results.extract_first(), Any)
+    assert_type(results.extract_first(default="missing"), Any)
+    assert_type(results.getall(), list[Any])
+    assert_type(results.extract(), list[Any])
 
 
 def correct() -> None:

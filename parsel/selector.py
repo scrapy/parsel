@@ -294,22 +294,15 @@ class SelectorList(list[_SelectorType]):
             return typing.cast("str", el)
         return default
 
-    def getall(self) -> list[str]:
+    def getall(self) -> list[Any]:
         """
         Call the ``.get()`` method for each element in this list and return
-        their results flattened, as a list of strings.
+        their results as a list. HTML and XML selectors return strings;
+        JSON selectors can return other Python values.
         """
         return [x.get() for x in self]
 
     extract = getall
-
-    @typing.overload
-    def get(self, default: None = None) -> str | None:
-        pass
-
-    @typing.overload
-    def get(self, default: str) -> str:
-        pass
 
     def get(self, default: str | None = None) -> Any:
         """
@@ -817,9 +810,10 @@ class Selector:
 
     extract = get
 
-    def getall(self) -> list[str]:
+    def getall(self) -> list[Any]:
         """
-        Serialize and return the matched node in a 1-element list of strings.
+        Return the result of ``.get()`` in a 1-element list. HTML and XML
+        selectors return strings; JSON selectors can return other Python values.
         """
         return [self.get()]
 
