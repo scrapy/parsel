@@ -477,6 +477,30 @@ document, whatever the element and attribute where it is defined, as
 Links are yielded as they appear in the document, so they may be relative, and
 they may use schemes such as ``javascript:``.
 
+Using a different HTML parser
+-----------------------------
+
+Parsel parses HTML with `lxml.html`_, which favors speed over strict
+compliance with how a browser would parse the same markup, e.g. it
+recovers from unclosed tags differently. To parse with a different,
+lxml-compatible parser, build the tree yourself and pass it as the
+``root`` argument:
+
+.. skip: start
+
+.. code-block:: pycon
+
+    >>> import html5lib
+    >>> root = html5lib.parse(doc, treebuilder="lxml", namespaceHTMLElements=False).getroot()
+    >>> sel = Selector(root=root)
+
+.. skip: end
+
+`html5lib`_ parses HTML the way a browser does, at a large cost: roughly
+25-50x slower than `lxml.html`_, depending on the treebuilder used.
+
+.. _html5lib: https://github.com/html5lib/html5lib-python
+
 Using selectors with regular expressions
 ----------------------------------------
 
@@ -516,17 +540,24 @@ elements. First, you would get all ``<div>`` elements::
 
     >>> divs = selector.xpath('//div')
 
-At first, you may be tempted to use the following approach, which is wrong, as
-it actually extracts all ``<p>`` elements from the document, not only those
-inside ``<div>`` elements::
-
-    >>> for p in divs.xpath('//p'):  # this is wrong - gets all <p> from the whole document
-    ...     print(p.get())
+At first, you may be tempted to use ``divs.xpath('//p')``, which is wrong: an
+absolute path extracts all ``<p>`` elements from the document, not only those
+inside ``<div>`` elements.
 
 This is the proper way to do it (note the dot prefixing the ``.//p`` XPath)::
 
     >>> for p in divs.xpath('.//p'):  # extracts all <p> inside
     ...     print(p.get())
+
+When an absolute XPath (starting with ``/``) is used on a *nested* selector -
+one produced by a prior ``xpath()`` / ``css()`` query - parsel emits an
+:class:`~parsel.selector.AbsoluteXPathWarning`. To silence the warning
+intentionally, filter on that category::
+
+    import warnings
+    from parsel import AbsoluteXPathWarning
+
+    warnings.filterwarnings("ignore", category=AbsoluteXPathWarning)
 
 Another common case would be to extract all direct ``<p>`` children::
 
@@ -1288,9 +1319,9 @@ On those occasions, use the function :func:`~parsel.css2xpath`:
 
     >>> from parsel import css2xpath
     >>> css2xpath('h1.title')
-    "descendant-or-self::h1[@class and contains(concat(' ', normalize-space(@class), ' '), ' title ')]"
+    "descendant-or-self::h1[@class and ...contains(concat(' ', normalize-space(@class), ' '), ' title ')]"
     >>> css2xpath('.profile-data') + '//h2'
-    "descendant-or-self::*[@class and contains(concat(' ', normalize-space(@class), ' '), ' profile-data ')]//h2"
+    "descendant-or-self::*[@class and ...contains(concat(' ', normalize-space(@class), ' '), ' profile-data ')]//h2"
 
 As you can see from the examples above, it returns the translated CSS query
 into an XPath expression as a string, which you can use as-is or combine to

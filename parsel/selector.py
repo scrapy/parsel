@@ -14,6 +14,7 @@ from typing import (
     TYPE_CHECKING,
     Any,
     Literal,
+    Self,
     SupportsIndex,
     TypeAlias,
     TypedDict,
@@ -29,9 +30,6 @@ from .utils import extract_regex, flatten, iflatten, shorten
 if TYPE_CHECKING:
     from collections.abc import Mapping
     from re import Pattern
-
-    # typing.Self requires Python 3.11
-    from typing_extensions import Self
 
 
 _SelectorType = TypeVar("_SelectorType", bound="Selector")
@@ -53,6 +51,10 @@ class CannotRemoveElementWithoutParent(Exception):
 
 class CannotDropElementWithoutParent(CannotRemoveElementWithoutParent):
     pass
+
+
+class AbsoluteXPathWarning(UserWarning):
+    """Emitted when an absolute XPath is used on a nested selector."""
 
 
 class SafeXMLParser(etree.XMLParser):
@@ -233,8 +235,12 @@ class SelectorList(list[_SelectorType]):
 
             selector.xpath('//a[href=$url]', url="http://www.example.com")
         """
+        if xpath[:1] == "/":
+            for sel in self:
+                if sel._warn_if_nested(xpath, stacklevel=3):
+                    break
         return self.__class__(
-            flatten([x.xpath(xpath, namespaces=namespaces, **kwargs) for x in self])
+            flatten([x._xpath(xpath, namespaces, kwargs) for x in self])
         )
 
     def css(self, query: str) -> SelectorList[_SelectorType]:
@@ -399,6 +405,37 @@ def _get_root_and_type_from_text(
     type_ = input_type or _detect_xml_or_html(text)
     root = _get_root_from_text(text, type_=type_, **lxml_kwargs)
     return root, type_
+
+
+# lxml registers the functions of these namespaces on every call of an
+# evaluator that maps them, and with libxml2 2.13+ every registration after the
+# first adds an entry to the evaluator's error log, which cannot be cleared.
+_EXSLT_NAMESPACES = frozenset(
+    f"http://exslt.org/{name}"
+    for name in ("dates-and-times", "math", "sets", "strings")
+)
+
+
+@lru_cache(maxsize=2048)
+def _compile_xpath(
+    query: str, namespaces: tuple[tuple[str, str], ...], smart_strings: bool
+) -> etree.XPath:
+    return etree.XPath(query, namespaces=dict(namespaces), smart_strings=smart_strings)
+
+
+def _get_xpath_evaluator(
+    query: str, namespaces: dict[str, str], smart_strings: bool
+) -> etree.XPath:
+    namespaces = {
+        prefix: uri
+        for prefix, uri in namespaces.items()
+        if uri not in _EXSLT_NAMESPACES
+        or not isinstance(query, str)
+        or f"{prefix}:" in query
+    }
+    if _EXSLT_NAMESPACES.intersection(namespaces.values()):
+        return etree.XPath(query, namespaces=namespaces, smart_strings=smart_strings)
+    return _compile_xpath(query, tuple(sorted(namespaces.items())), smart_strings)
 
 
 def _get_root_type(root: Any, *, input_type: str | None) -> str:
@@ -706,13 +743,32 @@ class Selector:
 
             selector.xpath('//a[href=$url]', url="http://www.example.com")
         """
+        if query[:1] == "/":
+            self._warn_if_nested(query, stacklevel=3)
+        return self._xpath(query, namespaces, kwargs)
+
+    def _warn_if_nested(self, xpath: str, *, stacklevel: int) -> bool:
+        if isinstance(self.root, etree._Element) and self.root.getparent() is not None:
+            warnings.warn(
+                f"Absolute XPath {xpath!r} used on a nested selector",
+                AbsoluteXPathWarning,
+                stacklevel=stacklevel,
+            )
+            return True
+        return False
+
+    def _xpath(
+        self,
+        query: str,
+        namespaces: Mapping[str, str] | None,
+        kwargs: dict[str, Any],
+    ) -> SelectorList[Self]:
         if self.type not in ("html", "xml", "text"):
             raise ValueError(f"Cannot use xpath on a Selector of type {self.type!r}")
         if self.type in ("html", "xml"):
-            try:
-                xpathev = self.root.xpath
-            except AttributeError:
-                if isinstance(self.root, str) and query.strip() == ".":
+            root = self.root
+            if not hasattr(root, "xpath"):
+                if isinstance(root, str) and query.strip() == ".":
                     return typing.cast(
                         "SelectorList[Self]",
                         self.selectorlist_cls(
@@ -728,21 +784,14 @@ class Selector:
                     )
                 return typing.cast("SelectorList[Self]", self.selectorlist_cls([]))
         else:
-            try:
-                xpathev = self._get_root(self._text or "", type_="html").xpath
-            except AttributeError:
-                return typing.cast("SelectorList[Self]", self.selectorlist_cls([]))
+            root = self._get_root(self._text or "", type_="html")
 
         nsp = dict(self.namespaces)
         if namespaces is not None:
             nsp.update(namespaces)
         try:
-            result = xpathev(
-                query,
-                namespaces=nsp,
-                smart_strings=self._lxml_smart_strings,
-                **kwargs,
-            )
+            xpathev = _get_xpath_evaluator(query, nsp, self._lxml_smart_strings)
+            result = xpathev(root, **kwargs)
         except etree.XPathError as exc:
             raise ValueError(f"XPath error: {exc} in {query}")
 
@@ -914,6 +963,14 @@ class Selector:
             if self.type == "xml":
                 if parent is None:
                     raise CannotDropElementWithoutParent(no_parent_message)
+                # Unlike HtmlElement.drop_tree(), _Element.remove() also
+                # removes the tail text, so we need to preserve it manually
+                if self.root.tail:
+                    previous = self.root.getprevious()
+                    if previous is not None:
+                        previous.tail = (previous.tail or "") + self.root.tail
+                    else:
+                        parent.text = (parent.text or "") + self.root.tail
                 parent.remove(self.root)
             else:
                 typing.cast("html.HtmlElement", self.root).drop_tree()

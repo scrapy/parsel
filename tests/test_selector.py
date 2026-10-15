@@ -11,7 +11,8 @@ from typing import TYPE_CHECKING, Any, cast
 import pytest
 from lxml import etree
 
-from parsel import Selector, SelectorList
+import parsel.selector as selector_module
+from parsel import AbsoluteXPathWarning, Selector, SelectorList
 from parsel.selector import (
     _NOT_SET,
     CannotRemoveElementWithoutParent,
@@ -369,7 +370,11 @@ class TestSelector:
 
         x = self.sscls(text=body)
         divtwo = x.xpath('//div[@class="two"]')
-        assert divtwo.xpath("//li").extract() == [
+        with pytest.warns(
+            AbsoluteXPathWarning, match="Absolute XPath.*nested selector"
+        ):
+            absolute_items = divtwo.xpath("//li")
+        assert absolute_items.extract() == [
             "<li>one</li>",
             "<li>two</li>",
             "<li>four</li>",
@@ -405,7 +410,11 @@ class TestSelector:
 
         x = self.sscls(text=body)
         divtwo = x.xpath('//div[@class="two"]')
-        assert divtwo.xpath("//li").getall() == [
+        with pytest.warns(
+            AbsoluteXPathWarning, match="Absolute XPath.*nested selector"
+        ):
+            absolute_items = divtwo.xpath("//li")
+        assert absolute_items.getall() == [
             "<li>one</li>",
             "<li>two</li>",
             "<li>four</li>",
@@ -683,6 +692,44 @@ class TestSelector:
         xpath = "//test[@foo='\\u0431ar]"
         with pytest.raises(ValueError, match=re.escape(xpath)):
             x.xpath(xpath)
+
+    def test_absolute_xpath_on_nested_selector_warns(self) -> None:
+        selector = self.sscls(text="<div><p>text</p></div>").xpath("//div")[0]
+
+        with pytest.warns(
+            AbsoluteXPathWarning, match="Absolute XPath.*nested selector"
+        ):
+            result = selector.xpath("//p")
+
+        assert result.get() == "<p>text</p>"
+
+    def test_absolute_xpath_via_selectorlist_points_at_user_code(self) -> None:
+        # SelectorList.xpath must not attribute the warning to parsel/selector.py
+        sel = self.sscls(text="<div><p>a</p></div><p>b</p>")
+        nested = sel.xpath("//div")
+        with warnings.catch_warnings(record=True) as caught:
+            warnings.simplefilter("always")
+            nested.xpath("//p")
+        abs_warns = [w for w in caught if issubclass(w.category, AbsoluteXPathWarning)]
+        assert abs_warns
+        assert abs_warns[0].filename == __file__
+
+    def test_absolute_xpath_via_selectorlist_checks_all_items(self) -> None:
+        # First item may be a root-level match; a later nested item must still warn.
+        sel = self.sscls(text="<html><body><div><p>a</p></div><p>b</p></body></html>")
+        mixed = sel.xpath("/html | //div")
+        with pytest.warns(
+            AbsoluteXPathWarning, match="Absolute XPath.*nested selector"
+        ):
+            mixed.xpath("//p")
+
+    def test_absolute_xpath_on_css_nested_selector_warns(self) -> None:
+        nested = self.sscls(text="<div><p>a</p></div>").css("div")[0]
+        with pytest.warns(
+            AbsoluteXPathWarning,
+            match=r"Absolute XPath '//p' used on a nested selector",
+        ):
+            assert nested.xpath("//p").get() == "<p>a</p>"
 
     def test_http_header_encoding_precedence(self) -> None:
         # '\xa3'     = pound symbol in unicode
@@ -1042,6 +1089,14 @@ class TestSelector:
         assert len(sel.css("span")) == nest_level
         assert len(sel.css("td")) == 1
 
+    def test_huge_tree_warning_skips_other_errors(self) -> None:
+        """Errors unrelated to the huge_tree limit must not stop the scan
+        for the warning-worthy one."""
+        content = '<a x="1" x="2">' + "<b>" * 300 + "hi" + "</b>" * 300 + "</a>"
+        with warnings.catch_warnings(record=True) as w:
+            self.sscls(text=content, type="xml", huge_tree=False)
+            assert "huge_tree" in str(w[0].message)
+
     def test_invalid_type(self) -> None:
         with pytest.raises(ValueError, match="Invalid type: xhtml"):
             self.sscls("", type="xhtml")
@@ -1143,6 +1198,34 @@ class TestSelector:
             pass
         else:
             assert selector.get() == "<a/>"
+
+    def test_xml_syntax_error_reraised(self, monkeypatch: pytest.MonkeyPatch) -> None:
+        def boom(*args: Any, **kwargs: Any) -> None:
+            raise etree.XMLSyntaxError("boom", 0, 1, 1, None)
+
+        monkeypatch.setattr(etree, "fromstring", boom)
+        with pytest.raises(etree.XMLSyntaxError):
+            self.sscls(text="<a/>", type="xml")
+
+    def test_xml_syntax_error_with_encoding_error_recovers(
+        self, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        """A syntax error accompanied by a genuine encoding error is
+        swallowed; the caller gets a tree parsed from the body with
+        undecodable bytes replaced instead."""
+        original_fromstring = etree.fromstring
+        calls: list[None] = []
+
+        def fromstring_once(*args: Any, **kwargs: Any) -> Any:
+            if not calls:
+                calls.append(None)
+                raise etree.XMLSyntaxError("boom", 0, 1, 1, None)
+            return original_fromstring(*args, **kwargs)
+
+        monkeypatch.setattr(etree, "fromstring", fromstring_once)
+        monkeypatch.setattr(selector_module, "_has_encoding_error", lambda parser: True)
+        selector = self.sscls(body=b"<a/>", type="xml")
+        assert selector.get() == "<a/>"
 
     def test_text_and_root_warning(self) -> None:
         with warnings.catch_warnings(record=True) as w:
@@ -1303,6 +1386,21 @@ class TestExslt:
         el.drop()
         assert sel.get() == "<a><c/></a>"
 
+    @pytest.mark.parametrize(
+        ("xml", "expected"),
+        [
+            ("<a><b/>tail<c/></a>", "<a>tail<c/></a>"),
+            ("<a>text<b/>tail<c/></a>", "<a>texttail<c/></a>"),
+            ("<a><c/>previous<b/>tail</a>", "<a><c/>previoustail</a>"),
+            ("<a><!--comment--><b/>tail</a>", "<a><!--comment-->tail</a>"),
+            ("<a><b/>tail<b/>tail2</a>", "<a>tailtail2</a>"),
+        ],
+    )
+    def test_drop_keeps_tail_with_xml_type(self, xml: str, expected: str) -> None:
+        sel = self.sscls(text=xml, type="xml")
+        sel.xpath("//b").drop()
+        assert sel.get() == expected
+
 
 class SelectorBytesInput(Selector):
     def __init__(
@@ -1383,3 +1481,28 @@ class TestSelectorBytes(TestSelector):
 
 class TestExsltBytes(TestExslt):
     sscls = SelectorBytesInput  # type: ignore[assignment]
+
+
+def test_repeated_queries_do_not_leak_memory() -> None:
+    tracemalloc = pytest.importorskip("tracemalloc")
+    text = "<html><body>" + '<p class="a">a</p>' * 20 + "</body></html>"
+
+    def run(iterations: int) -> None:
+        for _ in range(iterations):
+            sel = Selector(text=text, namespaces={"s": "http://exslt.org/strings"})
+            for p in sel.xpath("//p"):
+                p.xpath("string(.)").get()
+                p.xpath('s:padding(3, "x")').get()
+                p.xpath("has-class('a')").get()
+                p.css(".a::text").get()
+            sel.xpath("set:distinct(//p)").getall()
+
+    run(10)
+    tracemalloc.start()
+    try:
+        before = tracemalloc.get_traced_memory()[0]
+        run(100)
+        after = tracemalloc.get_traced_memory()[0]
+    finally:
+        tracemalloc.stop()
+    assert after - before < 50_000

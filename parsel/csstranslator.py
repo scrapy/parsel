@@ -1,17 +1,13 @@
 from __future__ import annotations
 
 from functools import lru_cache
-from typing import TYPE_CHECKING, Any, Protocol
+from typing import Any, Protocol, Self
 
 from cssselect import GenericTranslator as OriginalGenericTranslator
 from cssselect import HTMLTranslator as OriginalHTMLTranslator
 from cssselect.parser import Element, FunctionalPseudoElement, PseudoElement
 from cssselect.xpath import ExpressionError, is_safe_name
 from cssselect.xpath import XPathExpr as OriginalXPathExpr
-
-if TYPE_CHECKING:
-    # typing.Self requires Python 3.11
-    from typing_extensions import Self
 
 
 class XPathExpr(OriginalXPathExpr):
@@ -59,7 +55,7 @@ class XPathExpr(OriginalXPathExpr):
         **kwargs: Any,
     ) -> Self:
         if not isinstance(other, XPathExpr):
-            raise ValueError(
+            raise ValueError(  # noqa: TRY004
                 f"Expressions of type {__name__}.XPathExpr can only join expressions"
                 f" of the same type (or its descendants), got {type(other)}"
             )
@@ -71,11 +67,9 @@ class XPathExpr(OriginalXPathExpr):
 
 # e.g. cssselect.GenericTranslator, cssselect.HTMLTranslator
 class TranslatorProtocol(Protocol):
-    def xpath_element(self, selector: Element) -> OriginalXPathExpr:
-        pass
+    def xpath_element(self, selector: Element) -> OriginalXPathExpr: ...
 
-    def css_to_xpath(self, css: str, prefix: str = ...) -> str:
-        pass
+    def css_to_xpath(self, css: str, prefix: str = ...) -> str: ...
 
 
 class TranslatorMixin:

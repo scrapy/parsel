@@ -12,9 +12,6 @@ jobs:
       fail-fast: false
       matrix:
         include:
-        - python-version: "3.10"
-          env:
-            TOXENV: py
         - python-version: "3.11"
           env:
             TOXENV: py
@@ -27,16 +24,16 @@ jobs:
         - python-version: "3.14"
           env:
             TOXENV: py
-        - python-version: "3.15.0-rc.1"
+        - python-version: "3.15"
           env:
             TOXENV: py
         - python-version: pypy3.11
           env:
             TOXENV: pypy3
-        - python-version: "3.10"
+        - python-version: "3.11"
           env:
             TOXENV: min-deps
-        - python-version: "3.10"
+        - python-version: "3.11"
           env:
             TOXENV: min-deps-jsonpath-rfc9535
         - python-version: "3.13"
@@ -58,6 +55,7 @@ jobs:
       uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
       with:
         python-version: ${{ matrix.python-version }}
+        allow-prereleases: true
 
     - name: Run tests
       env: ${{ matrix.env }}
@@ -66,10 +64,10 @@ jobs:
         tox
 
     - name: Upload coverage report
-      uses: codecov/codecov-action@fb8b3582c8e4def4969c97caa2f19720cb33a72f # v7.0.0
+      uses: codecov/codecov-action@303a32d7a59b442fa8d48b6a1cc6825c09c847a5 # v7.1.1
 
     - name: Upload test results
       if: ${{ !cancelled() }}
-      uses: codecov/codecov-action@fb8b3582c8e4def4969c97caa2f19720cb33a72f # v7.0.0
+      uses: codecov/codecov-action@303a32d7a59b442fa8d48b6a1cc6825c09c847a5 # v7.1.1
       with:
         report_type: test_results
