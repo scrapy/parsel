@@ -17,28 +17,27 @@ keywords = [
 classifiers = [
     "Development Status :: 5 - Production/Stable",
     "Intended Audience :: Developers",
-    "License :: OSI Approved :: BSD License",
     "Natural Language :: English",
     "Programming Language :: Python :: 3",
-    "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
     "Programming Language :: Python :: 3.13",
     "Programming Language :: Python :: 3.14",
+    "Programming Language :: Python :: 3.15",
     "Programming Language :: Python :: Implementation :: CPython",
     "Programming Language :: Python :: Implementation :: PyPy",
     "Topic :: Text Processing :: Markup",
     "Topic :: Text Processing :: Markup :: HTML",
     "Topic :: Text Processing :: Markup :: XML",
+    "Typing :: Typed",
 ]
 dependencies = [
     "cssselect>=1.2.0",
     "jmespath>=1.0.0",
     "lxml>=5.1.0",
-    "packaging>=23.0",
     "w3lib>=1.19.0",
 ]
-requires-python = ">=3.10"
+requires-python = ">=3.11"
 dynamic = ["version"]
 
 [project.urls]
@@ -57,12 +56,11 @@ include = [
     "/parsel",
     "/tests",
     "/NEWS",
-    "/codecov.yml",
     "/tox.ini",
 ]
 
 [tool.bumpversion]
-current_version = "1.11.0"
+current_version = "1.12.1"
 commit = true
 tag = true
 tag_name = "v{new_version}"
@@ -122,7 +120,7 @@ disable = [
     "wrong-import-position",
 ]
 
-[tool.pytest.ini_options]
+[tool.pytest]
 addopts = [
     "--doctest-modules",
 ]
@@ -141,6 +139,12 @@ extend-select = [
     "COM",
     # pydocstyle
     "D",
+    # pycodestyle
+    "E4",
+    "E7",
+    "E9",
+    # Pyflakes
+    "F",
     # flake8-future-annotations
     "FA",
     # flynt
@@ -185,6 +189,8 @@ extend-select = [
     "T10",
     # flake8-type-checking
     "TC",
+    # flake8-tidy-imports
+    "TID",
     # pyupgrade
     "UP",
     # pycodestyle warnings
@@ -239,6 +245,8 @@ ignore = [
     "PLR0913",
     # Too many statements
     "PLR0915",
+    # Too many positional arguments
+    "PLR0917",
     # Magic value used in comparison
     "PLR2004",
     # String contains ambiguous {}.
@@ -251,9 +259,8 @@ ignore = [
     "RUF012",
     # Use of `assert` detected
     "S101",
-
-    # pending: https://github.com/scrapy/parsel/issues/312
-    "B019",
+    # Yoda condition detected
+    "SIM300",
 ]
 
 [tool.ruff.lint.isort]
@@ -264,3 +271,6 @@ split-on-trailing-comma = false
 
 [tool.ruff.lint.pydocstyle]
 convention = "pep257"
+
+[tool.sphinx-scrapy]
+python-version = "3.14"

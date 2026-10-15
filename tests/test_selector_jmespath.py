@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import cast
+from typing import Any, cast
 
 import pytest
 
@@ -90,6 +90,11 @@ class TestJMESPath:
         ]
         assert cast("int", sel.xpath("//div/content").jmespath("total").get()) == 4
 
+    def test_html_without_json(self) -> None:
+        sel = Selector(text="<div><content>not json</content><empty/></div>")
+        assert sel.xpath("//content/text()").jmespath("a").getall() == []
+        assert sel.xpath("//empty").jmespath("a").getall() == []
+
     def test_jmestpath_with_re(self) -> None:
         html_text = """
             <div>
@@ -145,25 +150,47 @@ class TestJMESPath:
             r"(\d+)"
         ) == ["18", "32", "22", "25"]
 
-    def test_json_types(self) -> None:
-        for text, root in (
+    @pytest.mark.parametrize(
+        ("text", "root"),
+        [
             ("{}", {}),
             ('{"a": "b"}', {"a": "b"}),
             ("[]", []),
             ('["a"]', ["a"]),
+        ],
+    )
+    def test_json_types(self, text: str, root: Any) -> None:
+        for input_type in (None, "json"):
+            selector = Selector(text=text, type=input_type, root=_NOT_SET)
+            assert selector.type == "json"
+            assert selector._text == text
+            assert selector.root == root
+
+        selector = Selector(text=None, root=root)
+        assert selector.type == "json"
+        assert selector._text is None
+        assert selector.root == root
+
+    @pytest.mark.parametrize(
+        ("text", "root"),
+        [
             ('""', ""),
             ("0", 0),
             ("1", 1),
             ("true", True),
             ("false", False),
             ("null", None),
-        ):
-            selector = Selector(text=text, root=_NOT_SET)
-            assert selector.type == "json"
-            assert selector._text == text
-            assert selector.root == root
+        ],
+    )
+    def test_json_scalar_types(self, text: str, root: Any) -> None:
+        """Scalar JSON values are only handled as JSON on request, since they
+        are also valid text and HTML."""
+        selector = Selector(text=text, type="json", root=_NOT_SET)
+        assert selector.type == "json"
+        assert selector._text == text
+        assert selector.root == root
 
-            selector = Selector(text=None, root=root)
-            assert selector.type == "json"
-            assert selector._text is None
-            assert selector.root == root
+        selector = Selector(text=text, root=_NOT_SET)
+        assert selector.type == "html"
+        # libxml2 may or may not wrap the text into a <p> element.
+        assert selector.xpath("string(//body)").get() == text

@@ -1,0 +1,25 @@
+name: Close unattended PRs
+
+permissions:
+  contents: read
+  pull-requests: write
+
+on:  # zizmor: ignore[dangerous-triggers]
+  pull_request_target:
+    types: [opened]
+  schedule:
+  - cron: 0 */6 * * *
+  workflow_dispatch:
+
+jobs:
+  unattended-pr-guard:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: scrapy/unattended-pr-guard@2ea7eff575dd0912d03cf3e3ae7acf65052c6445 # 0.2.0
+      with:
+        trusted-orgs: scrapy,scrapy-plugins,scrapinghub,zytedata
+        trusted-users: >-
+          adnan-awan,akhterwahab,alexldide,ankitjavalkar,DiogoCastro,
+          diogosuguimoto,emarondan,gutsytechster,haideriqbal1,
+          hammadqureshi-web,hassaan-naushahi,hygorcluz,imhamzaa,Nykakin,
+          serhii73

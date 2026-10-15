@@ -1942,8 +1942,8 @@ the translation:
 .. code:: pycon
 
     >>> from parsel import css2xpath
-    >>> css2xpath("div.second > a")
-    "descendant-or-self::div[@class and contains(concat(' ', normalize-space(@class), ' '), ' second ')]/a"
+    >>> css2xpath("div > a")
+    'descendant-or-self::div/a'
 
 CSS is more concise for the common cases -- classes, ids, descendants, child
 combinators -- and parsel adds the non-standard ``::text`` and ``::attr(name)``

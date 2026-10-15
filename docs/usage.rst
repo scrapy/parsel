@@ -108,8 +108,9 @@ So, let's download that page and create a selector for it:
 
    selector = load_selector('selectors-sample1.html')
 
-Since we're dealing with HTML, the default type for Selector, we don't need
-to specify the `type` argument.
+We don't need to specify the `type` argument: Selector detects JSON input and
+XML input that starts with an XML declaration, and falls back to HTML
+otherwise.
 
 So, by looking at the :ref:`HTML code <topics-selectors-htmlcode>` of that
 page, let's construct an XPath for selecting the text inside the title tag::
@@ -280,7 +281,7 @@ Examples:
     are string values already and do not have children nodes.
 
 .. note::
-    See also: :ref:`selecting-attributes`.
+    See also: :ref:`extracting-text` and :ref:`selecting-attributes`.
 
 
 .. _CSS Selectors: https://www.w3.org/TR/css3-selectors/#selectors
@@ -310,6 +311,97 @@ too. Here's an example::
     Link number 2 points to url 'image3.html' and image 'image3_thumb.jpg'
     Link number 3 points to url 'image4.html' and image 'image4_thumb.jpg'
     Link number 4 points to url 'image5.html' and image 'image5_thumb.jpg'
+
+.. _extracting-text:
+
+Extracting text
+---------------
+
+``::text`` and ``text()`` select text nodes, so an element that contains child
+elements has more than one, and an empty element has none:
+
+.. code-block:: pycon
+
+    >>> from parsel import Selector
+    >>> sel = Selector(text="""<h2>
+    ...     This is the <em>new</em>
+    ...     trend!
+    ... </h2>
+    ... <h3></h3>""")
+    >>> sel.css("h2::text").getall()
+    ['\n    This is the ', '\n    trend!\n']
+    >>> sel.css("h3::text").getall()
+    []
+
+To get all the text of an element as a single string, convert the element node
+to a string with the XPath ``string()`` function, or with ``normalize-space()``
+to also strip the result and collapse each run of whitespace into a single
+space:
+
+.. code-block:: pycon
+
+    >>> sel.css("h2").xpath("string(.)").get()
+    '\n    This is the new\n    trend!\n'
+    >>> sel.css("h2").xpath("normalize-space(.)").get()
+    'This is the new trend!'
+    >>> sel.css("h3").xpath("string(.)").get()
+    ''
+
+Both functions take a single node, so mind the difference between ``.``, the
+element node, and ``.//text()``, a node-set of which they would only use the
+first node; see :ref:`text-nodes-in-conditions`.
+
+The resulting string is the concatenation of the text nodes underneath, which
+gets you neither whitespace where markup implies a line break nor the removal
+of text that a browser does not render:
+
+.. code-block:: pycon
+
+    >>> sel = Selector(text="""<html><body>
+    ...     <p class="post_info">Published by newbie<br>on Sept 17</p>
+    ...     <script>var tracker = 1;</script>
+    ... </body></html>""")
+    >>> sel.css(".post_info").xpath("normalize-space(.)").get()
+    'Published by newbieon Sept 17'
+    >>> sel.css("body").xpath("normalize-space(.)").get()
+    'Published by newbieon Sept 17 var tracker = 1;'
+
+Text of a whole page
+~~~~~~~~~~~~~~~~~~~~
+
+`html-text`_ builds the text of an HTML tree the way a browser would render it:
+it inserts line breaks where block-level tags imply them, guesses missing
+spaces around inline tags, and ignores invisible content, such as ``<script>``
+and ``<style>`` elements. It reads parsel selectors:
+
+.. skip: start
+
+.. code-block:: pycon
+
+    >>> import html_text
+    >>> sel = html_text.cleaned_selector(html)
+    >>> html_text.selector_to_text(sel.css(".post_info"))
+    'Published by newbie\non Sept 17'
+
+.. skip: end
+
+`trafilatura`_ and `jusText`_ additionally discard boilerplate, such as
+navigation menus or footers, keeping only the main content of a page. They read
+the underlying `lxml`_ tree, which is the ``root`` attribute of a selector:
+
+.. skip: start
+
+.. code-block:: pycon
+
+    >>> import trafilatura
+    >>> trafilatura.extract(sel.root)
+    '…'
+
+.. skip: end
+
+.. _html-text: https://github.com/zytedata/html-text
+.. _jusText: https://github.com/miso-belica/jusText
+.. _trafilatura: https://trafilatura.readthedocs.io/
 
 .. _selecting-attributes:
 
@@ -354,6 +446,51 @@ ID, or when selecting an unique element on a page)::
     >>> selector.css('foo').attrib
     {}
 
+Extracting links
+----------------
+
+HTML selectors are built on top of `lxml.html`_, so the underlying element,
+available as ``.root``, provides `iterlinks()`_, which yields every link in the
+document, whatever the element and attribute where it is defined, as
+``(element, attribute, link, position)`` tuples::
+
+    >>> from parsel import Selector
+    >>> doc = """
+    ... <a href="a.html">A</a>
+    ... <a href="javascript:alert(1)">B</a>
+    ... <img src="i.png">
+    ... """
+    >>> sel = Selector(text=doc)
+    >>> [(element.tag, attribute, link) for element, attribute, link, _ in sel.root.iterlinks()]
+    [('a', 'href', 'a.html'), ('a', 'href', 'javascript:alert(1)'), ('img', 'src', 'i.png')]
+
+Links are yielded as they appear in the document, so they may be relative, and
+they may use schemes such as ``javascript:``.
+
+Using a different HTML parser
+-----------------------------
+
+Parsel parses HTML with `lxml.html`_, which favors speed over strict
+compliance with how a browser would parse the same markup, e.g. it
+recovers from unclosed tags differently. To parse with a different,
+lxml-compatible parser, build the tree yourself and pass it as the
+``root`` argument:
+
+.. skip: start
+
+.. code-block:: pycon
+
+    >>> import html5lib
+    >>> root = html5lib.parse(doc, treebuilder="lxml", namespaceHTMLElements=False).getroot()
+    >>> sel = Selector(root=root)
+
+.. skip: end
+
+`html5lib`_ parses HTML the way a browser does, at a large cost: roughly
+25-50x slower than `lxml.html`_, depending on the treebuilder used.
+
+.. _html5lib: https://github.com/html5lib/html5lib-python
+
 Using selectors with regular expressions
 ----------------------------------------
 
@@ -393,17 +530,24 @@ elements. First, you would get all ``<div>`` elements::
 
     >>> divs = selector.xpath('//div')
 
-At first, you may be tempted to use the following approach, which is wrong, as
-it actually extracts all ``<p>`` elements from the document, not only those
-inside ``<div>`` elements::
-
-    >>> for p in divs.xpath('//p'):  # this is wrong - gets all <p> from the whole document
-    ...     print(p.get())
+At first, you may be tempted to use ``divs.xpath('//p')``, which is wrong: an
+absolute path extracts all ``<p>`` elements from the document, not only those
+inside ``<div>`` elements.
 
 This is the proper way to do it (note the dot prefixing the ``.//p`` XPath)::
 
     >>> for p in divs.xpath('.//p'):  # extracts all <p> inside
     ...     print(p.get())
+
+When an absolute XPath (starting with ``/``) is used on a *nested* selector -
+one produced by a prior ``xpath()`` / ``css()`` query - parsel emits an
+:class:`~parsel.selector.AbsoluteXPathWarning`. To silence the warning
+intentionally, filter on that category::
+
+    import warnings
+    from parsel import AbsoluteXPathWarning
+
+    warnings.filterwarnings("ignore", category=AbsoluteXPathWarning)
 
 Another common case would be to extract all direct ``<p>`` children::
 
@@ -414,6 +558,28 @@ For more details about relative XPaths see the `Location Paths`_ section in the
 XPath specification.
 
 .. _Location Paths: https://www.w3.org/TR/xpath#location-paths
+
+
+Getting the XPath of a selector
+-------------------------------
+
+To find out where in the document the element of a selector is, ask its
+underlying lxml element tree for the XPath that locates it::
+
+    >>> image = selector.css('img')[2]
+    >>> image.root.getroottree().getpath(image.root)
+    '/html/body/div/a[3]/img'
+
+The result is an absolute XPath, so it works on the root selector regardless of
+which selector you got it from::
+
+    >>> selector.xpath('/html/body/div/a[3]/img').get()
+    '<img src="image3_thumb.jpg">'
+
+Only selectors that point to an element have such an XPath. For selectors that
+point to text or to an attribute value, such as those from
+``//title/text()`` or ``a::attr(href)``, ``root`` is a string, and there is no
+element to locate.
 
 
 Removing elements
@@ -432,22 +598,22 @@ Example removing an ad from a blog post:
     >>> from parsel import Selector
     >>> doc = """
     ... <article>
-    ...     <div class="row">Content paragraph...</div>
+    ...     <div class="row">Content paragraph</div>
     ...     <div class="row">
     ...         <div class="ad">
-    ...             Ad content...
-    ...             <a href="http://...">Link</a>
+    ...             Ad content
+    ...             <a href="http://link">Link</a>
     ...         </div>
     ...     </div>
-    ...     <div class="row">More content...</div>
+    ...     <div class="row">More content</div>
     ... </article>
     ... """
     >>> sel = Selector(text=doc)
     >>> sel.xpath('//div/text()').getall()
-    ['Content paragraph...', '\n        ', '\n            Ad content...\n            ', '\n        ', '\n    ', 'More content...']
+    ['Content paragraph', '\n        ', '\n            Ad content...\n            ', '\n        ', '\n    ', 'More content']
     >>> sel.xpath('//div[@class="ad"]').drop()
     >>> sel.xpath('//div//text()').getall()
-    ['Content paragraph...', 'More content...']
+    ['Content paragraph', '\n        \n    ', 'More content']
 
 
 Using EXSLT extensions
@@ -642,6 +808,8 @@ you may want to take a look first at this `XPath tutorial`_.
 .. _`XPath tutorial`: http://www.zvon.org/comp/r/tut-XPath_1.html
 .. _`this post from Zyte's blog`: https://www.zyte.com/blog/xpath-tips-from-the-web-scraping-trenches/
 
+
+.. _text-nodes-in-conditions:
 
 Using text nodes in a condition
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -895,18 +1063,9 @@ elements::
 Command-Line Interface Tools
 ============================
 
-There are third-party tools that allow using Parsel from the command line:
-
--   `Parsel CLI <https://github.com/rmax/parsel-cli>`_ allows applying
-    Parsel selectors to the standard input. For example, you can apply a Parsel
-    selector to the output of cURL_.
-
--   `parselcli
-    <https://github.com/Granitosaurus/parsel-cli>`_ provides an interactive
-    shell that allows applying Parsel selectors to a remote URL or a local
-    file.
-
-.. _cURL: https://curl.haxx.se/
+`parselcli <https://github.com/Granitosaurus/parsel-cli>`_ is a third-party
+tool that provides an interactive shell that allows applying Parsel selectors
+to a remote URL or a local file.
 
 
 .. _selector-examples-html:
@@ -1150,9 +1309,9 @@ On those occasions, use the function :func:`~parsel.css2xpath`:
 
     >>> from parsel import css2xpath
     >>> css2xpath('h1.title')
-    "descendant-or-self::h1[@class and contains(concat(' ', normalize-space(@class), ' '), ' title ')]"
+    "descendant-or-self::h1[@class and ...contains(concat(' ', normalize-space(@class), ' '), ' title ')]"
     >>> css2xpath('.profile-data') + '//h2'
-    "descendant-or-self::*[@class and contains(concat(' ', normalize-space(@class), ' '), ' profile-data ')]//h2"
+    "descendant-or-self::*[@class and ...contains(concat(' ', normalize-space(@class), ' '), ' profile-data ')]//h2"
 
 As you can see from the examples above, it returns the translated CSS query
 into an XPath expression as a string, which you can use as-is or combine to
@@ -1183,6 +1342,8 @@ selecting markup documents.
 
 
 .. _BeautifulSoup: https://www.crummy.com/software/BeautifulSoup/
+.. _iterlinks(): https://lxml.de/lxmlhtml.html#working-with-links
 .. _lxml: https://lxml.de/
+.. _lxml.html: https://lxml.de/lxmlhtml.html
 .. _PyQuery: https://pypi.python.org/pypi/pyquery
 .. _ElementTree: https://docs.python.org/2/library/xml.etree.elementtree.html

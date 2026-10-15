@@ -10,7 +10,7 @@ except ImportError:
 from sybil.parsers.doctest import DocTestParser
 from sybil.parsers.skip import skip
 
-from parsel import Selector
+from parsel import Selector, SelectorList
 
 # The Sphinx extensions under _ext require Sphinx/docutils, which are not part
 # of the test environment. Skip them during pytest's --doctest-modules pass.
@@ -22,8 +22,30 @@ def load_selector(filename, **kwargs):
     return Selector(text=input_path.read_text(encoding="utf-8"), **kwargs)
 
 
+_PATCHABLE = {
+    Selector: ("__str__", "__repr__"),
+    SelectorList: ("__repr__",),
+}
+
+
 def setup(namespace):
     namespace["load_selector"] = load_selector
+    namespace["_originals"] = {
+        (cls, name): cls.__dict__.get(name)
+        for cls, names in _PATCHABLE.items()
+        for name in names
+    }
+
+
+def teardown(namespace):
+    # Undo the repr changes some documents make for readability, so that they
+    # do not leak into other tests.
+    for (cls, name), original in namespace["_originals"].items():
+        if original is None:
+            if name in cls.__dict__:
+                delattr(cls, name)
+        else:
+            setattr(cls, name, original)
 
 
 def pytest_collection_modifyitems(items):
@@ -54,4 +76,5 @@ pytest_collect_file = Sybil(
     ],
     pattern="*.rst",
     setup=setup,
+    teardown=teardown,
 ).pytest()

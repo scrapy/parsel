@@ -7,7 +7,7 @@ Parsel
    :alt: Tests
 
 .. image:: https://img.shields.io/pypi/pyversions/parsel.svg
-   :target: https://github.com/scrapy/parsel/actions/workflows/tests.yml
+   :target: https://pypi.python.org/pypi/parsel
    :alt: Supported Python versions
 
 .. image:: https://img.shields.io/pypi/v/parsel.svg
