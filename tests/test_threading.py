@@ -20,7 +20,7 @@ from typing import TYPE_CHECKING, Any
 import pytest
 
 from parsel import Selector
-from parsel.csstranslator import GenericTranslator, HTMLTranslator
+from parsel.selector import _ctgroup
 from parsel.xpathfuncs import set_xpathfunc
 
 if TYPE_CHECKING:
@@ -280,22 +280,18 @@ def _xml_cache_queries(value: int) -> list[tuple[str, str]]:
     ]
 
 
-# css_to_xpath is decorated per class, so HTMLTranslator and GenericTranslator
-# own two independent caches and both need exercising.
+# The translation cache is per translator instance, and selectors of the html
+# and xml types share one translator instance per type, so both of those
+# caches need exercising.
 @pytest.mark.parametrize(
-    ("translator_cls", "selector_kwargs", "queries_factory"),
+    ("selector_kwargs", "queries_factory"),
     [
-        (HTMLTranslator, {"text": HTML_TEXT}, _html_cache_queries),
-        (
-            GenericTranslator,
-            {"text": XML_TEXT, "type": "xml"},
-            _xml_cache_queries,
-        ),
+        ({"text": HTML_TEXT}, _html_cache_queries),
+        ({"text": XML_TEXT, "type": "xml"}, _xml_cache_queries),
     ],
     ids=["html", "xml"],
 )
 def test_css_to_xpath_cache(
-    translator_cls: type[GenericTranslator | HTMLTranslator],
     selector_kwargs: dict[str, Any],
     queries_factory: Callable[[int], list[tuple[str, str]]],
 ) -> None:
@@ -304,7 +300,8 @@ def test_css_to_xpath_cache(
     The expressions outnumber the cache entries, forcing concurrent cache
     insertions and evictions.
     """
-    cache_info = translator_cls.css_to_xpath.cache_info
+    selector = Selector(**selector_kwargs)
+    cache_info = _ctgroup[selector.type]["_csstranslator"]._cache.cache_info
     maxsize = cache_info().maxsize
     assert maxsize is not None
     shape_count = len(queries_factory(0))
@@ -315,8 +312,6 @@ def test_css_to_xpath_cache(
         "not enough distinct expressions to overflow the cache, "
         "increase ITEM_COUNT or add expression shapes"
     )
-
-    selector = Selector(**selector_kwargs)
 
     def query(index: int) -> None:
         for offset in range(value_count):
