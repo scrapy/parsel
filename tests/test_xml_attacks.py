@@ -7,6 +7,9 @@ from psutil import Process
 
 from parsel import Selector
 
+# Process-wide memory measurements are meaningless while other threads run.
+pytestmark = pytest.mark.thread_unsafe
+
 MiB_1 = 1024**2
 
 

@@ -703,6 +703,8 @@ class TestSelector:
 
         assert result.get() == "<p>text</p>"
 
+    # warnings.catch_warnings() mutates process-global state.
+    @pytest.mark.thread_unsafe
     def test_absolute_xpath_via_selectorlist_points_at_user_code(self) -> None:
         # SelectorList.xpath must not attribute the warning to parsel/selector.py
         sel = self.sscls(text="<div><p>a</p></div><p>b</p>")
@@ -1031,6 +1033,8 @@ class TestSelector:
 
         assert sel.xpath("//b/text()").getall() == ["1"]
 
+    # warnings.catch_warnings() mutates process-global state.
+    @pytest.mark.thread_unsafe
     def test_deep_nesting(self) -> None:
         content = """
         <html>
@@ -1089,6 +1093,8 @@ class TestSelector:
         assert len(sel.css("span")) == nest_level
         assert len(sel.css("td")) == 1
 
+    # warnings.catch_warnings() mutates process-global state.
+    @pytest.mark.thread_unsafe
     def test_huge_tree_warning_skips_other_errors(self) -> None:
         """Errors unrelated to the huge_tree limit must not stop the scan
         for the warning-worthy one."""
@@ -1227,6 +1233,8 @@ class TestSelector:
         selector = self.sscls(body=b"<a/>", type="xml")
         assert selector.get() == "<a/>"
 
+    # warnings.catch_warnings() mutates process-global state.
+    @pytest.mark.thread_unsafe
     def test_text_and_root_warning(self) -> None:
         with warnings.catch_warnings(record=True) as w:
             self.sscls(text="a", root="b")
