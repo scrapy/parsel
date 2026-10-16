@@ -11,6 +11,9 @@ project_root = str(Path.cwd().parent)
 # version is used.
 sys.path.insert(0, project_root)
 
+# Make the local Sphinx extensions in _ext importable.
+sys.path.append(str(Path(__file__).parent / "_ext"))
+
 import parsel  # noqa: E402
 
 # -- General configuration ---------------------------------------------
@@ -20,6 +23,7 @@ import parsel  # noqa: E402
 extensions = [
     "notfound.extension",
     "sphinx_scrapy",
+    "xpathdemo",
 ]
 
 # Add any paths that contain templates here, relative to this directory.

@@ -15,6 +15,7 @@ Contents:
 
    installation
    usage
+   xpath-tutorial
    parsel
    history
 
