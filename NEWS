@@ -3,6 +3,12 @@
 History
 -------
 
+Unreleased
+~~~~~~~~~~
+
+* Corrected the return type annotations of ``get()``, ``getall()`` and their
+  aliases to account for JSON values that are not strings.
+
 1.12.1 (2026-09-28)
 ~~~~~~~~~~~~~~~~~~~
 

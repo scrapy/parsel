@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import re
+from typing import Any, assert_type
 
 from parsel import Selector
 
@@ -25,6 +26,24 @@ def correct() -> None:
     res: int = my_selector.my_own_func()
     sub_res: int = my_selector.xpath("//somens:a/text()")[0].my_own_func()
     jsonpath_res: int = my_selector.jsonpath("$.a")[0].my_own_func()
+
+
+def json_results() -> None:
+    selector = Selector(text='{"value": 42}', type="json")
+
+    assert_type(selector.get(), Any)
+    assert_type(selector.extract(), Any)
+    assert_type(selector.getall(), list[Any])
+
+    for results in (selector.jmespath("value"), selector.jsonpath("$.value")):
+        assert_type(results.get(), Any)
+        assert_type(results.get(default=None), Any)
+        assert_type(results.get(default="missing"), Any)
+        assert_type(results.extract_first(), Any)
+        assert_type(results.extract_first(default="missing"), Any)
+        assert_type(results.getall(), list[Any])
+        assert_type(results.extract(), list[Any])
+        assert_type(results[0].getall(), list[Any])
 
 
 # Negative checks: all the code lines below have typing errors.
