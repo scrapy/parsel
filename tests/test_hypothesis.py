@@ -60,7 +60,11 @@ def test_text_vs_body_utf8(text: str) -> None:
 @pytest.mark.parametrize("encoding", ["latin-1", "cp1252", "utf-16", "utf-16-le"])
 @given(data=st.data())
 def test_text_vs_body_other_encodings(encoding: str, data: st.DataObject) -> None:
-    text = data.draw(st.text(st.characters(codec=encoding), min_size=1))
+    # PyPy can encode U+FFFE, which single-byte codecs use to mark undefined
+    # bytes, but it doesn't decode back.
+    text = data.draw(
+        st.text(st.characters(codec=encoding, exclude_characters="\ufffe"), min_size=1)
+    )
     # JSON is only detected in UTF-8 bodies, test_json_body_any_encoding()
     # covers JSON with other encodings.
     assume(not _is_json_document(text))
