@@ -194,3 +194,11 @@ class TestJMESPath:
         assert selector.type == "html"
         # libxml2 may or may not wrap the text into a <p> element.
         assert selector.xpath("string(//body)").get() == text
+
+    @pytest.mark.parametrize("text", ['"hello"', '"42"', '"true"', '"null"', '"{}"'])
+    def test_json_string_query_preserves_type(self, text: str) -> None:
+        for selector in (
+            Selector(text=text, type="json"),
+            Selector(body=text.encode(), type="json"),
+        ):
+            assert selector.jmespath("type(@)").get() == "string"
