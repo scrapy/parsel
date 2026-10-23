@@ -745,6 +745,14 @@ class TestSelector:
     def test_empty_bodies_shouldnt_raise_errors(self) -> None:
         self.sscls(text="").xpath("//text()").extract()
 
+    @pytest.mark.parametrize("body", [b"", bytearray()])
+    def test_empty_byte_bodies_shouldnt_raise_errors(
+        self, body: bytes | bytearray
+    ) -> None:
+        selector = self.sscls(body=body)
+        assert selector.type == "html"
+        assert selector.get() == "<html></html>"
+
     def test_bodies_with_comments_only(self) -> None:
         sel = self.sscls(text="<!-- hello world -->", base_url="http://example.com")
         assert sel.root.base == "http://example.com"
@@ -1407,7 +1415,7 @@ class SelectorBytesInput(Selector):
         self,
         text: str | None = None,
         type: str | None = None,  # noqa: A002
-        body: bytes = b"",
+        body: bytes | bytearray | None = None,
         encoding: str = "utf-8",
         namespaces: Mapping[str, str] | None = None,
         root: Any | None = _NOT_SET,

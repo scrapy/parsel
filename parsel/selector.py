@@ -580,7 +580,7 @@ class Selector:
         self,
         text: str | None = None,
         type: str | None = None,  # noqa: A002
-        body: bytes | bytearray = b"",
+        body: bytes | bytearray | None = None,
         encoding: str = "utf-8",
         namespaces: Mapping[str, str] | None = None,
         root: Any | None = _NOT_SET,
@@ -610,7 +610,7 @@ class Selector:
             )
             self.root = root
             self.type = type
-        elif body:
+        elif body is not None:
             if not isinstance(body, (bytes, bytearray)):
                 msg = f"body argument should be of type bytes or bytearray, got {body.__class__}"
                 raise TypeError(msg)
