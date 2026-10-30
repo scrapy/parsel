@@ -1476,6 +1476,9 @@ class TestExsltBytes(TestExslt):
     sscls = SelectorBytesInput  # type: ignore[assignment]
 
 
+# tracemalloc tracing is process-global, and concurrent start()/stop() crashes
+# free-threaded CPython (https://github.com/python/cpython/issues/126315).
+@pytest.mark.thread_unsafe
 def test_repeated_queries_do_not_leak_memory() -> None:
     tracemalloc = pytest.importorskip("tracemalloc")
     text = "<html><body>" + '<p class="a">a</p>' * 20 + "</body></html>"
