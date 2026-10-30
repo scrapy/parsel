@@ -4,7 +4,6 @@ import html
 import pickle
 import re
 import typing
-import warnings
 import weakref
 from typing import TYPE_CHECKING, Any, cast
 
@@ -703,18 +702,13 @@ class TestSelector:
 
         assert result.get() == "<p>text</p>"
 
-    # warnings.catch_warnings() mutates process-global state.
-    @pytest.mark.thread_unsafe
     def test_absolute_xpath_via_selectorlist_points_at_user_code(self) -> None:
         # SelectorList.xpath must not attribute the warning to parsel/selector.py
         sel = self.sscls(text="<div><p>a</p></div><p>b</p>")
         nested = sel.xpath("//div")
-        with warnings.catch_warnings(record=True) as caught:
-            warnings.simplefilter("always")
+        with pytest.warns(AbsoluteXPathWarning) as record:
             nested.xpath("//p")
-        abs_warns = [w for w in caught if issubclass(w.category, AbsoluteXPathWarning)]
-        assert abs_warns
-        assert abs_warns[0].filename == __file__
+        assert record[0].filename == __file__
 
     def test_absolute_xpath_via_selectorlist_checks_all_items(self) -> None:
         # First item may be a root-level match; a later nested item must still warn.
@@ -1033,8 +1027,6 @@ class TestSelector:
 
         assert sel.xpath("//b/text()").getall() == ["1"]
 
-    # warnings.catch_warnings() mutates process-global state.
-    @pytest.mark.thread_unsafe
     def test_deep_nesting(self) -> None:
         content = """
         <html>
@@ -1081,11 +1073,10 @@ class TestSelector:
         </html>
         """
 
-        with warnings.catch_warnings(record=True) as w:
+        with pytest.warns(UserWarning, match="huge_tree"):
             sel = self.sscls(text=content, huge_tree=False)
-            assert "huge_tree" in str(w[0].message)
-            assert len(sel.css("span")) <= 256
-            assert len(sel.css("td")) == 0
+        assert len(sel.css("span")) <= 256
+        assert len(sel.css("td")) == 0
 
         # If huge trees are enabled, elements with a depth > 255 should be found
         sel = self.sscls(text=content)
@@ -1093,15 +1084,12 @@ class TestSelector:
         assert len(sel.css("span")) == nest_level
         assert len(sel.css("td")) == 1
 
-    # warnings.catch_warnings() mutates process-global state.
-    @pytest.mark.thread_unsafe
     def test_huge_tree_warning_skips_other_errors(self) -> None:
         """Errors unrelated to the huge_tree limit must not stop the scan
         for the warning-worthy one."""
         content = '<a x="1" x="2">' + "<b>" * 300 + "hi" + "</b>" * 300 + "</a>"
-        with warnings.catch_warnings(record=True) as w:
+        with pytest.warns(UserWarning, match="huge_tree"):
             self.sscls(text=content, type="xml", huge_tree=False)
-            assert "huge_tree" in str(w[0].message)
 
     def test_invalid_type(self) -> None:
         with pytest.raises(ValueError, match="Invalid type: xhtml"):
@@ -1233,12 +1221,9 @@ class TestSelector:
         selector = self.sscls(body=b"<a/>", type="xml")
         assert selector.get() == "<a/>"
 
-    # warnings.catch_warnings() mutates process-global state.
-    @pytest.mark.thread_unsafe
     def test_text_and_root_warning(self) -> None:
-        with warnings.catch_warnings(record=True) as w:
+        with pytest.warns(UserWarning, match="both text and root"):
             self.sscls(text="a", root="b")
-            assert "both text and root" in str(w[0].message)
 
     def test_etree_root_invalid_type(self) -> None:
         selector = self.sscls("<html></html>")
