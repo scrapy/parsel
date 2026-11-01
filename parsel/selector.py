@@ -659,10 +659,10 @@ class Selector:
         )
 
     def _json_data(self) -> Any:
-        if isinstance(self.root, str):
-            return _load_json_or_none(self.root)
         if self.type == "json":
             return self.root
+        if isinstance(self.root, str):
+            return _load_json_or_none(self.root)
         assert self.type in {"html", "xml"}  # nosec
         return _load_json_or_none(self.root.text)
 
