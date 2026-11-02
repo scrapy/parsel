@@ -140,6 +140,8 @@ class TestJSONPath:
         finally:
             _jsonpath_backend.cache_clear()
 
+    # Clears and inspects the process-global _compile_jsonpath cache.
+    @pytest.mark.thread_unsafe
     def test_compilation_is_cached(self) -> None:
         _compile_jsonpath.cache_clear()
         Selector(text="{}").jsonpath("$.cached")
