@@ -1077,11 +1077,10 @@ class TestSelector:
         </html>
         """
 
-        with warnings.catch_warnings(record=True) as w:
+        with pytest.warns(UserWarning, match="huge_tree"):
             sel = self.sscls(text=content, huge_tree=False)
-            assert "huge_tree" in str(w[0].message)
-            assert len(sel.css("span")) <= 256
-            assert len(sel.css("td")) == 0
+        assert len(sel.css("span")) <= 256
+        assert len(sel.css("td")) == 0
 
         # If huge trees are enabled, elements with a depth > 255 should be found
         sel = self.sscls(text=content)
@@ -1093,9 +1092,8 @@ class TestSelector:
         """Errors unrelated to the huge_tree limit must not stop the scan
         for the warning-worthy one."""
         content = '<a x="1" x="2">' + "<b>" * 300 + "hi" + "</b>" * 300 + "</a>"
-        with warnings.catch_warnings(record=True) as w:
+        with pytest.warns(UserWarning, match="huge_tree"):
             self.sscls(text=content, type="xml", huge_tree=False)
-            assert "huge_tree" in str(w[0].message)
 
     def test_invalid_type(self) -> None:
         with pytest.raises(ValueError, match="Invalid type: xhtml"):
@@ -1228,9 +1226,8 @@ class TestSelector:
         assert selector.get() == "<a/>"
 
     def test_text_and_root_warning(self) -> None:
-        with warnings.catch_warnings(record=True) as w:
+        with pytest.warns(UserWarning, match="both text and root"):
             self.sscls(text="a", root="b")
-            assert "both text and root" in str(w[0].message)
 
     def test_etree_root_invalid_type(self) -> None:
         selector = self.sscls("<html></html>")

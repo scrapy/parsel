@@ -132,6 +132,12 @@ disable = [
 addopts = [
     "--doctest-modules",
 ]
+# Warnings are errors. When a new warning turns the suite red, fix it if it
+# comes from parsel, and otherwise add the narrowest possible ignore *after*
+# "error", since the last matching filter wins.
+filterwarnings = [
+    "error",
+]
 
 [tool.ruff.lint]
 extend-select = [
