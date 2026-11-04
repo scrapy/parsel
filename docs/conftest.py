@@ -1,6 +1,7 @@
 from doctest import ELLIPSIS, NORMALIZE_WHITESPACE
 from pathlib import Path
 
+import pytest
 from sybil import Sybil
 
 try:
@@ -66,6 +67,13 @@ def pytest_collection_modifyitems(items):
             and item.path.suffix in {".rst", ".txt"}
         )
     ]
+    for item in items:
+        # The XPath tutorial uses absolute paths on nested selectors on purpose,
+        # to show why they are a mistake.
+        if item.path.name == "xpath-tutorial.rst":
+            item.add_marker(
+                pytest.mark.filterwarnings("ignore::parsel.AbsoluteXPathWarning")
+            )
 
 
 pytest_collect_file = Sybil(
