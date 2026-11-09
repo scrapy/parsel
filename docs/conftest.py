@@ -50,7 +50,8 @@ def teardown(namespace):
 
 
 def pytest_collection_modifyitems(items):
-    """Drop pytest's built-in doctest collection of the ``.rst`` files.
+    """Drop pytest's built-in doctest collection of the ``.rst`` files, and
+    ignore ``AbsoluteXPathWarning`` in the XPath tutorial.
 
     When an ``.rst`` file is named explicitly on the command line (e.g.
     ``pytest docs/xpath-tutorial.rst``), pytest's own doctest plugin collects it
@@ -58,6 +59,10 @@ def pytest_collection_modifyitems(items):
     That native pass does not run the ``.. code:: python`` setup blocks, so it
     fails on names such as ``doc``. Sybil is the source of truth for these
     files, so drop the duplicate native doctest items.
+
+    The XPath tutorial uses absolute paths on nested selectors on purpose, to
+    show why they are a mistake, so its items ignore ``AbsoluteXPathWarning``,
+    which the ``error`` warnings filter would otherwise turn into failures.
     """
     items[:] = [
         item
@@ -68,8 +73,6 @@ def pytest_collection_modifyitems(items):
         )
     ]
     for item in items:
-        # The XPath tutorial uses absolute paths on nested selectors on purpose,
-        # to show why they are a mistake.
         if item.path.name == "xpath-tutorial.rst":
             item.add_marker(
                 pytest.mark.filterwarnings("ignore::parsel.AbsoluteXPathWarning")

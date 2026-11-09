@@ -4,7 +4,6 @@ import html
 import pickle
 import re
 import typing
-import warnings
 import weakref
 from typing import TYPE_CHECKING, Any, cast
 
@@ -707,12 +706,9 @@ class TestSelector:
         # SelectorList.xpath must not attribute the warning to parsel/selector.py
         sel = self.sscls(text="<div><p>a</p></div><p>b</p>")
         nested = sel.xpath("//div")
-        with warnings.catch_warnings(record=True) as caught:
-            warnings.simplefilter("always")
+        with pytest.warns(AbsoluteXPathWarning) as record:
             nested.xpath("//p")
-        abs_warns = [w for w in caught if issubclass(w.category, AbsoluteXPathWarning)]
-        assert abs_warns
-        assert abs_warns[0].filename == __file__
+        assert record[0].filename == __file__
 
     def test_absolute_xpath_via_selectorlist_checks_all_items(self) -> None:
         # First item may be a root-level match; a later nested item must still warn.
