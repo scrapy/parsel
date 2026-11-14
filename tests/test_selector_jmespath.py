@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Any, cast
+from typing import Any, assert_type
 
 import pytest
 
@@ -9,6 +9,15 @@ from parsel.selector import _NOT_SET
 
 
 class TestJMESPath:
+    def test_extract_non_string_json_values(self) -> None:
+        matches = Selector(text='{"values": [42, false, {"count": 3}]}').jmespath(
+            "values"
+        )
+        assert assert_type(matches.get(), Any) == 42
+        assert assert_type(matches.get(default="missing"), Any) == 42
+        assert assert_type(matches.getall(), list[Any]) == [42, False, {"count": 3}]
+        assert assert_type(matches[0].getall(), list[Any]) == [42]
+
     def test_json_has_html(self) -> None:
         """Sometimes the information is returned in a json wrapper"""
         data = """
@@ -43,7 +52,7 @@ class TestJMESPath:
         )
         assert sel.jmespath("html").xpath("//div/a/text()").getall() == ["a", "b", "d"]
         assert sel.jmespath("html").css("div > b").getall() == ["<b>f</b>"]
-        assert cast("int", sel.jmespath("content").jmespath("name.age").get()) == 18
+        assert sel.jmespath("content").jmespath("name.age").get() == 18
 
     def test_html_has_json(self) -> None:
         html_text = """
@@ -88,7 +97,7 @@ class TestJMESPath:
             "C",
             "D",
         ]
-        assert cast("int", sel.xpath("//div/content").jmespath("total").get()) == 4
+        assert sel.xpath("//div/content").jmespath("total").get() == 4
 
     def test_html_without_json(self) -> None:
         sel = Selector(text="<div><content>not json</content><empty/></div>")
